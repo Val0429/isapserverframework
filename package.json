@@ -1,0 +1,32 @@
+{
+  "name": "testserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index",
+  "typings": "dist/index",
+  "scripts": {
+    "start": "npm run build:live",
+    "build:live": "nodemon --exec ts-node main.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^7.0.12",
+    "nodemon": "^1.11.0",
+    "ts-node": "^3.0.2",
+    "typescript": "^2.2.2",
+    "typings": "^2.1.1"
+  },
+  "dependencies": {
+    "@types/parse": "^2.4.7",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "express-ws": "^3.0.0",
+    "network": "^0.3.2",
+    "parse": "^1.11.0",
+    "parse-server": "^2.7.2",
+    "rxjs": "^5.4.0",
+    "websocket": "^1.0.25"
+  }
+}

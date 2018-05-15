@@ -6,7 +6,7 @@ import { Router } from 'express/lib/router/index';
 
 import * as bodyParser from 'body-parser';
 
-import { IRole } from '../interfaces/core';
+import { IRole, IUser } from '../interfaces/core';
 
 let router: Router = express.Router();
 router.use(bodyParser.json());
@@ -19,6 +19,7 @@ interface Input {
 interface Output {
     sessionId: string;
     serverTime: number;
+    user: IUser;
     role: IRole;
 }
 
@@ -29,9 +30,9 @@ router.get('*', async (req: Request, res: Response) => {
     if (!query.username) res.status(401).end("<username> is required.");
 
     /// Try login
-    var user = await Parse.User.logIn(query.username, query.password)
+    await Parse.User.logIn(query.username, query.password)
         .then(
-            async (user) => {
+            async (user: Parse.User) => {
                 var role = await new Parse.Query(Parse.Role)
                                     .equalTo("users", user)
                                     .first();
@@ -41,7 +42,8 @@ router.get('*', async (req: Request, res: Response) => {
                     <Output>{
                         sessionId: user.getSessionToken(),
                         serverTime: new Date().valueOf(),
-                        role: { name: role.get("name") }
+                        role: { name: role.get("name") },
+                        user: user.attributes
                     }
                 ));
             },
@@ -50,6 +52,18 @@ router.get('*', async (req: Request, res: Response) => {
                 res.status(401).end("Login failed.");
             }
         );
+
+// export interface IHost {
+//     /** 樓層 */
+//     floor?: number;
+//     /** 公司名稱 */
+//     companyName: string;
+//     /** 聯絡人名稱 */
+//     contactPerson: string;
+//     /** 聯絡人號碼 */
+//     contactNumber: string;
+// }
+
 });
 
 export default router;

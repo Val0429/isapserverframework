@@ -9,18 +9,13 @@ import cfg from './config/config';
 let app: express.Server = express();
 let wsapp = expressWs(app);
 
-//import router_listen from './routers/listen';
-var router_listen = require('./routers/'+'listen').default;
-import router_search from './routers/search';
-import router_latestImages from './routers/latestImages';
-
 /// No Cache
 import noCacheModule from './middlewares/no-cache';
 app.use(noCacheModule);
 
 /// Load Routers!
 import RouterLoader from './helpers/RouterLoader';
-RouterLoader(app, `${__dirname}/routers`);
+RouterLoader(app, `${__dirname}/cgi-bin`);
 
 /// run parse server ////
 import * as parse from 'parse-server';
@@ -33,6 +28,21 @@ var ParseServer = new parse.ParseServer({
 });
 app.use('/parse', ParseServer);
 /////////////////////////
+
+/// run parse dashboard ////
+import * as ParseDashboard from 'parse-dashboard';
+var Dashboard = new ParseDashboard({
+  "apps": [
+    {
+      "serverURL": "http://localhost:7070/parse",
+      "appId": "APPLICATIONKEY",
+      "masterKey": "MASTERKEY",
+      "appName": "Val App"
+    }
+  ]
+});
+app.use('/dashboard', Dashboard);
+////////////////////////////
 
 app.listen(cfg.serverport, () => {
     console.log(`Server listening on port ${cfg.port}.`);

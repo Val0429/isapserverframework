@@ -1,5 +1,7 @@
 import * as Parse from 'parse/node';
 
+import { registerSubclass, AsParseObject } from '../helpers/Parse';
+
 export interface IRole {
     name: string;
 }
@@ -67,23 +69,105 @@ export interface IVisitorGroup {
     watch: boolean;
 }
 
+// export enum EventList {
+//     Login = 1,
+//     Logout
+// };
+// interface EventListType {
+//     [index: number/*EventList*/]: typeof Parse.Object;
+// }
+// var Events: EventListType = {};
+// /// Event - Login /////////////////////////////////////////
+// export interface IEvent {
+//     action: Number;
+//     owner: Parse.User;
+//     target?: Parse.User;
+//     entity: IEventEntity;
+// }
 
-const registerSubclass = (collectionName?) =>
-    targetClass =>
-        Parse.Object.registerSubclass(collectionName || targetClass.name, targetClass);
+// export interface IEventEntity {
+//     owner: Parse.User;
+//     target?: Parse.User;
+// }
 
-function AsParseObject(name) {
-    class ParseObject<T> extends Parse.Object {
-        constructor(data?: Partial<T>) {
-            super(name);
-            data && super.set(data);
-        }
-        getValue<U extends keyof T>(key: U): T[U] {
-            return super.get(key);
-        }
-        setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean {
-            return super.set(key, <any>value, options);
-        }
-    }
-    return ParseObject;
-}
+// export interface IEventLogin extends IEventEntity {}
+// @registerSubclass() class EventLogin extends AsParseObject("EventLogin")<IEventLogin> {}
+// Events[EventList.Login] = EventLogin;
+///////////////////////////////////////////////////////////
+
+
+// export type EventList =
+//     'Login' | 'Logout'
+//     ;
+// type EventList = EventList & 'Logs';
+// export type EventListType = {
+//     [P in EventList]?: typeof Parse.Object;
+// }
+// var Events: EventListType = {};
+// /// Event - Login /////////////////////////////////////////
+// export interface IEvent {
+//     action: EventList;
+//     owner: Parse.User;
+//     target?: Parse.User;
+//     entity: IEventEntity;
+// }
+
+// export interface IEventEntity {
+//     owner: Parse.User;
+//     target?: Parse.User;
+// }
+
+// export interface IEventLogin extends IEventEntity {}
+// @registerSubclass() class EventLogin extends AsParseObject("EventLogin")<IEventLogin> {}
+// Events.Login = EventLogin;
+// ///////////////////////////////////////////////////////////
+
+
+// [
+//     [1, "Login", "EventLogin"],
+//     [2, "Logout", "EventLogout"]
+// ]
+
+// [
+//     [1001, "Custom", "EventCustom"]
+// ]
+
+// =>
+// enum EventListEnum {
+//     Login = 1,
+//     logout = 2,
+// }
+// interface EventListInterface {
+//     Login: typeof EventLogin;
+//     Logout: typeof EventLogout;
+// }
+
+
+// export var EventListEnum: {[index: number]: string} = {
+//     1: "Login",
+//     2: "Logout",
+// };
+
+// interface EventListInterface {
+//     Login: typeof EventLogin;
+// }
+
+// var Events: EventListInterface = {};
+// /// Event - Login /////////////////////////////////////////
+// export interface IEvent {
+//     action: number;
+//     owner: Parse.User;
+//     target?: Parse.User;
+//     entity: IEventEntity;
+// }
+
+// export interface IEventEntity {
+//     owner: Parse.User;
+//     target?: Parse.User;
+// }
+
+// export interface IEventLogin extends IEventEntity {}
+// @registerSubclass() class EventLogin extends AsParseObject("EventLogin")<IEventLogin> {}
+// Events[EventListEnum.Login] = EventLogin;
+
+// var tt = Events[EventListEnum.Login];

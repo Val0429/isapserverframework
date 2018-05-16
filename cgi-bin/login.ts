@@ -6,7 +6,7 @@ import { Router } from 'express/lib/router/index';
 
 import * as bodyParser from 'body-parser';
 
-import { IRole, IUser } from '../interfaces/core';
+import { IRole, IUser } from '../models/core';
 
 let router: Router = express.Router();
 router.use(bodyParser.json());

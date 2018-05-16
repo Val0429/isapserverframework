@@ -5,12 +5,13 @@ import * as express from 'express';
 import * as expressWs from 'express-ws';
 import * as fs from 'fs';
 import cfg from './config/config';
+import './models/events/definition/events.template';
 
 let app: express.Server = express();
 let wsapp = expressWs(app);
 
 /// No Cache
-import noCacheModule from './middlewares/no-cache';
+import noCacheModule from './helpers/middlewares/no-cache';
 app.use(noCacheModule);
 
 /// Load Routers!

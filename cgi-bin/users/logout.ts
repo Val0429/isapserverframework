@@ -4,7 +4,7 @@ import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { Router } from 'express/lib/router/index';
 
-import * as bodyParser from 'body-parser';
+import { bodyParser } from './../../helpers/middlewares/body-parser';
 import * as Parse from 'parse/node';
 
 let router: Router = express.Router();
@@ -15,7 +15,7 @@ interface Input {
 }
 
 router.post('*', async (req: Request, res: Response) => {
-    var query: Input = (<any>req).body;
+    var query: Input = req.body;
 
     /// Input not match: 401
     if (!query.sessionId) res.status(401).end("<sessionId> required.");

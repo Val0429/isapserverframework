@@ -5,7 +5,7 @@ import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
 // } from './events';
 var tHeader = `
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject } from '../helpers/Parse';
+import { registerSubclass, AsParseObject } from '../helpers/parse-server/parse-helper';
 import { IEventEntity } from './../models/events/events.base';
 export * from './../models/events/events.base';
 `;

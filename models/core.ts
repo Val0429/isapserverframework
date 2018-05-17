@@ -1,7 +1,5 @@
 import * as Parse from 'parse/node';
 
-import { registerSubclass, AsParseObject } from '../helpers/Parse';
-
 export interface IRole {
     name: string;
 }

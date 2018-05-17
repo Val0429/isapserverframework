@@ -4,9 +4,9 @@ import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { Router } from 'express/lib/router/index';
 
-import * as bodyParser from 'body-parser';
+import { bodyParser } from './../../helpers/middlewares/body-parser';
 
-import { IRole, IUser } from '../models/core';
+import { IRole, IUser } from './../../models/core';
 
 let router: Router = express.Router();
 router.use(bodyParser.json());
@@ -23,8 +23,8 @@ interface Output {
     role: IRole;
 }
 
-router.get('*', async (req: Request, res: Response) => {
-    var query: Input = <any>req.query;
+router.post('*', async (req: Request, res: Response) => {
+    var query: Input = req.body;
 
     /// Input not match: 401
     if (!query.username) res.status(401).end("<username> is required.");

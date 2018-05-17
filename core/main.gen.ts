@@ -12,13 +12,16 @@ let app: express.Server = express();
 /// Enable WebSocket support
 let wsapp = expressWs(app);
 
+
 /// Disable Cache
 import noCacheModule from './../helpers/middlewares/no-cache';
 if (config.server.disableCache) app.use(noCacheModule);
 
+
 /// Load Routers!
 import RouterLoader from './../helpers/RouterLoader';
 RouterLoader(app, `${__dirname}/../cgi-bin`);
+
 
 /// run parse server ////
 import * as parse from 'parse-server';
@@ -31,6 +34,7 @@ var ParseServer = new parse.ParseServer({
 });
 app.use(config.parseServer.serverPath, ParseServer);
 /////////////////////////
+
 
 /// run parse dashboard ////
 import * as ParseDashboard from 'parse-dashboard';
@@ -48,6 +52,7 @@ if (config.parseDashboard.enable) {
   app.use('/dashboard', Dashboard);
 }
 ////////////////////////////
+
 
 app.listen(config.server.port, () => {
     console.log(`Server running at port ${config.server.port}.`);

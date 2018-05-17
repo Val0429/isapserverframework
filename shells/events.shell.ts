@@ -1,3 +1,5 @@
+import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
+
 // import {
 //     IEventLogin, IEventLogout
 // } from './events';
@@ -38,13 +40,6 @@ export interface IEvent{0} extends IEventEntity {
 ////////////////////////////////////////////////////
 `;
 // // Events.Login = EventLogin;
-
-function autoPad(input: string, value: number) {
-    return input.replace(
-        new RegExp(`^ {${value},}`, "gm"),
-        Array(value+1).join(" ")
-    );
-}
 
 function main(events: Array<[number, string, string] | [number, string]>): string {
     var tmpstr = [];
@@ -106,7 +101,6 @@ var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
 
-import shellWriter from './../helpers/shells/shell-writer';
 shellWriter(
     [defPath, tmplPath, customDefPath],
     genFilePath,

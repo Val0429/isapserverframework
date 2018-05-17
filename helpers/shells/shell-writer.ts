@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-export default function shellWriter(detects: string[], target: string, ready: () => void) {
+export function shellWriter(detects: string[], target: string, ready: () => void) {
     var dts: fs.Stats[] = [];
     for (var detect of detects) dts.push( fs.statSync(detect) );
     var tar: fs.Stats;
@@ -11,4 +11,11 @@ export default function shellWriter(detects: string[], target: string, ready: ()
             break;
         }
     }
+}
+
+export function autoPad(input: string, value: number) {
+    return input.replace(
+        new RegExp(`^ {${value},}`, "gm"),
+        Array(value+1).join(" ")
+    );
 }

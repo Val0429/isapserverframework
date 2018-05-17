@@ -5,7 +5,7 @@ import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
 // } from './events';
 var tHeader = `
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject } from '../helpers/parse-server/parse-helper';
+import { registerSubclass, AsParseObject, Omit } from '../helpers/parse-server/parse-helper';
 import { IEventEntity } from './../models/events/events.base';
 export * from './../models/events/events.base';
 `;
@@ -36,7 +36,7 @@ export interface IEvent{0} extends IEventEntity {
     action: {1};
     {2}
 }
-@registerSubclass() export class Event{0} extends AsParseObject("Event{1}")<IEvent{0}> { constructor() { super({ action: {1} }) } }
+@registerSubclass() export class Event{0} extends AsParseObject("Event{1}")<IEvent{0}> { constructor(data?: Omit<IEvent{0}, 'action'>) { super({ action: {1}, ...data }) } }
 ////////////////////////////////////////////////////
 `;
 // // Events.Login = EventLogin;

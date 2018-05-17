@@ -16,3 +16,6 @@ export function AsParseObject(name) {
         }
     }
 }
+
+export type StringLiteralDiff<T, U extends string> = ({[P in keyof T]: P } & {[P in U]: never } & { [x: string]: never })[keyof T];
+export type Omit<T, K extends keyof T> = Pick<T, StringLiteralDiff<T, K>>;

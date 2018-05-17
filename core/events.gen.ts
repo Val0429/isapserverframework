@@ -1,5 +1,5 @@
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject } from '../helpers/parse-server/parse-helper';
+import { registerSubclass, AsParseObject, Omit } from '../helpers/parse-server/parse-helper';
 import { IEventEntity } from './../models/events/events.base';
 export * from './../models/events/events.base';
 
@@ -38,7 +38,7 @@ export interface IEventLogin extends IEventEntity {
     /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
     
 }
-@registerSubclass() export class EventLogin extends AsParseObject("Event1")<IEventLogin> { constructor() { super({ action: 1 }) } }
+@registerSubclass() export class EventLogin extends AsParseObject("Event1")<IEventLogin> { constructor(data?: Omit<IEventLogin, 'action'>) { super({ action: 1, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -50,7 +50,7 @@ export interface IEventLogout extends IEventEntity {
     /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
     
 }
-@registerSubclass() export class EventLogout extends AsParseObject("Event2")<IEventLogout> { constructor() { super({ action: 2 }) } }
+@registerSubclass() export class EventLogout extends AsParseObject("Event2")<IEventLogout> { constructor(data?: Omit<IEventLogout, 'action'>) { super({ action: 2, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -59,7 +59,7 @@ export interface IEventPickFloor extends IEventEntity {
     action: 3101;
     
 }
-@registerSubclass() export class EventPickFloor extends AsParseObject("Event3101")<IEventPickFloor> { constructor() { super({ action: 3101 }) } }
+@registerSubclass() export class EventPickFloor extends AsParseObject("Event3101")<IEventPickFloor> { constructor(data?: Omit<IEventPickFloor, 'action'>) { super({ action: 3101, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -68,7 +68,7 @@ export interface IEventScanIDCard extends IEventEntity {
     action: 3102;
     
 }
-@registerSubclass() export class EventScanIDCard extends AsParseObject("Event3102")<IEventScanIDCard> { constructor() { super({ action: 3102 }) } }
+@registerSubclass() export class EventScanIDCard extends AsParseObject("Event3102")<IEventScanIDCard> { constructor(data?: Omit<IEventScanIDCard, 'action'>) { super({ action: 3102, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -77,7 +77,7 @@ export interface IEventRegistrationComplete extends IEventEntity {
     action: 3188;
     
 }
-@registerSubclass() export class EventRegistrationComplete extends AsParseObject("Event3188")<IEventRegistrationComplete> { constructor() { super({ action: 3188 }) } }
+@registerSubclass() export class EventRegistrationComplete extends AsParseObject("Event3188")<IEventRegistrationComplete> { constructor(data?: Omit<IEventRegistrationComplete, 'action'>) { super({ action: 3188, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -86,7 +86,7 @@ export interface IEventVerifyOTPCode extends IEventEntity {
     action: 3201;
     
 }
-@registerSubclass() export class EventVerifyOTPCode extends AsParseObject("Event3201")<IEventVerifyOTPCode> { constructor() { super({ action: 3201 }) } }
+@registerSubclass() export class EventVerifyOTPCode extends AsParseObject("Event3201")<IEventVerifyOTPCode> { constructor(data?: Omit<IEventVerifyOTPCode, 'action'>) { super({ action: 3201, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -95,7 +95,7 @@ export interface IEventFaceVerify extends IEventEntity {
     action: 3202;
     
 }
-@registerSubclass() export class EventFaceVerify extends AsParseObject("Event3202")<IEventFaceVerify> { constructor() { super({ action: 3202 }) } }
+@registerSubclass() export class EventFaceVerify extends AsParseObject("Event3202")<IEventFaceVerify> { constructor(data?: Omit<IEventFaceVerify, 'action'>) { super({ action: 3202, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -104,7 +104,7 @@ export interface IEventCheckInComplete extends IEventEntity {
     action: 3288;
     
 }
-@registerSubclass() export class EventCheckInComplete extends AsParseObject("Event3288")<IEventCheckInComplete> { constructor() { super({ action: 3288 }) } }
+@registerSubclass() export class EventCheckInComplete extends AsParseObject("Event3288")<IEventCheckInComplete> { constructor(data?: Omit<IEventCheckInComplete, 'action'>) { super({ action: 3288, ...data }) } }
 ////////////////////////////////////////////////////
 
 
@@ -116,5 +116,5 @@ export interface IEventFingerPrintVerify extends IEventEntity {
     pass: boolean;
     
 }
-@registerSubclass() export class EventFingerPrintVerify extends AsParseObject("Event3601")<IEventFingerPrintVerify> { constructor() { super({ action: 3601 }) } }
+@registerSubclass() export class EventFingerPrintVerify extends AsParseObject("Event3601")<IEventFingerPrintVerify> { constructor(data?: Omit<IEventFingerPrintVerify, 'action'>) { super({ action: 3601, ...data }) } }
 ////////////////////////////////////////////////////

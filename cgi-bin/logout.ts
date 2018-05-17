@@ -14,24 +14,31 @@ interface Input {
     sessionId: string;
 }
 
-router.post('*', (req: Request, res: Response) => {
+router.post('*', async (req: Request, res: Response) => {
     var query: Input = (<any>req).body;
 
     /// Input not match: 401
     if (!query.sessionId) res.status(401).end("<sessionId> required.");
 
     /// Try get session user
-    new Parse.Query("_Session")
-        .find({sessionToken: query.sessionId})
-        .then( (o: Parse.Session[]) => {
-            /// Perform Logout: 200
-            o[0].destroy({ sessionToken: query.sessionId });
-            res.end();
+    try {
+        var o: Parse.Session = await new Parse.Query("_Session")
+            .descending("createdAt")
+            .first({sessionToken: query.sessionId}) as Parse.Session;
 
-        }, (reason) => {
-            /// No session exists
-            res.status(404).end("<sessionId> not exists.");
-        });
+        /// Session not match
+        if (!o || o.getSessionToken() !== query.sessionId) throw "";
+
+        /// Success
+        /// Perform Logout: 200
+        o.destroy({ sessionToken: query.sessionId });
+        res.end();
+
+    } catch(reason) {
+        /// No session exists: 404
+        res.status(404).end("<sessionId> not exists.");
+
+    }
 });
 
 export default router;

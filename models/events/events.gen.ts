@@ -17,6 +17,19 @@ export enum EventList {
 }
 
 
+export type EventType<T> =
+    T extends 1 ? EventLogin :
+    T extends 2 ? EventLogout :
+    T extends 3101 ? EventPickFloor :
+    T extends 3102 ? EventScanIDCard :
+    T extends 3188 ? EventRegistrationComplete :
+    T extends 3201 ? EventVerifyOTPCode :
+    T extends 3202 ? EventFaceVerify :
+    T extends 3288 ? EventCheckInComplete :
+    T extends 3601 ? EventFingerPrintVerify :
+    Parse.Object;
+
+
 /// Event1: Login //////////////////////////////////
 export interface IEventLogin extends IEventEntity {
     action: 1;

@@ -30,39 +30,27 @@ router.get('*', async (req: Request, res: Response) => {
     if (!query.username) res.status(401).end("<username> is required.");
 
     /// Try login
-    await Parse.User.logIn(query.username, query.password)
-        .then(
-            async (user: Parse.User) => {
-                var role = await new Parse.Query(Parse.Role)
-                                    .equalTo("users", user)
-                                    .first();
+    try {
+        var user: Parse.User = await Parse.User.logIn(query.username, query.password);
+        /// Success
+        var role = await new Parse.Query(Parse.Role)
+                                  .equalTo("users", user)
+                                  .first();
 
-                /// Success
-                res.end(JSON.stringify(
-                    <Output>{
-                        sessionId: user.getSessionToken(),
-                        serverTime: new Date().valueOf(),
-                        role: { name: role.get("name") },
-                        user: user.attributes
-                    }
-                ));
-            },
-            async (reason) => {
-                /// Failed: 401
-                res.status(401).end("Login failed.");
+        res.end(JSON.stringify(
+            <Output>{
+                sessionId: user.getSessionToken(),
+                serverTime: new Date().valueOf(),
+                role: { name: role.get("name") },
+                user: user.attributes
             }
-        );
+        ));
 
-// export interface IHost {
-//     /** 樓層 */
-//     floor?: number;
-//     /** 公司名稱 */
-//     companyName: string;
-//     /** 聯絡人名稱 */
-//     contactPerson: string;
-//     /** 聯絡人號碼 */
-//     contactNumber: string;
-// }
+    } catch(reason) {
+        /// Failed: 401
+        res.status(401).end("Login failed.");
+
+    }
 
 });
 

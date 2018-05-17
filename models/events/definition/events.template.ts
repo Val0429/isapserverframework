@@ -18,6 +18,16 @@ export enum EventList {
 }
 `;
 
+// export type EventType<T> =
+//     T extends 1 ? EventLogin :
+//     T extends 2 ? EventLogout :
+//     Parse.Object;
+var tType = `
+export type EventType<T> =
+{0}
+    Parse.Object;
+`;
+
 var tInterface = `
 /// Event{1}: {0} //////////////////////////////////
 export interface IEvent{0} extends IEventEntity {
@@ -29,15 +39,18 @@ export interface IEvent{0} extends IEventEntity {
 `;
 // // Events.Login = EventLogin;
 
+function autoPad(input: string, value: number) {
+    return input.replace(
+        new RegExp(`^ {${value},}`, "gm"),
+        Array(value+1).join(" ")
+    );
+}
 
 function main(events: Array<[number, string, string] | [number, string]>): string {
     var tmpstr = [];
     
     /// make header /////////////////////////////
     var tmp = [];
-    // for (var event of events) {
-    //     tmp.push(`IEvent${event[1]}`);
-    // }
     tmpstr.push(
         tHeader.replace("{0}", tmp.join(", "))
                .replace(/^[\r\n]+/, '')
@@ -54,11 +67,24 @@ function main(events: Array<[number, string, string] | [number, string]>): strin
     );
     /////////////////////////////////////////////
 
+    /// make type ///////////////////////////////
+    var tmp = [];
+    for (var event of events) {
+        tmp.push(
+            "    T extends {0} ? Event{1} :".replace("{0}", event[0].toString())
+                                        .replace("{1}", event[1])
+            );
+    }
+    tmpstr.push(
+        tType.replace("{0}", tmp.join("\r\n"))
+    );
+    /////////////////////////////////////////////
+
     /// make interface //////////////////////////
     var tmp = [];
     for (var event of events) {
         var attrs = <any>event[2] || '';
-        attrs = attrs.replace(/^ {4,}/gm, '    ');
+        attrs = autoPad(attrs, 4);
         tmp.push(
             tInterface.replace(/\{0\}/g, event[1])
                       .replace(/\{1\}/g, event[0].toString())

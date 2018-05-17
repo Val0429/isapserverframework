@@ -101,21 +101,18 @@ const genFilePath = `${__dirname}/../core/events.gen.ts`;
 const tmplPath = `${__dirname}/events.shell.ts`;
 const defPath = `${__dirname}/../models/events/events.define.ts`;
 const customDefPath = `${__dirname}/../config/events/events.define.ts`;
-import events from './../models/events/events.define';
-import cevents from './../config/events/events.define';
+
+var events = require(defPath).default;
+var cevents = require(customDefPath).default;
 import * as fs from 'fs';
 
-function writeIfChanges() {
-    var st1;
-    try { st1 = fs.statSync(genFilePath); }
-    catch (e) { st1 = { mtime: new Date(0) } }
-    var st2 = fs.statSync(defPath);
-    var st3 = fs.statSync(tmplPath);
-    var st4 = fs.statSync(customDefPath);
-    if (st2.mtime >= st1.mtime || st3.mtime >= st1.mtime || st4.mtime >= st1.mtime) {
+import shellWriter from './../helpers/shells/shell-writer';
+shellWriter(
+    [defPath, tmplPath, customDefPath],
+    genFilePath,
+    () => {
         var merged = [...events, ...cevents];
         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
-        console.log("<Generated> Event file updated!");
+        console.log("<Generated> Event file updated!");        
     }
-}
-writeIfChanges();
+);

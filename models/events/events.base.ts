@@ -1,5 +1,5 @@
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject } from '../../../helpers/Parse';
+import { registerSubclass, AsParseObject } from '../../helpers/Parse';
 
 /// Base
 export interface IEvent<T = IEventEntity, U = IEventEntity> {

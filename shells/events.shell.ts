@@ -3,9 +3,9 @@
 // } from './events';
 var tHeader = `
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject } from '../../helpers/Parse';
-import { IEventEntity } from './definition/events.base';
-import {{0}} from './../events';
+import { registerSubclass, AsParseObject } from '../helpers/Parse';
+import { IEventEntity } from './../models/events/events.base';
+export * from './../models/events/events.base';
 `;
 
 // export enum EventList {
@@ -50,10 +50,8 @@ function main(events: Array<[number, string, string] | [number, string]>): strin
     var tmpstr = [];
     
     /// make header /////////////////////////////
-    var tmp = [];
     tmpstr.push(
-        tHeader.replace("{0}", tmp.join(", "))
-               .replace(/^[\r\n]+/, '')
+        tHeader.replace(/^[\r\n]+/, '')
     );
     /////////////////////////////////////////////
 
@@ -99,12 +97,12 @@ function main(events: Array<[number, string, string] | [number, string]>): strin
 }
 
 
-const genFilePath = `${__dirname}/../events.gen.ts`;
-const tmplPath = `${__dirname}/events.template.ts`;
-const defPath = `${__dirname}/events.define.ts`;
-const customDefPath = `${__dirname}/../../../config/events/events.define.ts`;
-import events from './events.define';
-import cevents from './../../../config/events/events.define';
+const genFilePath = `${__dirname}/../core/events.gen.ts`;
+const tmplPath = `${__dirname}/events.shell.ts`;
+const defPath = `${__dirname}/../models/events/events.define.ts`;
+const customDefPath = `${__dirname}/../config/events/events.define.ts`;
+import events from './../models/events/events.define';
+import cevents from './../config/events/events.define';
 import * as fs from 'fs';
 
 function writeIfChanges() {

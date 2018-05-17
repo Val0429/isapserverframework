@@ -1,10 +1,11 @@
 /// <reference path="./../typings/index.d.ts" />
 "use strict";
 
+import './../shells/events.shell';
+
 import * as express from 'express';
 import * as expressWs from 'express-ws';
 import * as fs from 'fs';
-import './../models/events/definition/events.template';
 import config from './../config/core/core.define';
 
 let app: express.Server = express();

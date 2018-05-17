@@ -1,7 +1,7 @@
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject } from '../../helpers/Parse';
-import { IEventEntity } from './definition/events.base';
-import {} from './../events';
+import { registerSubclass, AsParseObject } from '../helpers/Parse';
+import { IEventEntity } from './../models/events/events.base';
+export * from './../models/events/events.base';
 
 
 export enum EventList {

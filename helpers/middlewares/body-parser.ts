@@ -7,6 +7,11 @@ declare module 'express/lib/request' {
     }
 }
 
+var bodyParserJson = bodyParser.json();
+var bodyParserText = bodyParser.text();
+
 export {
-    bodyParser
+    bodyParser,
+    bodyParserJson,
+    bodyParserText
 }

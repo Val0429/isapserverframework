@@ -19,8 +19,8 @@ let wsapp = expressWs(app);
 
 var tDisableCache = `
 /// Disable Cache
-import noCacheModule from './../helpers/middlewares/no-cache';
-if (config.server.disableCache) app.use(noCacheModule);
+import { noCache } from './../helpers/middlewares/no-cache';
+if (config.server.disableCache) app.use(noCache);
 `;
 
 var tLoadRouter = `

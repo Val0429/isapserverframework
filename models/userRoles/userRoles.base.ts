@@ -4,7 +4,7 @@ export interface IRole {
     name: string;
 }
 
-export interface IUser<T> {
+export interface IUser<T = any> {
     username: string;
     password: string;
     email?: string;

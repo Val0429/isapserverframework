@@ -1,3 +1,5 @@
+import * as Parse from 'parse/node';
+
 export const registerSubclass = (collectionName?) =>
     targetClass =>
         Parse.Object.registerSubclass(collectionName || targetClass.name, targetClass);

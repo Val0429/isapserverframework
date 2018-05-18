@@ -34,8 +34,12 @@ export type EventType<T> =
 export interface IEventLogin extends IEventEntity {
     action: 1;
     
-    /// owner: self User
+    /**
+    * owner: self User
+    */
+    owner: Parse.User;
     /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
+    target?: Parse.User;
     
 }
 @registerSubclass() export class EventLogin extends AsParseObject("Event1")<IEventLogin> { constructor(data?: Omit<IEventLogin, 'action'>) { super({ action: 1, ...data }) } }

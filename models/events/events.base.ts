@@ -10,7 +10,13 @@ export interface IEvent<T = IEventEntity, U = IEventEntity> {
 
 export interface IEventEntity {
     action: number;
+    /**
+     * Owner of this event, current user.
+     */
     owner: Parse.User;
+    /**
+     * User that being target of this event.
+     */
     target?: Parse.User;
     /**
      * Parent event related to this.

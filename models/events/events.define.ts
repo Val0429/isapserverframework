@@ -3,10 +3,14 @@
 /// 2000 for Tenant
 /// 3000 for Visitor
 /// 4000 for Kiosk
-var events: Array<[number, string, string] | [number, string]> = [
+var events: Config[] = [
     [1, "Login", `
-        /// owner: self User
+        /**
+         * owner: self User
+         */
+        owner: Parse.User;
         /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
+        target?: Parse.User;
     `],
     [2, "Logout", `
         /// owner: self User
@@ -27,3 +31,5 @@ var events: Array<[number, string, string] | [number, string]> = [
 ];
 
 export default events;
+
+export type Config = [number, string, string] | [number, string];

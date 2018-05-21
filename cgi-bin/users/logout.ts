@@ -2,7 +2,6 @@ import {
     express, Request, Response, Router, WebSocket,
     Parse, IRole, IUser, RoleList, config,
     Action, Errors,
-    loginRequired
 } from './../../core/cgi-package';
 
 

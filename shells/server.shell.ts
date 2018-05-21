@@ -1,4 +1,4 @@
-import config from './../config/core/core.define';
+import config from './../core/config.gen';
 import { shellWriter } from './../helpers/shells/shell-writer';
 
 var tHeader = `

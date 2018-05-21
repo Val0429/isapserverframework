@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as fs from 'fs';
 import * as p from 'path';
+import { Action } from './../../core/cgi-package';
 
 var defaultPath = "index";
 
@@ -20,8 +21,12 @@ export function routerLoader(app, path, first = true) {
         }
 
     } else {
-        var route = require(`${path}`).default;
+        var route: Action = require(`${path}`).default;
         if (name == defaultPath) name = "";
-        app.use(`/${name}`, route);
+        //app.use(`/${name}`, route);
+
+        if (route instanceof Action)
+            app.use(`/${name}`, route.mount());
+        else app.use(`/${name}`, route);
     }
 }

@@ -1,59 +1,118 @@
 import {
     express, Request, Response, Router, WebSocket,
     Parse, IRole, IUser, RoleList,
-    Error,
+    Action, Errors,
     bodyParserJson
 } from './../../core/cgi-package';
 
 
-interface Input {
+export interface Input {
     username: string;
     password: string;
 }
 
-interface Output {
+export interface Output {
     sessionId: string;
     serverTime: number;
     user: IUser;
     role: IRole;
 }
 
-let router: Router =
-    express.Router()
-    .use(bodyParserJson)
-    .post('*', async (req: Request, res: Response) => {
+// let router: Router =
+//     express.Router()
+//     .use(bodyParserJson)
+//     .post('*', async (req: Request, res: Response) => {
 
-        var query: Input = req.body;
+//         var query: Input = req.body;
 
-        /// Input not match: 401
-        if (!query.username) res.status(401).end("<username> is required.");
+//         /// Input not match: 401
+//         if (!query.username) res.status(401).end("<username> is required.");
 
-        /// Try login
-        try {
-            var user: Parse.User = await Parse.User.logIn(query.username, query.password);
-            /// Success
-            var role = await new Parse.Query(Parse.Role)
-                                    .equalTo("users", user)
-                                    .first();
+//         /// Try login
+//         try {
+//             var user: Parse.User = await Parse.User.logIn(query.username, query.password);
+//             /// Success
+//             var role = await new Parse.Query(Parse.Role)
+//                                     .equalTo("users", user)
+//                                     .first();
 
-            res.end(JSON.stringify(
-                <Output>{
-                    sessionId: user.getSessionToken(),
-                    serverTime: new Date().valueOf(),
-                    role: { name: role.get("name") },
-                    user: user.attributes
-                }
-            ));
+//             res.end(JSON.stringify(
+//                 <Output>{
+//                     sessionId: user.getSessionToken(),
+//                     serverTime: new Date().valueOf(),
+//                     role: { name: role.get("name") },
+//                     user: user.attributes
+//                 }
+//             ));
 
-        } catch(reason) {
-            /// Failed: 401
-            res.status(401).end("Login failed.");
+//         } catch(reason) {
+//             /// Failed: 401
+//             res.status(401).end("Login failed.");
 
+//         }
+
+//     });
+
+// export default router;
+
+export default new Action<Input, Output>({
+    loginRequired: false,
+    middlewares: [bodyParserJson]
+})
+.post(async (data) => {
+    /// Input not match
+    if (!data.params.username) return Errors.throw(Errors.ParametersRequired);
+
+    /// Try login
+    try {
+        var user: Parse.User = await Parse.User.logIn(data.params.username, data.params.password);
+        /// Success
+        var role = await new Parse.Query(Parse.Role)
+                                .equalTo("users", user)
+                                .first();
+        return {
+            sessionId: user.getSessionToken(),
+            serverTime: new Date().valueOf(),
+            role: { name: role.get("name") },
+            user: user.attributes
         }
 
-    });
+    } catch(reason) {
+        return Errors.throw(Errors.RequestFailed);
+    }
+});
 
-export default router;
+//     .post('*', async (req: Request, res: Response) => {
+
+//         var query: Input = req.body;
+
+//         /// Input not match: 401
+//         if (!query.username) res.status(401).end("<username> is required.");
+
+//         /// Try login
+//         try {
+//             var user: Parse.User = await Parse.User.logIn(query.username, query.password);
+//             /// Success
+//             var role = await new Parse.Query(Parse.Role)
+//                                     .equalTo("users", user)
+//                                     .first();
+
+//             res.end(JSON.stringify(
+//                 <Output>{
+//                     sessionId: user.getSessionToken(),
+//                     serverTime: new Date().valueOf(),
+//                     role: { name: role.get("name") },
+//                     user: user.attributes
+//                 }
+//             ));
+
+//         } catch(reason) {
+//             /// Failed: 401
+//             res.status(401).end("Login failed.");
+
+//         }
+
+//     });
 
 
 

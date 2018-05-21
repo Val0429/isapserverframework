@@ -6,7 +6,7 @@ export * from './../models/cgis/errors.base';
 `;
 
 var tInterface = `
-export class Error {
+export class Errors {
 {0}
 
     detail: ErrorObject;
@@ -14,8 +14,8 @@ export class Error {
         this.detail = error;
     }
 
-    static throw(error: ErrorObject): Error {
-        return new Error(error);
+    static throw(error: ErrorObject): Errors {
+        return new Errors(error);
     }
 }
 `;

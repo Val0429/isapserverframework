@@ -1,6 +1,6 @@
 import {
     express, Request, Response, Router, WebSocket,
-    Parse, IRole, IUser, RoleList,
+    Parse, IRole, IUser, RoleList, config,
     Action, Errors,
     bodyParserJson
 } from './../../core/cgi-package';
@@ -60,16 +60,17 @@ export default new Action<Input, Output>({
     middlewares: []
 })
 .post(async (data) => {
-    /// Input not match
-    if (!data.params.username) return Errors.throw(Errors.ParametersRequired);
+    /// Check param requirement
+    if (!data.parameters.username) return Errors.throw(Errors.ParametersRequired, ["username"]);
 
     /// Try login
     try {
-        var user: Parse.User = await Parse.User.logIn(data.params.username, data.params.password);
+        var user: Parse.User = await Parse.User.logIn(data.parameters.username, data.parameters.password);
         /// Success
         var role = await new Parse.Query(Parse.Role)
                                 .equalTo("users", user)
                                 .first();
+
         return {
             sessionId: user.getSessionToken(),
             serverTime: new Date().valueOf(),

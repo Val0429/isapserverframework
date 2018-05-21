@@ -1,4 +1,4 @@
-import config from './../core/config.gen';
+import { config } from './../core/config.gen';
 import { shellWriter } from './../helpers/shells/shell-writer';
 
 var tHeader = `
@@ -10,7 +10,7 @@ import './../shells/events.shell';
 import * as express from 'express';
 import * as expressWs from 'express-ws';
 import * as fs from 'fs';
-import config from './../config/core/core.define';
+import { config } from './../config/core/core.define';
 
 let app: express.Server = express();
 /// Enable WebSocket support

@@ -1,6 +1,7 @@
 
 import { ErrorObject } from './../models/cgis/errors.base';
 export * from './../models/cgis/errors.base';
+import { Response } from 'express/lib/response';
 
 
 export class Errors {
@@ -8,6 +9,7 @@ export class Errors {
     static ParametersRequired: ErrorObject = { statusCode: 401, message: "Parameters required: {0}" };
     static RequestFailed: ErrorObject = { statusCode: 404, message: "Request failed." };
     static PermissionDenined: ErrorObject = { statusCode: 404, message: "Permission denined." };
+    static SessionNotExists: ErrorObject = { statusCode: 404, message: "Session not exists." };
 
     detail: ErrorObject;
     args: string[];
@@ -22,13 +24,20 @@ export class Errors {
         return rtn;
     }
 
-    resolve(): string {
+    resolve(res: Response = null): string {
         var message = this.detail.message;
-        if (!this.args) return message;
-        for (var i=0; i<this.args.length; ++i) {
-            var arg = this.args[i];
-            message = message.replace(new RegExp(`\{${i}\}`, "g"), arg);
-        }
+        do {
+            if (!this.args) break;
+            for (var i=0; i<this.args.length; ++i) {
+                var arg = this.args[i];
+                message = message.replace(new RegExp(`\\{${i}\\}`, "g"), arg);
+            }
+        } while(0);
+        
+        if (res) {
+            res.status(this.detail.statusCode)
+               .end(message);
+        }        
         return message;
     }
 }

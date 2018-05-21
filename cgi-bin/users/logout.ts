@@ -1,44 +1,21 @@
-import * as express from 'express';
+import {
+    express, Request, Response, Router, WebSocket,
+    Parse, IRole, IUser, RoleList, config,
+    Action, Errors,
+    loginRequired
+} from './../../core/cgi-package';
 
-import { Request } from 'express/lib/request';
-import { Response } from 'express/lib/response';
-import { Router } from 'express/lib/router/index';
 
-import { bodyParser } from './../../helpers/middlewares/body-parser';
-import * as Parse from 'parse/node';
-
-let router: Router = express.Router();
-router.use(bodyParser.json());
-
-interface Input {
+export interface Input {
     sessionId: string;
 }
 
-router.post('*', async (req: Request, res: Response) => {
-    var query: Input = req.body;
+export default new Action<Input>({
+    loginRequired: true
+})
+.post(async (data) => {
+    /// Check param requirement
 
-    /// Input not match: 401
-    if (!query.sessionId) res.status(401).end("<sessionId> required.");
-
-    /// Try get session user
-    try {
-        var o: Parse.Session = await new Parse.Query("_Session")
-            .descending("createdAt")
-            .first({sessionToken: query.sessionId}) as Parse.Session;
-
-        /// Session not match
-        if (!o || o.getSessionToken() !== query.sessionId) throw "";
-
-        /// Success
-        /// Perform Logout: 200
-        o.destroy({ sessionToken: query.sessionId });
-        res.end();
-
-    } catch(reason) {
-        /// No session exists: 404
-        res.status(404).end("<sessionId> not exists.");
-
-    }
+    /// Perform Logout
+    data.session.destroy({ sessionToken: data.parameters.sessionId });
 });
-
-export default router;

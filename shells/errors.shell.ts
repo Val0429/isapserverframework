@@ -3,6 +3,7 @@ import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
 var tHeader = `
 import { ErrorObject } from './../models/cgis/errors.base';
 export * from './../models/cgis/errors.base';
+import { Response } from 'express/lib/response';
 `;
 
 var tInterface = `
@@ -22,13 +23,20 @@ export class Errors {
         return rtn;
     }
 
-    resolve(): string {
+    resolve(res: Response = null): string {
         var message = this.detail.message;
-        if (!this.args) return message;
-        for (var i=0; i<this.args.length; ++i) {
-            var arg = this.args[i];
-            message = message.replace(new RegExp(\`\\{\${i}\\}\`, "g"), arg);
-        }
+        do {
+            if (!this.args) break;
+            for (var i=0; i<this.args.length; ++i) {
+                var arg = this.args[i];
+                message = message.replace(new RegExp(\`\\\\{\${i}\\\\}\`, "g"), arg);
+            }
+        } while(0);
+        
+        if (res) {
+            res.status(this.detail.statusCode)
+               .end(message);
+        }        
         return message;
     }
 }

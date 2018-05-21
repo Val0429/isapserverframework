@@ -24,7 +24,7 @@ var config: Config = {
         appName: "Val App",
     }
 }
-export default config;
+export { config };
 
 export interface ServerConfig {
     port: number;

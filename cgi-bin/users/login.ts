@@ -57,7 +57,7 @@ export interface Output {
 
 export default new Action<Input, Output>({
     loginRequired: false,
-    middlewares: [bodyParserJson]
+    middlewares: []
 })
 .post(async (data) => {
     /// Input not match

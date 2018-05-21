@@ -75,7 +75,7 @@ export class Action<T = any, U = any> {
                     var result = await this[`func${func}`]({...param, request, response});
                     if (result instanceof Errors) {
                         response.status(result.detail.statusCode)
-                                .end(result.detail.message);
+                                .end(result.resolve());
                     } else {
                         result.end(JSON.stringify(result));
                     }
@@ -87,7 +87,7 @@ export class Action<T = any, U = any> {
             router["ws"]("*", async (ws, request) => {
                 var result = await this.funcWs({...param, ws, request});
                 if (result instanceof Errors) {
-                    ws.send(JSON.stringify(result.detail));
+                    ws.send(JSON.stringify(result.resolve()));
                     /// todo: ws end?
                 } else {
                     ws.send(JSON.stringify(result));

@@ -10,11 +10,25 @@ export class Errors {
     static PermissionDenined: ErrorObject = { statusCode: 404, message: "Permission denined." };
 
     detail: ErrorObject;
+    args: string[];
+
     constructor(error: ErrorObject) {
         this.detail = error;
     }
 
-    static throw(error: ErrorObject): Errors {
-        return new Errors(error);
+    static throw(error: ErrorObject, args: string[] = null): Errors {
+        var rtn = new Errors(error);
+        rtn.args = args;
+        return rtn;
+    }
+
+    resolve(): string {
+        var message = this.detail.message;
+        if (!this.args) return message;
+        for (var i=0; i<this.args.length; ++i) {
+            var arg = this.args[i];
+            message = message.replace(new RegExp(`\{${i}\}`, "g"), arg);
+        }
+        return message;
     }
 }

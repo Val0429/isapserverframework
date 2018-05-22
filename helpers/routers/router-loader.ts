@@ -14,6 +14,7 @@ export function routerLoader(app, path, first = true) {
             var router = express.Router();
             app.use(`/${name}`, router);
             app = router;
+            console.log('mount', name);
         }
 
         for (var file of files) {
@@ -25,6 +26,7 @@ export function routerLoader(app, path, first = true) {
         if (name == defaultPath) name = "";
         //app.use(`/${name}`, route);
 
+        console.log('mount', name);
         if (route instanceof Action)
             app.use(`/${name}`, route.mount());
         else app.use(`/${name}`, route);

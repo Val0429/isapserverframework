@@ -8,13 +8,11 @@ var tHeader = `
 import './../shells/events.shell';
 
 import * as express from 'express';
-import * as expressWs from 'express-ws';
+import { expressWsRoutes } from './../helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
 import { config } from './../config/core/core.define';
 
-let app: express.Server = express();
-/// Enable WebSocket support
-let wsapp = expressWs(app);
+let app: express.Application = expressWsRoutes();
 `;
 
 var tDisableCache = `

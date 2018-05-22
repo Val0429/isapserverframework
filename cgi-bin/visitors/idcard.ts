@@ -10,7 +10,7 @@ export interface Input {
     name: string;
     birthdate: string;
     idnumber: string;
-    image: Parse.File;
+    image: Parse.File | Parse.File[];
 }
 
 export default new Action<Input>({

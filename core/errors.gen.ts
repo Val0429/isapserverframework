@@ -2,6 +2,7 @@
 import { ErrorObject } from './../models/cgis/errors.base';
 export * from './../models/cgis/errors.base';
 import { Response } from 'express/lib/response';
+import { ExpressWsSocket } from './../helpers/middlewares/express-ws-routes';
 
 
 export class Errors {
@@ -35,9 +36,15 @@ export class Errors {
         } while(0);
         
         if (res) {
-            res.status(this.detail.statusCode)
-               .end(message);
-        }        
+            if ((<any>res)._websocket) {
+                var ws: ExpressWsSocket = (<any>res)._websocket;
+                ws.cb(false, this.detail.statusCode, message);
+
+            } else {
+                res.status(this.detail.statusCode)
+                   .end(message);
+            }
+        }
         return message;
     }
 }

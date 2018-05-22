@@ -23,6 +23,7 @@
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "express-ws": "^3.0.0",
+    "express-ws-routes": "^1.1.0",
     "network": "^0.3.2",
     "parse": "^1.11.0",
     "parse-dashboard": "^1.2.0",

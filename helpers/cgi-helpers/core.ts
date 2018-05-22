@@ -3,6 +3,8 @@ import * as express from 'express';
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { Router } from 'express/lib/router/index';
+import * as Socket from 'ws';
+import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
 
 /// Parse & define
 import * as Parse from 'parse/node';
@@ -62,8 +64,9 @@ export class Action<T = any, U = any> {
                 router[func.toLowerCase()]("*", async (request: Request, response: Response) => {
                     var result = await realfunc({...request, request, response});
                     if (result instanceof Errors) {
-                        response.status(result.detail.statusCode)
-                                .end(result.resolve());
+                        result.resolve(response);
+                        // response.status(result.detail.statusCode)
+                        //         .end(result.resolve());
                     } else {
                         response.end(JSON.stringify(result));
                     }
@@ -72,15 +75,32 @@ export class Action<T = any, U = any> {
         }
         /// ws
         if (this.funcWs) {
-            router["ws"]("*", async (ws, request) => {
-                var result = await this.funcWs({...request, ws, request});
-                if (result instanceof Errors) {
-                    ws.send(JSON.stringify(result.resolve()));
-                    /// todo: ws end?
-                } else {
-                    ws.send(JSON.stringify(result));
-                }
+            let realfunc = this.funcWs;
+            router["websocket"]("*", (info: ExpressWsRouteInfo, cb: ExpressWsCb) => {
+                cb( async (socket: Socket) => {
+                    var request = <any>info.req;
+                    var response = <any>info.res;
+                    var result = await realfunc({...request, socket, request, response});
+                    if (result instanceof Errors) {
+                        result.resolve(response);
+                    } else {
+                        socket.send(JSON.stringify(result));
+                    }
+                });
             });
+
+            // console.log('who?', 'got');
+            // router["ws"]("*", async (ws, request) => {
+            //     console.log('got??');
+            //     ws.send('gotgotecho');
+            //     var result = await this.funcWs({...request, ws, request});
+            //     if (result instanceof Errors) {
+            //         ws.send(JSON.stringify(result.resolve()));
+            //         /// todo: ws end?
+            //     } else {
+            //         ws.send(JSON.stringify(result));
+            //     }
+            // });
         }
         return router;
     }
@@ -111,7 +131,7 @@ export interface ActionCallback<T, U> {
 }
 
 export interface ActionParam<T> {
-    ws: WebSocket;
+    socket: Socket;
     request: Request;
     response: Response;
 }

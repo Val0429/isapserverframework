@@ -50,14 +50,14 @@ if (config.parseDashboard.enable) {
   var Dashboard = new ParseDashboard({
     "apps": [
       {
-        "serverURL": \`http://localhost:\${config.server.port}\${config.parseDashboard.serverPath}\`,
+        "serverURL": \`http://localhost:\${config.server.port}\${config.parseServer.serverPath}\`,
         "appId": config.parseServer.appId,
         "masterKey": config.parseServer.masterKey,
         "appName": config.parseDashboard.appName
       }
     ]
   });
-  app.use('/dashboard', Dashboard);
+  app.use(config.parseDashboard.serverPath, Dashboard);
 }
 ////////////////////////////
 `;

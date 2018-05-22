@@ -41,14 +41,6 @@ export class Action<T = any, U = any> {
 
     mount(): Router {
         var router: Router = express.Router();
-        var param = {
-            // parameters: null,
-            // request: null,
-            // response: null,
-            // role: null,
-            // user: null,
-            // ws: null,
-        }
 
         /////////////////////////////////////////////
         /// mount middlewares
@@ -68,7 +60,7 @@ export class Action<T = any, U = any> {
             if (this[`func${func}`]) {
                 let realfunc = this[`func${func}`];
                 router[func.toLowerCase()]("*", async (request: Request, response: Response) => {
-                    var result = await realfunc({...param, ...request, request, response});
+                    var result = await realfunc({...request, request, response});
                     if (result instanceof Errors) {
                         response.status(result.detail.statusCode)
                                 .end(result.resolve());
@@ -81,7 +73,7 @@ export class Action<T = any, U = any> {
         /// ws
         if (this.funcWs) {
             router["ws"]("*", async (ws, request) => {
-                var result = await this.funcWs({...param, ...request, ws, request});
+                var result = await this.funcWs({...request, ws, request});
                 if (result instanceof Errors) {
                     ws.send(JSON.stringify(result.resolve()));
                     /// todo: ws end?
@@ -136,7 +128,7 @@ declare module 'express/lib/request' {
 }
 function VBodyParserJson(req: Request, res: Response, next) {
     return Middlewares.bodyParserJson(req, res, () => {
-        req.parameters = { ...req.params, ...req.body };
+        req.parameters = { ...req.query, ...req.body };
         next();
     });
 }

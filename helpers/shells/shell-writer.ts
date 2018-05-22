@@ -15,7 +15,7 @@ export function shellWriter(detects: string[], target: string, ready: () => void
 
 export function autoPad(input: string, value: number) {
     return input.replace(
-        new RegExp(`^ {${value},}`, "gm"),
+        new RegExp(`^ {0,}`, "gm"),
         Array(value+1).join(" ")
     );
 }

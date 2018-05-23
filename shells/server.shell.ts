@@ -24,7 +24,7 @@ if (config.server.disableCache) app.use(noCache);
 var tLoadRouter = `
 /// Load Routers!
 import { routerLoader } from './../helpers/routers/router-loader';
-routerLoader(app, \`\${__dirname}/../cgi-bin\`);
+routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`);
 `;
 
 var tRunParseServer = `

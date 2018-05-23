@@ -18,7 +18,7 @@ if (config.server.disableCache) app.use(noCache);
 
 /// Load Routers!
 import { routerLoader } from './../helpers/routers/router-loader';
-routerLoader(app, `${__dirname}/../cgi-bin`);
+routerLoader(app, `${__dirname}/../workspace/cgi-bin`);
 
 
 /// run parse server ////
@@ -59,3 +59,13 @@ app.listen(config.server.port, () => {
 export {
   app
 }
+
+// import * as https from 'https';
+// import { readFileSync } from 'fs';
+// const options = {
+//   key: readFileSync('./config/certificates/mykey.key'),
+//   cert: readFileSync('./config/certificates/mycert.crt')
+// }
+// https.createServer(options, app).listen(8081, () => {
+//   console.log('https server listen on 8081.');
+// });

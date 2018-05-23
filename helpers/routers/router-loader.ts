@@ -39,7 +39,7 @@ export function routerLoader(app, path, first = true, level = 0) {
             var protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];
             for (var proto of protos)
                 if (route[`func${proto}`])
-                    types.push(proto);
+                    types.push(proto.toUpperCase());
             ///////////////
 
         } else app.use(`/${name}`, route);

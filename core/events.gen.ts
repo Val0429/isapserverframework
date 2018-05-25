@@ -33,7 +33,7 @@ export type EventType<T> =
 /// Event1: Login //////////////////////////////////
 export interface IEventLogin extends IEventEntity {
     action: 1;
-    
+        
     /**
     * owner: self User
     */
@@ -49,7 +49,7 @@ export interface IEventLogin extends IEventEntity {
 /// Event2: Logout //////////////////////////////////
 export interface IEventLogout extends IEventEntity {
     action: 2;
-    
+        
     /// owner: self User
     /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
     
@@ -61,7 +61,7 @@ export interface IEventLogout extends IEventEntity {
 /// Event3101: PickFloor //////////////////////////////////
 export interface IEventPickFloor extends IEventEntity {
     action: 3101;
-    
+        
 }
 @registerSubclass() export class EventPickFloor extends AsParseObject("Event3101")<IEventPickFloor> { constructor(data?: Omit<IEventPickFloor, 'action'>) { super({ action: 3101, ...data }) } }
 ////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ export interface IEventPickFloor extends IEventEntity {
 /// Event3102: ScanIDCard //////////////////////////////////
 export interface IEventScanIDCard extends IEventEntity {
     action: 3102;
-    
+        
 }
 @registerSubclass() export class EventScanIDCard extends AsParseObject("Event3102")<IEventScanIDCard> { constructor(data?: Omit<IEventScanIDCard, 'action'>) { super({ action: 3102, ...data }) } }
 ////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ export interface IEventScanIDCard extends IEventEntity {
 /// Event3188: RegistrationComplete //////////////////////////////////
 export interface IEventRegistrationComplete extends IEventEntity {
     action: 3188;
-    
+        
 }
 @registerSubclass() export class EventRegistrationComplete extends AsParseObject("Event3188")<IEventRegistrationComplete> { constructor(data?: Omit<IEventRegistrationComplete, 'action'>) { super({ action: 3188, ...data }) } }
 ////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ export interface IEventRegistrationComplete extends IEventEntity {
 /// Event3201: VerifyOTPCode //////////////////////////////////
 export interface IEventVerifyOTPCode extends IEventEntity {
     action: 3201;
-    
+        
 }
 @registerSubclass() export class EventVerifyOTPCode extends AsParseObject("Event3201")<IEventVerifyOTPCode> { constructor(data?: Omit<IEventVerifyOTPCode, 'action'>) { super({ action: 3201, ...data }) } }
 ////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ export interface IEventVerifyOTPCode extends IEventEntity {
 /// Event3202: FaceVerify //////////////////////////////////
 export interface IEventFaceVerify extends IEventEntity {
     action: 3202;
-    
+        
 }
 @registerSubclass() export class EventFaceVerify extends AsParseObject("Event3202")<IEventFaceVerify> { constructor(data?: Omit<IEventFaceVerify, 'action'>) { super({ action: 3202, ...data }) } }
 ////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ export interface IEventFaceVerify extends IEventEntity {
 /// Event3288: CheckInComplete //////////////////////////////////
 export interface IEventCheckInComplete extends IEventEntity {
     action: 3288;
-    
+        
 }
 @registerSubclass() export class EventCheckInComplete extends AsParseObject("Event3288")<IEventCheckInComplete> { constructor(data?: Omit<IEventCheckInComplete, 'action'>) { super({ action: 3288, ...data }) } }
 ////////////////////////////////////////////////////
@@ -115,7 +115,7 @@ export interface IEventCheckInComplete extends IEventEntity {
 /// Event3601: FingerPrintVerify //////////////////////////////////
 export interface IEventFingerPrintVerify extends IEventEntity {
     action: 3601;
-    
+        
     /// owner: self User
     pass: boolean;
     

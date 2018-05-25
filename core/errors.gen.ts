@@ -11,6 +11,7 @@ export class Errors {
     static RequestFailed: ErrorObject = { statusCode: 404, message: "Request failed." };
     static PermissionDenined: ErrorObject = { statusCode: 404, message: "Permission denined." };
     static SessionNotExists: ErrorObject = { statusCode: 404, message: "Session not exists." };
+    static VisitorAlreadyExists: ErrorObject = { statusCode: 400, message: "An visitor with this key already exists." };
 
     detail: ErrorObject;
     args: string[];
@@ -42,7 +43,7 @@ export class Errors {
 
             } else {
                 res.status(this.detail.statusCode)
-                   .end(message);
+                   .send(message);
             }
         }
         return message;

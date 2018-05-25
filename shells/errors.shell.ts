@@ -41,7 +41,7 @@ export class Errors {
 
             } else {
                 res.status(this.detail.statusCode)
-                   .end(message);
+                   .send(message);
             }
         }
         return message;
@@ -87,7 +87,7 @@ function main(events: Config[]): string {
 const genFilePath = `${__dirname}/../core/errors.gen.ts`;
 const tmplPath = `${__dirname}/errors.shell.ts`;
 const defPath = `${__dirname}/../models/cgis/errors.define.ts`;
-const customDefPath = `${__dirname}/../config/cgis/errors.define.ts`;
+const customDefPath = `${__dirname}/../workspace/config/cgis/errors.define.ts`;
 
 var events = require(defPath).default;
 var cevents = require(customDefPath).default;

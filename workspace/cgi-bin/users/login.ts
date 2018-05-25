@@ -1,8 +1,9 @@
 import {
     express, Request, Response, Router, WebSocket,
-    Parse, IRole, IUser, RoleList, config,
+    IRole, IUser, RoleList, config,
     Action, Errors,
-    bodyParserJson
+    bodyParserJson,
+    UserHelper
 } from './../../../core/cgi-package';
 
 
@@ -27,21 +28,16 @@ export default new Action<Input, Output>({
     if (!data.parameters.username) return Errors.throw(Errors.ParametersRequired, ["username"]);
 
     /// Try login
-    try {
-        var user: Parse.User = await Parse.User.logIn(data.parameters.username, data.parameters.password);
-        /// Success
-        var role = await new Parse.Query(Parse.Role)
-                                .equalTo("users", user)
-                                .first();
+    var obj = await UserHelper.login({ ...data.parameters });
 
+    if (obj instanceof Errors) {
+        return <Errors>obj;
+    } else {
         return {
-            sessionId: user.getSessionToken(),
+            sessionId: obj.sessionId,
             serverTime: new Date().valueOf(),
-            role: { name: role.get("name") },
-            user: user.attributes
+            role: { name: obj.role.get("name") },
+            user: obj.user.attributes
         }
-
-    } catch(reason) {
-        return Errors.throw(Errors.RequestFailed);
     }
 });

@@ -12,6 +12,7 @@ export { Router };
 import * as Parse from 'parse/node';
 export { Parse };
 export * from './userRoles.gen';
+export * from './personRoles.gen';
 export * from './events.gen';
 export * from './errors.gen';
 export * from './config.gen';

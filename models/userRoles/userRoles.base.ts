@@ -1,12 +1,14 @@
-import * as Parse from 'parse/node';
-
 export interface IRole {
     name: string;
 }
 
-export interface IUser<T = any> {
+export interface IUserData {
+    image?: Parse.File[];
+}
+
+export interface IUser<T = {}> {
     username: string;
     password: string;
     email?: string;
-    data?: T;
+    data?: T & IUserData;
 }

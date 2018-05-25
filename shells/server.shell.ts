@@ -10,7 +10,7 @@ import './../shells/events.shell';
 import * as express from 'express';
 import { expressWsRoutes } from './../helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
-import { config } from './../config/core/core.define';
+import { config } from './../workspace/config/core/core.define';
 
 let app: express.Application = expressWsRoutes();
 `;

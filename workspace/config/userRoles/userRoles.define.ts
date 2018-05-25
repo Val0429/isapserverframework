@@ -37,4 +37,4 @@ var userRoles: Config[] = [
 
 export default userRoles;
 
-type Config = [number, string, string] | [number, string];
+export type Config = [number, string, string] | [number, string];

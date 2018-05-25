@@ -15,6 +15,8 @@ import { config } from './../../core/config.gen';
 /// Middlewares
 import * as Middlewares from './../../helpers/middlewares/index';
 
+/// Helpers
+export * from './../parse-server/user-helper';
 
 export class Action<T = any, U = any> {
     config: ActionConfig;
@@ -65,10 +67,8 @@ export class Action<T = any, U = any> {
                     var result = await realfunc({...request, request, response});
                     if (result instanceof Errors) {
                         result.resolve(response);
-                        // response.status(result.detail.statusCode)
-                        //         .end(result.resolve());
                     } else {
-                        response.end(JSON.stringify(result));
+                        response.send(result);
                     }
                 });
             }

@@ -2,7 +2,7 @@ import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
 
 const genFilePath = `${__dirname}/../core/config.gen.ts`;
 const tmplPath = `${__dirname}/config.shell.ts`;
-const defPath = `${__dirname}/../config/core/core.define.ts`;
+const defPath = `${__dirname}/../workspace/config/core/core.define.ts`;
 
 import * as fs from 'fs';
 

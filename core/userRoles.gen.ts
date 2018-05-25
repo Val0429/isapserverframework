@@ -17,12 +17,12 @@ export type UserType<T> =
     T extends "1" ? IUserTenant :
     T extends "2" ? IUserVisitor :
     T extends "3" ? IUserKiosk :
-    Parse.Object;
+    never;
 
 
 /// UserAdministrator: 0 ///////////////////////////////////
 export interface IUserAdministratorData {
-    
+        
 }
 export type IUserAdministrator = ParseTypedGetterSetter<IUser<IUserAdministratorData>> & Parse.User;
 ////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ export type IUserAdministrator = ParseTypedGetterSetter<IUser<IUserAdministrator
 
 /// UserTenant: 1 ///////////////////////////////////
 export interface IUserTenantData {
-    
+        
     /**
     * Which floor this Tenant is in.
     */
@@ -55,7 +55,7 @@ export type IUserTenant = ParseTypedGetterSetter<IUser<IUserTenantData>> & Parse
 
 /// UserVisitor: 2 ///////////////////////////////////
 export interface IUserVisitorData {
-    
+        
     /**
     * Name of this visitor.
     */
@@ -68,7 +68,7 @@ export type IUserVisitor = ParseTypedGetterSetter<IUser<IUserVisitorData>> & Par
 
 /// UserKiosk: 3 ///////////////////////////////////
 export interface IUserKioskData {
-    
+        
     /**
     * Name of this kiosk.
     */

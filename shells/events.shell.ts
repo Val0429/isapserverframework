@@ -95,7 +95,7 @@ function main(events: Array<[number, string, string] | [number, string]>): strin
 const genFilePath = `${__dirname}/../core/events.gen.ts`;
 const tmplPath = `${__dirname}/events.shell.ts`;
 const defPath = `${__dirname}/../models/events/events.define.ts`;
-const customDefPath = `${__dirname}/../config/events/events.define.ts`;
+const customDefPath = `${__dirname}/../workspace/config/events/events.define.ts`;
 
 var events = require(defPath).default;
 var cevents = require(customDefPath).default;

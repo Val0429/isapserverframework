@@ -1,4 +1,4 @@
-import { registerSubclass, AsParseObject } from './../../helpers/parse-server/parse-helper';
+import { registerSubclass, ParseObject } from './../../helpers/parse-server/parse-helper';
 
 /// Floors /////////////////////////////////////////
 export interface IFloors {
@@ -6,5 +6,5 @@ export interface IFloors {
     unitNo: string;
     phone: string[];
 }
-@registerSubclass() export class Floors extends AsParseObject("Floors")<IFloors> {}
+@registerSubclass() export class Floors extends ParseObject<IFloors> {}
 ////////////////////////////////////////////////////

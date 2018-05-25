@@ -1,4 +1,5 @@
 import * as Parse from 'parse/node';
+import { Person } from './../userRoles/personRoles.base';
 
 /// Base
 export interface IEvent<T = IEventEntity, U = IEventEntity> {
@@ -22,4 +23,8 @@ export interface IEventEntity {
      * Parent event related to this.
      */
     parent?: IEventEntity;
+    /**
+     * Person related to this event.
+     */
+    relatedPerson?: Person;
 }

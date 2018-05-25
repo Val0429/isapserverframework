@@ -1,28 +1,9 @@
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject, registerPrimaryKey } from '../helpers/parse-server/parse-helper';
+import { registerSubclass, registerPrimaryKey } from '../helpers/parse-server/parse-helper';
 import { IRole, IUser } from './../models/userRoles/userRoles.base';
+import { Person } from './../models/userRoles/personRoles.base';
 export * from './../models/userRoles/userRoles.base';
-
-export interface IPerson<T> extends IUser<T> {}
-@registerSubclass()
-@registerPrimaryKey("username")
-export class Person<T = any> extends AsParseObject("Person")<IPerson<T>> {}
-
-export interface IPersonRole extends IRole {
-    people: Parse.Relation<PersonRole, Person>;
-    roles: Parse.Relation<PersonRole, PersonRole>;
-}
-export interface PersonRole {
-    relation<T extends keyof IPersonRole>(relation: T);
-}
-@registerSubclass() export class PersonRole extends AsParseObject("PersonRole")<IPersonRole & IRole> {
-    getRoles(): Parse.Relation<this, PersonRole> {
-        return <any>this.relation("roles");
-    }
-    getPeople(): Parse.Relation<this, Person> {
-        return <any>this.relation("people");
-    }
-}
+export * from './../models/userRoles/personRoles.base';
 
 
 export enum PersonRoleList {

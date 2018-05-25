@@ -5,7 +5,7 @@ import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
 // } from './events';
 var tHeader = `
 import * as Parse from 'parse/node';
-import { registerSubclass, AsParseObject, Omit, ParseTypedGetterSetter } from '../helpers/parse-server/parse-helper';
+import { registerSubclass, Omit, ParseTypedGetterSetter } from '../helpers/parse-server/parse-helper';
 import { IRole, IUser } from './../models/userRoles/userRoles.base';
 export * from './../models/userRoles/userRoles.base';
 `;

@@ -2,42 +2,42 @@ import {
     express, Request, Response, Router, WebSocket,
     Parse, IRole, IUser, RoleList, config,
     Action, Errors, Person,
-    Events, EventTryCheckIn
+    Events, EventFaceVerifyResult, FileHelper
 } from './../../../core/cgi-package';
 
 
 export interface Input {
     sessionId: string;
-    username: string;
-}
-
-export interface Output {
     personId: string;
+    image: string;
+    result: boolean;
 }
 
-export default new Action<Input, Output>({
+export default new Action<Input>({
     loginRequired: true,
     permission: [RoleList.Kiosk]
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.username) return Errors.throw(Errors.ParametersRequired, ["username"]);
+    if (!data.parameters.personId) return Errors.throw(Errors.ParametersRequired, ["personId"]);
 
-    /// Insert or Retrive
+    var { personId, image, result } = data.parameters;
+
+    /// Get Person
     var person: Person = await new Parse.Query(Person)
-        .equalTo("username", data.parameters.username)
-        .first();
+        .get(personId);
 
     /// Error if not exists
     if (!person) return Errors.throw(Errors.VisitorNotExists);
 
-    var comp = new EventTryCheckIn({
+    var comp = new EventFaceVerifyResult({
         owner: data.user,
         relatedPerson: person,
+
+        image: await FileHelper.toParseFile(image),
+        result,
     });
     await Events.save(comp);
 
-    return {
-        personId: person.id
-    }
+    return;
 });

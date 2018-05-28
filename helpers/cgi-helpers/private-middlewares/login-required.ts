@@ -10,13 +10,13 @@ import { Response } from 'express/lib/response';
 export interface ActionParam<T> {
     session: Parse.Session;
     user: Parse.User;
-    role: IRole;
+    role: Parse.Role;
 }
 declare module 'express/lib/request' {
     interface Request {
         session: Parse.Session;
         user: Parse.User;
-        role: IRole;
+        role: Parse.Role;
     }
 }
 export async function loginRequired(req: Request, res: Response, next) {
@@ -58,7 +58,7 @@ export async function loginRequired(req: Request, res: Response, next) {
     /// final
     req.session = session;
     req.user = user;
-    req.role = { name: role.get("name") };
+    req.role = role;
     next();
 }
 ////////////////////////////////////////////////////////////

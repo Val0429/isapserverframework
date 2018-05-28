@@ -30,8 +30,4 @@ export default new Action<Input>({
         .find();
 
     return floors;
-
-    // return floors.map( (value: Floors) => {
-    //     return value.toJSON();
-    // });
 });

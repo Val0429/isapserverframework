@@ -7,7 +7,7 @@ import { Config } from './../models/events/events.define';
 var tHeader = `
 import * as Parse from 'parse/node';
 import { registerSubclass, ParseObject, Omit } from '../helpers/parse-server/parse-helper';
-import { IEventEntity } from './../models/events/events.base';
+import { Events, IEvents, IEventEntity } from './../models/events/events.base';
 export * from './../models/events/events.base';
 `;
 
@@ -29,11 +29,15 @@ export enum EventList {
 // export type EventType<T> =
 //     T extends 1 ? EventLogin :
 //     T extends 2 ? EventLogout :
-//     Parse.Object;
+//     never;
 var tType = `
 export type EventType<T> =
 {0}
-    Parse.Object;
+    never;
+
+export type EventsType<T> =
+{1}
+    never;
 `;
 
 var tInterface = `
@@ -80,15 +84,19 @@ function main(events: Config): string {
     /////////////////////////////////////////////
 
     /// make type ///////////////////////////////
-    var tmp = [];
+    var tmp = [], tmp2 = [];
     for (var event of events) {
         tmp.push(
             "    T extends {0} ? Event{1} :".replace("{0}", event[0].toString())
                                         .replace("{1}", event[1])
             );
+        tmp2.push(
+            "    T extends {0} ? Events<IEvents<IEvent{1}>> :".replace("{0}", event[0].toString())
+                                        .replace("{1}", event[1])
+        );
     }
     tmpstr.push(
-        tType.replace("{0}", tmp.join("\r\n"))
+        tType.replace("{0}", tmp.join("\r\n")).replace("{1}", tmp2.join("\r\n"))
     );
     /////////////////////////////////////////////
 

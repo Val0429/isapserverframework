@@ -17,6 +17,7 @@ import * as Middlewares from './../../helpers/middlewares/index';
 
 /// Helpers
 export * from './../parse-server/user-helper';
+export * from './../parse-server/file-helper';
 
 export class Action<T = any, U = any> {
     config: ActionConfig;

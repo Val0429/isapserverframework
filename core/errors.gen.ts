@@ -13,6 +13,7 @@ export class Errors {
     static PermissionDenined: ErrorObject = { statusCode: 404, message: "Permission denined." };
     static SessionNotExists: ErrorObject = { statusCode: 404, message: "Session not exists." };
     static VisitorAlreadyExists: ErrorObject = { statusCode: 400, message: "An visitor with this key already exists." };
+    static VisitorNotExists: ErrorObject = { statusCode: 400, message: "An visitor with this key not exists." };
 
     detail: ErrorObject;
     args: string[];

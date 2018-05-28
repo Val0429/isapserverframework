@@ -2,13 +2,12 @@ import {
     express, Request, Response, Router, WebSocket,
     Parse, IRole, IUser, RoleList, config,
     Action, Errors, Person,
-    Events, EventTryCheckIn
+    Events, EventRegistrationComplete,
 } from './../../../core/cgi-package';
-
 
 export interface Input {
     sessionId: string;
-    username: string;
+    personId: string;
 }
 
 export interface Output {
@@ -21,23 +20,26 @@ export default new Action<Input, Output>({
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.username) return Errors.throw(Errors.ParametersRequired, ["username"]);
+    if (!data.parameters.personId) return Errors.throw(Errors.ParametersRequired, ["personId"]);
 
-    /// Insert or Retrive
-    var person: Person = await new Parse.Query(Person)
-        .equalTo("username", data.parameters.username)
-        .first();
+    var { personId } = data.parameters;
 
-    /// Error if not exists
-    if (!person) return Errors.throw(Errors.VisitorNotExists);
+    /// Get Person
+    var person: Person;
+    try {
+        person = await new Parse.Query(Person)
+            .get(personId);
+    } catch(reason) {
+        /// Error if not exists
+        return Errors.throw(Errors.VisitorNotExists);
+    }
 
-    var comp = new EventTryCheckIn({
+    /// todo: Add to Role
+    var comp = new EventRegistrationComplete({
         owner: data.user,
         relatedPerson: person,
     });
     await Events.save(comp);
 
-    return {
-        personId: person.id
-    }
+    return;
 });

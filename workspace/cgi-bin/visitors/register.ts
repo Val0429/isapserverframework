@@ -2,7 +2,7 @@ import {
     express, Request, Response, Router, WebSocket,
     Parse, IRole, IUser, RoleList, config,
     Action, Errors, Person,
-    Events, EventRegistrationComplete
+    Events, EventTryRegister, EventList,
 } from './../../../core/cgi-package';
 
 export interface Input {
@@ -28,11 +28,15 @@ export default new Action<Input, Output>({
     });
     var { object: person, status } = await person.fetchOrInsert();
 
-    /// Error if exists?
-    if (status == "fetch") return Errors.throw(Errors.VisitorAlreadyExists);
+    /// Error if exists
+    if (status == "fetch") {
+        /// Double check registration complete
+        var events = await Events.fetchLast(EventList.RegistrationComplete, person);
+        if (events) return Errors.throw(Errors.VisitorAlreadyExists);
+    }
 
     /// todo: Add to Role
-    var comp = new EventRegistrationComplete({
+    var comp = new EventTryRegister({
         owner: data.user,
         relatedPerson: person,
     });

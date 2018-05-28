@@ -28,7 +28,7 @@ export namespace UserHelper {
                 .first();
 
         } catch(reason) {
-            console.log('failed', reason);
+            console.log('login failed', reason);
             return Errors.throw(Errors.RequestFailed);
         }
         

@@ -8,19 +8,39 @@ import { Config } from './../../../models/events/events.define';
 var events: Config[] = [
     /// 3000 for Visitor ///////////////////////
     /// 3600 - Register
-    [3601, "PickFloor", `
+    [3601, "TryRegister"],
+    [3602, "PickFloor", `
         /**
          * Floors object pick by Person.
          */
         floor: Floors;
     `, ["Floors"]],
-    [3602, "ScanIDCard"],
+    [3603, "ScanIDCard", `
+        /**
+         * Extracted info from ID Card.
+         */
+        name: string;
+        birthdate: string;
+        idnumber: string;
+        image: Parse.File[];
+    `],
     [3688, "RegistrationComplete"],
 
     /// 3700 - Check In
     [3701, "TryCheckIn"],
-    [3702, "FaceVerifyResult"],
-    [3788, "DoneCheckIn"],
+    [3702, "FaceVerifyResult", `
+        /**
+         * Verified face image and final result.
+         */
+        image: Parse.File;
+        result: boolean;
+    `],
+    [3788, "DoneCheckIn", `
+        /**
+         * Check-in final result.
+         */
+        result: boolean;
+    `],
     ////////////////////////////////////////////
 ];
 

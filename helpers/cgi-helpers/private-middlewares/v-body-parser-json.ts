@@ -2,8 +2,10 @@ import { Request } from 'express/lib/request';
 import { bodyParserJson } from './../../middlewares/body-parser';
 
 /// BodyParser --> + parameters ////////////////////////////
-export interface ActionParam<T> {
-    parameters: T;
+declare module 'helpers/cgi-helpers/core' {
+    export interface ActionParam<T> {
+        parameters: T;
+    }
 }
 declare module 'express/lib/request' {
     interface Request {

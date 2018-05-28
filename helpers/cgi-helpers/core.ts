@@ -3,12 +3,12 @@ import * as express from 'express';
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { Router } from 'express/lib/router/index';
-import * as Socket from 'ws';
 import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
 
 /// Parse & define
 import * as Parse from 'parse/node';
 import { RoleList, IRole } from './../../core/userRoles.gen';
+import * as Socket from 'ws';
 import { Errors } from './../../core/errors.gen';
 import { config } from './../../core/config.gen';
 
@@ -18,6 +18,43 @@ import * as Middlewares from './../../helpers/middlewares/index';
 /// Helpers
 export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
+
+/// private middlewares
+import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
+import { permissionCheck } from './private-middlewares/permission-check';
+import { loginRequired } from './private-middlewares/login-required';
+
+declare module 'helpers/cgi-helpers/core' {
+    export interface ActionConfig {
+        /**
+         * Is this action require login?
+         * Default = true.
+         */
+        loginRequired?: boolean;
+
+        /**
+         * Is this action limit to specific role?
+         * Default = none.
+         */
+        permission?: RoleList[];
+
+        /**
+         * Which middlewares should be injected into route?
+         * Default = none.
+         */
+        middlewares?: any[];
+    }
+
+    export interface ActionCallback<T, U> {
+        (data: ActionParam<T>): (U | Errors) | (Promise<U | Errors>);
+    }
+
+    export interface ActionParam<T> {
+        socket: Socket;
+        request: Request;
+        response: Response;
+    }
+}
 
 export class Action<T = any, U = any> {
     config: ActionConfig;
@@ -51,7 +88,7 @@ export class Action<T = any, U = any> {
         /// mount middlewares
         /// 1) bodyParser
         //router.use(Middlewares.bodyParserJson);
-        router.use(VBodyParserJson);
+        router.use(<any>VBodyParserJson);
         /// 2) login
         if (this.config.loginRequired) router.use(loginRequired);
         /// 3) permission
@@ -107,118 +144,3 @@ export class Action<T = any, U = any> {
     }
 }
 
-export interface ActionConfig {
-    /**
-     * Is this action require login?
-     * Default = true.
-     */
-    loginRequired?: boolean;
-
-    /**
-     * Is this action limit to specific role?
-     * Default = none.
-     */
-    permission?: RoleList[];
-
-    /**
-     * Which middlewares should be injected into route?
-     * Default = none.
-     */
-    middlewares?: any[];
-}
-
-export interface ActionCallback<T, U> {
-    (data: ActionParam<T>): (U | Errors) | (Promise<U | Errors>);
-}
-
-export interface ActionParam<T> {
-    socket: Socket;
-    request: Request;
-    response: Response;
-}
-
-/// Innate Middlewares
-/// BodyParser --> + parameters ////////////////////////////
-export interface ActionParam<T> {
-    parameters: T;
-}
-declare module 'express/lib/request' {
-    interface Request {
-        parameters: any;
-    }
-}
-function VBodyParserJson(req: Request, res: Response, next) {
-    return Middlewares.bodyParserJson(req, res, () => {
-        req.parameters = { ...req.query, ...req.body };
-        next();
-    });
-}
-////////////////////////////////////////////////////////////
-
-/// permissionCheck ////////////////////////////////////////
-export function permissionCheck(permissions: RoleList[]) {
-    return (req: Request, res, next) => {
-        if (permissions.indexOf(<RoleList>req.role.get("name")) < 0) {
-            return Errors.throw(Errors.PermissionDenined).resolve(res);
-        }
-        next();
-    }
-}
-////////////////////////////////////////////////////////////
-
-/// loginRequired //////////////////////////////////////////
-export interface ActionParam<T> {
-    session: Parse.Session;
-    user: Parse.User;
-    role: Parse.Role;
-}
-declare module 'express/lib/request' {
-    interface Request {
-        session: Parse.Session;
-        user: Parse.User;
-        role: Parse.Role;
-    }
-}
-export async function loginRequired(req: Request, res: Response, next) {
-    var sessionKey: string = config.server.keyOfSessionId;
-
-    /// should contain sessionId
-    var sessionId: string = req.parameters[sessionKey];
-    if (!sessionId) {
-        return Errors.throw(Errors.ParametersRequired, [sessionKey]).resolve(res);
-    }
-
-    var session: Parse.Session;
-    var user: Parse.User;
-    var role: Parse.Role;
-    try {
-        /// get session instance
-        session = await new Parse.Query("_Session")
-                .descending("createdAt")
-                .include("user")
-                .first({sessionToken: sessionId}) as Parse.Session;
-            
-        /// session not match
-        if (!session || session.getSessionToken() != sessionId) {
-            return Errors.throw(Errors.LoginRequired).resolve(res);
-        }
-
-        /// get user instance
-        user = session.get("user");
-
-        /// get user role
-        role = await new Parse.Query(Parse.Role)
-                .equalTo("users", user)
-                .first() as Parse.Role;
-
-    } catch(reason) {
-        return Errors.throw(Errors.SessionNotExists).resolve(res);
-    }
-
-    /// final
-    req.session = session;
-    req.user = user;
-    req.role = role;
-    next();
-}
-////////////////////////////////////////////////////////////

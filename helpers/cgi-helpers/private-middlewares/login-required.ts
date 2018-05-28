@@ -7,11 +7,14 @@ import { Response } from 'express/lib/response';
 
 
 /// loginRequired //////////////////////////////////////////
-export interface ActionParam<T> {
-    session: Parse.Session;
-    user: Parse.User;
-    role: Parse.Role;
+declare module "helpers/cgi-helpers/core" {
+    export interface ActionParam<T> {
+        session: Parse.Session;
+        user: Parse.User;
+        role: Parse.Role;
+    }
 }
+
 declare module 'express/lib/request' {
     interface Request {
         session: Parse.Session;
@@ -62,3 +65,6 @@ export async function loginRequired(req: Request, res: Response, next) {
     next();
 }
 ////////////////////////////////////////////////////////////
+
+
+

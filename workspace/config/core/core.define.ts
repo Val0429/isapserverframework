@@ -1,6 +1,6 @@
 var config: Config = {
     server: {
-        port: 7070,
+        port: 8080,
         disableCache: true,
         keyOfSessionId: "sessionId",
     },

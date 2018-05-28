@@ -33,7 +33,7 @@ export function retrievePrimaryClass<T>(target: T): new () => T {
 
 
 
-export type SaveStatus = "update" | "insert";
+export type SaveStatus = "update" | "insert" | "fetch";
 export class ParseObject<T> extends Parse.Object {
     constructor(data?: Partial<T>) {
         super();
@@ -45,6 +45,13 @@ export class ParseObject<T> extends Parse.Object {
     }
     setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean {
         return super.set(key, <any>value, options);
+    }
+    async fetchOrInsert<U extends ParseObject<T>>(this: U): Promise<{object: U, status: SaveStatus}> {
+        var rtn = await this.updateOrInsert(true);
+        return {
+            ...rtn,
+            status: rtn.status === "update" ? "fetch" : rtn.status
+        };
     }
     async updateOrInsert<U extends ParseObject<T>>(this: U, dontUpdate: boolean = false): Promise<{object: U, status: SaveStatus}> {
         var key = retrievePrimaryKey(this);

@@ -18,7 +18,6 @@ export namespace UserHelper {
         
         try {
             user = await Parse.User.logIn(options.username, options.password);
-            console.log('user!', user);
             
             /// Success
             sessionId = user.getSessionToken();

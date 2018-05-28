@@ -15,8 +15,8 @@ export interface Input {
 export interface Output {
     sessionId: string;
     serverTime: number;
-    user: IUser;
-    role: IRole;
+    user: Parse.User;
+    role: Parse.Role;
 }
 
 export default new Action<Input, Output>({
@@ -36,8 +36,8 @@ export default new Action<Input, Output>({
         return {
             sessionId: obj.sessionId,
             serverTime: new Date().valueOf(),
-            role: { name: obj.role.get("name") },
-            user: obj.user.attributes
+            role: obj.role,
+            user: obj.user,
         }
     }
 });

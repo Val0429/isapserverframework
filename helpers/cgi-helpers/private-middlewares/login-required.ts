@@ -57,7 +57,7 @@ export async function loginRequired(req: Request, res: Response, next) {
 
     /// final
     req.session = session;
-    req.user = user.attributes;
+    req.user = user;
     req.role = { name: role.get("name") };
     next();
 }

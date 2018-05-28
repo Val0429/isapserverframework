@@ -8,6 +8,7 @@ import { ExpressWsSocket } from './../helpers/middlewares/express-ws-routes';
 export class Errors {
     static LoginRequired: ErrorObject = { statusCode: 401, message: "This action requires login." };
     static ParametersRequired: ErrorObject = { statusCode: 401, message: "Parameters required: {0}" };
+    static ParametersInvalid: ErrorObject = { statusCode: 404, message: "Parameters invalid: {0}" };
     static RequestFailed: ErrorObject = { statusCode: 404, message: "Request failed." };
     static PermissionDenined: ErrorObject = { statusCode: 404, message: "Permission denined." };
     static SessionNotExists: ErrorObject = { statusCode: 404, message: "Session not exists." };

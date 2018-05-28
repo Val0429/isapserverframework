@@ -157,7 +157,7 @@ function VBodyParserJson(req: Request, res: Response, next) {
 /// permissionCheck ////////////////////////////////////////
 export function permissionCheck(permissions: RoleList[]) {
     return (req: Request, res, next) => {
-        if (permissions.indexOf(<RoleList>req.role.name) < 0) {
+        if (permissions.indexOf(<RoleList>req.role.get("name")) < 0) {
             return Errors.throw(Errors.PermissionDenined).resolve(res);
         }
         next();
@@ -169,13 +169,13 @@ export function permissionCheck(permissions: RoleList[]) {
 export interface ActionParam<T> {
     session: Parse.Session;
     user: Parse.User;
-    role: IRole;
+    role: Parse.Role;
 }
 declare module 'express/lib/request' {
     interface Request {
         session: Parse.Session;
         user: Parse.User;
-        role: IRole;
+        role: Parse.Role;
     }
 }
 export async function loginRequired(req: Request, res: Response, next) {
@@ -216,8 +216,8 @@ export async function loginRequired(req: Request, res: Response, next) {
 
     /// final
     req.session = session;
-    req.user = user.attributes;
-    req.role = { name: role.get("name") };
+    req.user = user;
+    req.role = role;
     next();
 }
 ////////////////////////////////////////////////////////////

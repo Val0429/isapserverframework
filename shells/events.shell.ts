@@ -1,4 +1,5 @@
 import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
+import { Config } from './../models/events/events.define';
 
 // import {
 //     IEventLogin, IEventLogout
@@ -8,6 +9,11 @@ import * as Parse from 'parse/node';
 import { registerSubclass, ParseObject, Omit } from '../helpers/parse-server/parse-helper';
 import { IEventEntity } from './../models/events/events.base';
 export * from './../models/events/events.base';
+`;
+
+var tHeaderSpecial = `
+import { {0} } from './../workspace/models/index';
+export * from './../workspace/models/index';
 `;
 
 // export enum EventList {
@@ -41,12 +47,25 @@ export interface IEvent{0} extends IEventEntity {
 `;
 // // Events.Login = EventLogin;
 
-function main(events: Array<[number, string, string] | [number, string]>): string {
+function main(events: Config): string {
     var tmpstr = [];
     
     /// make header /////////////////////////////
     tmpstr.push(
         tHeader.replace(/^[\r\n]+/, '')
+    );
+    /////////////////////////////////////////////
+
+    /// make header special /////////////////////
+    var tmp = [];
+    for (var event of events) {
+        if (event[3]) {
+            tmp = [...tmp, ...event[3]];
+        }
+    }
+    tmp = tmp.filter( (a, b, c) => c.indexOf(a) === b );
+    tmpstr.push(
+        tHeaderSpecial.replace("{0}", tmp.join(", "))
     );
     /////////////////////////////////////////////
 
@@ -105,7 +124,7 @@ shellWriter(
     [defPath, tmplPath, customDefPath],
     genFilePath,
     () => {
-        var merged = [...events, ...cevents];
+        var merged: Config = <any>[...events, ...cevents];
         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
         console.log("<Generated> Event file updated!");        
     }

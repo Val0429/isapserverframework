@@ -11,6 +11,7 @@ export interface Input {
 }
 
 export interface FloorUnit {
+    objectId: string;
     floor: number;
     unitNo: string;
     phone: string[];
@@ -28,7 +29,9 @@ export default new Action<Input>({
     var floors = await new Parse.Query(Floors)
         .find();
 
-    return floors.map( (value: Floors) => {
-        return value.attributes;
-    });
+    return floors;
+
+    // return floors.map( (value: Floors) => {
+    //     return value.toJSON();
+    // });
 });

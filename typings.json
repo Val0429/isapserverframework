@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "express": "registry:npm/express#4.14.0+20170217205433",
+    "request": "registry:npm/request#2.69.0+20160428223725",
     "websocket": "registry:dt/websocket#0.0.0+20170217141817",
     "ws": "registry:dt/ws#0.0.0+20170307231658"
   }

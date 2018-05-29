@@ -1,4 +1,4 @@
-import { config } from './../config/custom/frs';
+import { config } from './../../config/custom/frs';
 import * as request from 'request';
 import * as http from 'http';
 

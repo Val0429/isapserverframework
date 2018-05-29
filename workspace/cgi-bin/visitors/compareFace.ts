@@ -6,7 +6,7 @@ import {
 } from './../../../core/cgi-package';
 
 import { Buffer } from 'buffer';
-import FRS from './../../services/frs-service';
+import FRS from './../../custom/services/frs-service';
 
 export interface Input {
     sessionId: string;

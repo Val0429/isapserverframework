@@ -12,8 +12,8 @@ export * from './../models/events/events.base';
 `;
 
 var tHeaderSpecial = `
-import { {0} } from './../workspace/models/index';
-export * from './../workspace/models/index';
+import { {0} } from './../workspace/custom/models/index';
+export * from './../workspace/custom/models/index';
 `;
 
 // export enum EventList {

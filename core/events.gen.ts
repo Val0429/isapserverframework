@@ -4,8 +4,8 @@ import { Events, IEvents, IEventEntity } from './../models/events/events.base';
 export * from './../models/events/events.base';
 
 
-import { Floors } from './../workspace/models/index';
-export * from './../workspace/models/index';
+import { Floors } from './../workspace/custom/models/index';
+export * from './../workspace/custom/models/index';
 
 
 export enum EventList {

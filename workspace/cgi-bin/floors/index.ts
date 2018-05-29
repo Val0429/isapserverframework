@@ -4,7 +4,7 @@ import {
     Action, Errors,
 } from './../../../core/cgi-package';
 
-import { Floors } from './../../models/floors';
+import { Floors } from './../../custom/models/floors';
 
 export interface Input {
     sessionId: string;

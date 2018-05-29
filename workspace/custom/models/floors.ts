@@ -1,4 +1,4 @@
-import { registerSubclass, ParseObject } from './../../helpers/parse-server/parse-helper';
+import { registerSubclass, ParseObject } from './../../../helpers/parse-server/parse-helper';
 
 /// Floors /////////////////////////////////////////
 export interface IFloors {

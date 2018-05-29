@@ -1,5 +1,7 @@
 import { Request } from 'express/lib/request';
+import { NextFunction, RequestHandler } from 'express/lib/router/index';
 import { bodyParserJson } from './../../middlewares/body-parser';
+
 
 /// BodyParser --> + parameters ////////////////////////////
 declare module 'helpers/cgi-helpers/core' {
@@ -12,10 +14,12 @@ declare module 'express/lib/request' {
         parameters: any;
     }
 }
-export function VBodyParserJson(req: Request, res: Response, next) {
+
+export const VBodyParserJson: RequestHandler = <any>((req: Request, res: Response, next: NextFunction): any => {
     return bodyParserJson(req, res, () => {
-        req.parameters = { ...req.params, ...req.body };
+        req.parameters = { ...req.query, ...req.body };
         next();
     });
-}
+});
+
 ////////////////////////////////////////////////////////////

@@ -44,7 +44,7 @@ export class FRSService {
             body: { session_id: this.session_id }
         }, (err, res, body) => {
             if (err) {
-                console.log(`Main FRS session failed@${config.ip}:${config.port}.`);
+                console.log(`Maintain FRS session failed@${config.ip}:${config.port}.`);
             }
             // console.log('maintain success', body);
         });
@@ -60,6 +60,7 @@ export class FRSService {
                 body: { session_id: this.session_id, image_1, image_2 }
             }, (err, res, body) => {
                 if (err) {
+                    console.log(`FRS compare face failed.`, err);
                     return reject(err);
                 }
                 resolve(body.score);

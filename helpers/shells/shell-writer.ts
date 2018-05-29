@@ -1,4 +1,7 @@
 import * as fs from 'fs';
+/**
+ * Check for detects[] update time, chance to gen data, write to target.
+ */
 export function shellWriter(detects: string[], target: string, ready: () => void) {
     var dts: fs.Stats[] = [];
     for (var detect of detects) dts.push( fs.statSync(detect) );
@@ -13,6 +16,9 @@ export function shellWriter(detects: string[], target: string, ready: () => void
     }
 }
 
+/**
+ * Replace input, padding number of <value>'s spaces at front.
+ */
 export function autoPad(input: string, value: number) {
     return input.replace(
         new RegExp(`^ {0,}`, "gm"),

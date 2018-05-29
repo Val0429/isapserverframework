@@ -4,7 +4,7 @@ import { config } from './../../../core/config.gen';
 
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
-
+import { NextFunction, RequestHandler } from 'express/lib/router/index';
 
 /// loginRequired //////////////////////////////////////////
 declare module "helpers/cgi-helpers/core" {
@@ -22,7 +22,7 @@ declare module 'express/lib/request' {
         role: Parse.Role;
     }
 }
-export async function loginRequired(req: Request, res: Response, next) {
+export async function loginRequired(req: Request, res: Response, next: NextFunction) {
     var sessionKey: string = config.server.keyOfSessionId;
 
     /// should contain sessionId

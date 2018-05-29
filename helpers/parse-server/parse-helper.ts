@@ -43,6 +43,10 @@ export class ParseObject<T> extends Parse.Object {
     setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean {
         return super.set(key, <any>value, options);
     }
+    /**
+     * important: decorator <registerPrimaryKey> required.
+     * If not exists, insert. else fetch.
+     */
     async fetchOrInsert<U extends ParseObject<T>>(this: U): Promise<{object: U, status: SaveStatus}> {
         var rtn = await this.updateOrInsert(true);
         return {
@@ -50,6 +54,10 @@ export class ParseObject<T> extends Parse.Object {
             status: rtn.status === "update" ? "fetch" : rtn.status
         };
     }
+    /**
+     * important: decorator <registerPrimaryKey> required.
+     * If not exists, insert. else update.
+     */
     async updateOrInsert<U extends ParseObject<T>>(this: U, dontUpdate: boolean = false): Promise<{object: U, status: SaveStatus}> {
         var key = retrievePrimaryKey(this);
         var thisclass = retrievePrimaryClass(this);
@@ -81,6 +89,9 @@ export class ParseObject<T> extends Parse.Object {
     }
 }
 
+/**
+ * Apply to Parse.Object that not extendable, ex: User, Role.
+ */
 export interface ParseTypedGetterSetter<T> {
     get<U extends keyof T>(key: U): T[U];
     set<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean;

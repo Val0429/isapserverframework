@@ -2,7 +2,7 @@
 import * as express from 'express';
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
-import { Router } from 'express/lib/router/index';
+import { Router, RequestHandler } from 'express/lib/router/index';
 import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
 
 /// Parse & define
@@ -19,10 +19,6 @@ import * as Middlewares from './../../helpers/middlewares/index';
 export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
 
-/// private middlewares
-import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
-import { permissionCheck } from './private-middlewares/permission-check';
-import { loginRequired } from './private-middlewares/login-required';
 
 declare module 'helpers/cgi-helpers/core' {
     export interface ActionConfig {
@@ -56,6 +52,11 @@ declare module 'helpers/cgi-helpers/core' {
     }
 }
 
+/// private middlewares
+import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
+import { permissionCheck } from './private-middlewares/permission-check';
+import { loginRequired } from './private-middlewares/login-required';
+
 export class Action<T = any, U = any> {
     config: ActionConfig;
 
@@ -88,7 +89,7 @@ export class Action<T = any, U = any> {
         /// mount middlewares
         /// 1) bodyParser
         //router.use(Middlewares.bodyParserJson);
-        router.use(<any>VBodyParserJson);
+        router.use(VBodyParserJson);
         /// 2) login
         if (this.config.loginRequired) router.use(loginRequired);
         /// 3) permission

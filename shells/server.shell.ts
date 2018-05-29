@@ -2,7 +2,6 @@ import { config } from './../core/config.gen';
 import { shellWriter } from './../helpers/shells/shell-writer';
 
 var tHeader = `
-/// <reference path="./../typings/index.d.ts" />
 "use strict";
 
 import './../shells/events.shell';

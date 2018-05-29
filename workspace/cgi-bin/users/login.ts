@@ -1,5 +1,5 @@
 import {
-    express, Request, Response, Router, WebSocket,
+    express, Request, Response, Router,
     IRole, IUser, RoleList, config,
     Action, Errors,
     bodyParserJson,

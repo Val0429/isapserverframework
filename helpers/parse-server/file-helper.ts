@@ -3,6 +3,7 @@ import * as Parse from 'parse/node';
 
 export namespace FileHelper {
 
+    /// save base64 file(s) into Parse.File(s), and return.
     export async function toParseFile<T extends string | string[]>(input: T):
         Promise<
             T extends string ? Parse.File :
@@ -14,10 +15,6 @@ export namespace FileHelper {
             for (var image of input) {
                 result.push(await toParseFile(image));
             }
-            // var result = <any>input.map( async (value: string) => {
-            //     return await toParseFile(value)
-            // });
-            // console.log(result);
             return <any>result;
         }
 

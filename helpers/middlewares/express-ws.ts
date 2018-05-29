@@ -1,5 +1,8 @@
 import * as expressWs from 'express-ws';
 
+/// deprecated. not use in this project anymore.
+/// changed to express-ws-routes.
+
 export type WebSocketEvent = "message" | "close";
 export interface WebSocketOnMessage {
     (data: string): void;

@@ -1,3 +1,5 @@
+/// <reference path="./core.define.ts" />
+
 /// Express
 import * as express from 'express';
 import { Request } from 'express/lib/request';
@@ -18,39 +20,6 @@ import * as Middlewares from './../../helpers/middlewares/index';
 /// Helpers
 export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
-
-
-declare module 'helpers/cgi-helpers/core' {
-    export interface ActionConfig {
-        /**
-         * Is this action require login?
-         * Default = true.
-         */
-        loginRequired?: boolean;
-
-        /**
-         * Is this action limit to specific role?
-         * Default = none.
-         */
-        permission?: RoleList[];
-
-        /**
-         * Which middlewares should be injected into route?
-         * Default = none.
-         */
-        middlewares?: any[];
-    }
-
-    export interface ActionCallback<T, U> {
-        (data: ActionParam<T>): (U | Errors) | (Promise<U | Errors>);
-    }
-
-    export interface ActionParam<T> {
-        socket: Socket;
-        request: Request;
-        response: Response;
-    }
-}
 
 /// private middlewares
 import { VBodyParserJson } from './private-middlewares/v-body-parser-json';

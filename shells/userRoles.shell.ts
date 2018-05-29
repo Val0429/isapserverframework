@@ -94,7 +94,7 @@ function main(events: Array<[number, string, string] | [number, string]>): strin
 const genFilePath = `${__dirname}/../core/userRoles.gen.ts`;
 const tmplPath = `${__dirname}/userRoles.shell.ts`;
 // const defPath = `${__dirname}/../models/userRoles/userRoles.define.ts`;
-const customDefPath = `${__dirname}/../workspace/config/userRoles/userRoles.define.ts`;
+const customDefPath = `${__dirname}/../workspace/define/userRoles/userRoles.define.ts`;
 
 // var events = require(defPath).default;
 var cevents = require(customDefPath).default;

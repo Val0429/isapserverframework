@@ -122,7 +122,7 @@ function main(events: Config): string {
 const genFilePath = `${__dirname}/../core/events.gen.ts`;
 const tmplPath = `${__dirname}/events.shell.ts`;
 const defPath = `${__dirname}/../models/events/events.define.ts`;
-const customDefPath = `${__dirname}/../workspace/config/events/events.define.ts`;
+const customDefPath = `${__dirname}/../workspace/define/events/events.define.ts`;
 
 var events = require(defPath).default;
 var cevents = require(customDefPath).default;

@@ -4,7 +4,7 @@ var config: Config = {
     account: "Admin",
     password: "123456"
 }
-export { config };
+export default config;
 
 export interface Config {
     ip: string;

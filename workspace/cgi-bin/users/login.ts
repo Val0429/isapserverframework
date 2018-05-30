@@ -1,6 +1,6 @@
 import {
     express, Request, Response, Router,
-    IRole, IUser, RoleList, config,
+    IRole, IUser, RoleList,
     Action, Errors,
     bodyParserJson,
     UserHelper

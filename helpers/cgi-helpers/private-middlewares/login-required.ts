@@ -1,10 +1,12 @@
 import { RoleList, IRole } from './../../../core/userRoles.gen';
 import { Errors } from './../../../core/errors.gen';
-import { config } from './../../../core/config.gen';
 
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
+
+import config from './../../../workspace/config/default/core';
+import './../core';
 
 /// loginRequired //////////////////////////////////////////
 declare module "helpers/cgi-helpers/core" {
@@ -23,7 +25,7 @@ declare module 'express/lib/request' {
     }
 }
 export async function loginRequired(req: Request, res: Response, next: NextFunction) {
-    var sessionKey: string = config.server.keyOfSessionId;
+    var sessionKey: string = config.keyOfSessionId;
 
     /// should contain sessionId
     var sessionId: string = req.parameters[sessionKey];

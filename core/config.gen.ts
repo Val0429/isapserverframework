@@ -1,71 +1,25 @@
-var config: Config = {
-    server: {
-        port: 8080,
-        disableCache: true,
-        keyOfSessionId: "sessionId",
-    },
+import coreConfig, { Config as coreConfigType } from './../workspace/config/default/core';
+import mongodbConfig, { Config as mongodbConfigType } from './../workspace/config/default/mongodb';
+import parseDashboardConfig, { Config as parseDashboardConfigType } from './../workspace/config/default/parse-dashboard';
+import parseServerConfig, { Config as parseServerConfigType } from './../workspace/config/default/parse-server';
+import frsConfig, { Config as frsConfigType } from './../workspace/config/custom/frs';
 
-    mongodb: {
-        ip: "localhost",
-        port: 27017,
-    },
 
-    parseServer: {
-        collection: "FRS",
-        appId: "APPLICATIONKEY",
-        masterKey: "MASTERKEY",
-        fileKey: "FILEKEY",
-        serverPath: "/parse",
-    },
-
-    parseDashboard: {
-        enable: true,
-        serverPath: "/dashboard",
-        appName: "Val App",
-    }
-}
-export { config };
-
-export interface ServerConfig {
-    port: number;
-    disableCache: boolean;
-    keyOfSessionId: string;
+interface Config {
+core: coreConfigType;
+mongodb: mongodbConfigType;
+parseDashboard: parseDashboardConfigType;
+parseServer: parseServerConfigType;
+frs: frsConfigType;
 }
 
-export interface MongoDBConfig {
-    ip: string;
-    port: number;
+
+var Config: Config = {
+core: <any>coreConfig,
+mongodb: <any>mongodbConfig,
+parseDashboard: <any>parseDashboardConfig,
+parseServer: <any>parseServerConfig,
+frs: <any>frsConfig,
 }
 
-export interface ParseServerConfig {
-    /**
-     * Database / Collection used for app.
-     */
-    collection: string;
-    appId: string;
-    masterKey: string;
-    fileKey: string;
-    /**
-     * Parse url exposed by server. ex: /parse
-     */
-    serverPath: string;
-}
-
-export interface ParseDashboard {
-    enable: boolean;
-    /**
-     * Parse dashboard url exposed by server. ex: /dashboard
-     */
-    serverPath: string;
-    appName: string;
-}
-
-export interface Config {
-    server: ServerConfig;
-
-    mongodb: MongoDBConfig;
-
-    parseServer: ParseServerConfig;
-
-    parseDashboard: ParseDashboard;
-}
+export { Config };

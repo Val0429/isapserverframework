@@ -1,5 +1,6 @@
-import { config } from './../core/config.gen';
 import { shellWriter } from './../helpers/shells/shell-writer';
+
+import { Config } from './../core/config.gen';
 
 var tHeader = `
 "use strict";
@@ -9,60 +10,71 @@ import './../shells/events.shell';
 import * as express from 'express';
 import { expressWsRoutes } from './../helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
-import { config } from './../workspace/config/core/core.define';
+import { noCache } from './../helpers/middlewares/no-cache';
+import { routerLoader } from './../helpers/routers/router-loader';
+import * as parse from 'parse-server';
+import * as ParseDashboard from 'parse-dashboard';
+import { configLoader } from './../helpers/config/config-helper';
+
+import { Config } from './../core/config.gen';
 
 let app: express.Application = expressWsRoutes();
 `;
 
+var tFuncStart = `
+/// (async () => {
+///  await configLoader();
+`;
+
 var tDisableCache = `
 /// Disable Cache
-import { noCache } from './../helpers/middlewares/no-cache';
-if (config.server.disableCache) app.use(noCache);
+if (Config.core.disableCache) app.use(noCache);
 `;
 
 var tLoadRouter = `
 /// Load Routers!
-import { routerLoader } from './../helpers/routers/router-loader';
 routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`);
 `;
 
 var tRunParseServer = `
 /// run parse server ////
-import * as parse from 'parse-server';
 var ParseServer = new parse.ParseServer({
-    databaseURI: \`mongodb://\${config.mongodb.ip}:\${config.mongodb.port}/\${config.parseServer.collection}\`,
-    appId: config.parseServer.appId,
-    masterKey: config.parseServer.masterKey,
-    fileKey: config.parseServer.fileKey,
-    serverURL: \`http://localhost:\${config.server.port}\${config.parseServer.serverPath}\`,
+    databaseURI: \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.parseServer.collection}\`,
+    appId: Config.parseServer.appId,
+    masterKey: Config.parseServer.masterKey,
+    fileKey: Config.parseServer.fileKey,
+    serverURL: \`http://localhost:\${Config.core.port}\${Config.parseServer.serverPath}\`,
 });
-app.use(config.parseServer.serverPath, ParseServer);
+app.use(Config.parseServer.serverPath, ParseServer);
 /////////////////////////
 `;
 
 var tRunParseDashboard = `
 /// run parse dashboard ////
-import * as ParseDashboard from 'parse-dashboard';
-if (config.parseDashboard.enable) {
+if (Config.parseDashboard.enable) {
   var Dashboard = new ParseDashboard({
     "apps": [
       {
-        "serverURL": \`http://localhost:\${config.server.port}\${config.parseServer.serverPath}\`,
-        "appId": config.parseServer.appId,
-        "masterKey": config.parseServer.masterKey,
-        "appName": config.parseDashboard.appName
+        "serverURL": \`http://localhost:\${Config.core.port}\${Config.parseServer.serverPath}\`,
+        "appId": Config.parseServer.appId,
+        "masterKey": Config.parseServer.masterKey,
+        "appName": Config.parseDashboard.appName
       }
     ]
   });
-  app.use(config.parseDashboard.serverPath, Dashboard);
+  app.use(Config.parseDashboard.serverPath, Dashboard);
 }
 ////////////////////////////
 `;
 
 var tRunServer = `
-app.listen(config.server.port, () => {
-    console.log(\`Server running at port \${config.server.port}.\`);
+app.listen(Config.core.port, () => {
+    console.log(\`Server running at port \${Config.core.port}.\`);
 });
+`;
+
+var tFuncEnd = `
+/// })();
 
 export {
   app
@@ -85,8 +97,12 @@ function main(): string {
     );
     /////////////////////////////////////////////
 
+    /// func end ////////////////////////////////
+    tmpstr.push(tFuncStart);
+    /////////////////////////////////////////////
+
     /// disable cache ///////////////////////////
-    if (config.server.disableCache) tmpstr.push(tDisableCache);
+    tmpstr.push(tDisableCache);
     /////////////////////////////////////////////
 
     /// load router /////////////////////////////
@@ -98,11 +114,15 @@ function main(): string {
     /////////////////////////////////////////////
 
     /// run parse dashboard /////////////////////
-    if (config.parseDashboard.enable) tmpstr.push(tRunParseDashboard);
+    if (Config.parseDashboard.enable) tmpstr.push(tRunParseDashboard);
     /////////////////////////////////////////////
     
     /// run server //////////////////////////////
-    if (config.parseDashboard.enable) tmpstr.push(tRunServer);
+    tmpstr.push(tRunServer);
+    /////////////////////////////////////////////
+
+    /// func end ////////////////////////////////
+    tmpstr.push(tFuncEnd);
     /////////////////////////////////////////////
 
     /// concat

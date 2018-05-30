@@ -12,7 +12,6 @@ import * as Parse from 'parse/node';
 import { RoleList, IRole } from './../../core/userRoles.gen';
 import * as Socket from 'ws';
 import { Errors } from './../../core/errors.gen';
-import { config } from './../../core/config.gen';
 
 /// Middlewares
 import * as Middlewares from './../../helpers/middlewares/index';

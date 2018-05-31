@@ -17,6 +17,7 @@ export interface Input {
 
 export default new Action<Input>({
     loginRequired: true,
+    postSizeLimit: 1024*1024*100,   /// 100MB
     permission: [RoleList.Kiosk]
 })
 .post(async (data) => {

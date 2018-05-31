@@ -1,12 +1,14 @@
 import * as fs from 'fs';
 import * as p from 'path';
 
+/// deprecated for now. just keep for reference.
+
 const defaultPath = `${__dirname}/../../config_default`;
 const wsDefaultPath = `${__dirname}/../../workspace/config/default`;
 const wsOtherPath = `${__dirname}/../../workspace/config/custom`;
 
 import { registerSubclass, ParseObject } from './../../helpers/parse-server/parse-helper';
-import { exec as configWriterExec } from './../../shells/config.shell';
+//import { exec as configWriterExec } from './../../shells/config.shell';
 
 /// Configurations /////////////////////////////////
 export interface IConfiguration<T = any> {
@@ -39,7 +41,7 @@ export /*async*/ function configLoader() {
             console.log(`Workspace ${file} not exists, default created.`);
         }
     }
-    configWriterExec();
+    //configWriterExec();
 
     /// 2) merge configs
     var loadConfig = (dir, file) => {

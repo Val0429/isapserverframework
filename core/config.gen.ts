@@ -6,20 +6,20 @@ import frsConfig, { Config as frsConfigType } from './../workspace/config/custom
 
 
 interface Config {
-core: coreConfigType;
-mongodb: mongodbConfigType;
-parseDashboard: parseDashboardConfigType;
-parseServer: parseServerConfigType;
-frs: frsConfigType;
+    core: coreConfigType;
+    mongodb: mongodbConfigType;
+    parseDashboard: parseDashboardConfigType;
+    parseServer: parseServerConfigType;
+    frs: frsConfigType;
 }
 
 
 var Config: Config = {
-core: <any>coreConfig,
-mongodb: <any>mongodbConfig,
-parseDashboard: <any>parseDashboardConfig,
-parseServer: <any>parseServerConfig,
-frs: <any>frsConfig,
+    core: <any>coreConfig,
+    mongodb: <any>mongodbConfig,
+    parseDashboard: <any>parseDashboardConfig,
+    parseServer: <any>parseServerConfig,
+    frs: <any>frsConfig,
 }
 
 export { Config };

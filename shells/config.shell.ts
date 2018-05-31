@@ -32,7 +32,8 @@ export { Config };
 const genFilePath = `${__dirname}/../core/config.gen.ts`;
 const tmplPath = `${__dirname}/config.shell.ts`;
 const defPath = `${__dirname}/../config_default`;
-const customDefPath = `${__dirname}/../workspace/config/custom`;
+const wsDefPath = `${__dirname}/../workspace/config/default`;
+const wsCustomPath = `${__dirname}/../workspace/config/custom`;
 
 function capitalize(str: string) {
     var regex = /(\-[^-]+)/g;
@@ -59,7 +60,7 @@ function main(): string {
         );
     }
     var template = `import {0}Config, { Config as {0}ConfigType } from './../workspace/config/custom/{1}';`;
-    var dir = customDefPath;
+    var dir = wsCustomPath;
     var files = fs.readdirSync(dir);
     for (var file of files) {
         var name = p.parse(file).name;
@@ -80,7 +81,7 @@ function main(): string {
     var template = `{0}: {0}ConfigType;`;
     for (var key of keys) {
         tmp.push(
-            template.replace(/\{0\}/g, capitalize(key))
+            autoPad(template.replace(/\{0\}/g, capitalize(key)), 4)
         );
     }
     tmpstr.push(
@@ -93,7 +94,7 @@ function main(): string {
     var template = `{0}: <any>{0}Config,`;
     for (var key of keys) {
         tmp.push(
-            template.replace(/\{0\}/g, capitalize(key))
+            autoPad(template.replace(/\{0\}/g, capitalize(key)), 4)
         );
     }
     tmpstr.push(
@@ -105,13 +106,61 @@ function main(): string {
     return tmpstr.join("\r\n");
 }
 
-function exec() {
-    var origin = fs.existsSync(genFilePath) ? fs.readFileSync(genFilePath, "UTF-8") : "";
-    var data = main();
-    if (origin !== data) {
-        fs.writeFileSync(genFilePath, data, "UTF-8");
-        console.log("<Generated> Config file updated!");            
+
+var result = {};
+var template = `
+import { Config } from './../../../config_default/{0}';
+export { Config };
+
+var config: Partial<Config> = {};
+export default config;
+`;
+/// 1) create into workspace default, if not exists.
+var files = fs.readdirSync(defPath);
+for (var file of files) {
+    var target = `${wsDefPath}/${file}`;
+    if (!fs.existsSync(target)) {
+        var name = p.parse(file).name;
+        var content = template.replace("{0}", name);
+        fs.writeFileSync(target, content, "UTF-8");
+        console.log(`Workspace ${file} not exists, default created.`);
     }
 }
+/// 2) Try update config.gen
+var origin = fs.existsSync(genFilePath) ? fs.readFileSync(genFilePath, "UTF-8") : "";
+var data = main();
+if (origin !== data) {
+    fs.writeFileSync(genFilePath, data, "UTF-8");
+    console.log("<Generated> Config file updated!");            
+}
 
-export { exec };
+/// 3) merge configs
+var loadConfig = (dir, file) => {
+    var name = p.parse(file).name;
+    var path = `${dir}/${file}`;
+    var config = require(path).default;
+    var stats = fs.statSync(path);
+    return { name, config, stats };
+}
+/// 3.1) load default path
+var dir = defPath;
+var files = fs.readdirSync(dir);
+for (var file of files) {
+    var { name, config } = loadConfig(dir, file);
+    result[name] = config;
+}
+/// 3.2) load workspace paths
+var dirs = [wsDefPath, wsCustomPath];
+for (var dir of dirs) {
+    var files = fs.readdirSync(dir);
+    for (var file of files) {
+        var { name, config, stats } = loadConfig(dir, file);
+        result[name] = { ...(result[name] || {}), ...config };
+
+        /// 2.4) update back to target
+        for (var key in result[name]) {
+            var value = result[name][key];
+            config[key] = value;
+        }
+    }
+}

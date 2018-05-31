@@ -57,7 +57,9 @@ export class Action<T = any, U = any> {
         /// mount middlewares
         /// 1) bodyParser
         //router.use(Middlewares.bodyParserJson);
-        router.use(VBodyParserJson);
+        router.use(VBodyParserJson(
+            this.config.postSizeLimit ? { limit: this.config.postSizeLimit } : null
+        ));
         /// 2) login
         if (this.config.loginRequired) router.use(loginRequired);
         /// 3) permission

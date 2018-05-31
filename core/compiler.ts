@@ -1,5 +1,6 @@
-import { configLoader } from './../helpers/config/config-helper';
-configLoader();
+// import { configLoader } from './../helpers/config/config-helper';
+// configLoader();
+import './../shells/config.shell';
 
 import './../shells/server.shell';
 import './../shells/userRoles.shell';

@@ -18,6 +18,11 @@ declare module 'helpers/cgi-helpers/core' {
         permission?: RoleList[];
 
         /**
+         * How many bytes allowed for the post body?
+         */
+        postSizeLimit?: number;
+
+        /**
          * Which middlewares should be injected into route?
          * Default = none.
          */

@@ -56,7 +56,6 @@ export class Action<T = any, U = any> {
         /////////////////////////////////////////////
         /// mount middlewares
         /// 1) bodyParser
-        //router.use(Middlewares.bodyParserJson);
         router.use(VBodyParserJson(
             this.config.postSizeLimit ? { limit: this.config.postSizeLimit } : null
         ));

@@ -6,6 +6,8 @@ var errors: Config[] = [
     ["RequestFailed", 404, "Request failed."],
     ["PermissionDenined", 404, "Permission denined."],
     ["SessionNotExists", 404, "Session not exists."],
+
+    ["Custom", 500, "{0}"],
 ];
 
 export default errors;

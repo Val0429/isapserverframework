@@ -13,15 +13,16 @@ var tHeaderSpecial = `
 //     mongodb: mongodbConfigType;
 // }
 var tInterface = `
-interface Config {
+interface IConfig {
 {0}
 }
+export { IConfig };
 `;
 
 // core: coreConfig,
 // mongodb: mongodbConfig,
 var tExport = `
-var Config: Config = {
+var Config: IConfig = {
 {0}
 }
 
@@ -34,6 +35,8 @@ const tmplPath = `${__dirname}/config.shell.ts`;
 const defPath = `${__dirname}/../config_default`;
 const wsDefPath = `${__dirname}/../workspace/config/default`;
 const wsCustomPath = `${__dirname}/../workspace/config/custom`;
+
+export { wsDefPath, wsCustomPath };
 
 function capitalize(str: string) {
     var regex = /(\-[^-]+)/g;

@@ -25,7 +25,7 @@ export default new Action<Input, Output>({
 })
 .all(async (data) => {
     /// Check param requirement
-    if (!data.parameters.username) return Errors.throw(Errors.ParametersRequired, ["username"]);
+    if (!data.parameters.username) throw Errors.throw(Errors.ParametersRequired, ["username"]);
 
     /// Try login
     var obj = await UserHelper.login({ ...data.parameters });

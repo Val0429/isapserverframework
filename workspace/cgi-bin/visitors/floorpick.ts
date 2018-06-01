@@ -17,7 +17,7 @@ export default new Action<Input>({
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.personId || !data.parameters.floorId) return Errors.throw(Errors.ParametersRequired, ["personId, floorId"]);
+    if (!data.parameters.personId || !data.parameters.floorId) throw Errors.throw(Errors.ParametersRequired, ["personId, floorId"]);
 
     /// get Person
     var person: Person;
@@ -25,7 +25,7 @@ export default new Action<Input>({
         person = await new Parse.Query(Person)
             .get(data.parameters.personId);
     } catch(reason) {
-        return Errors.throw(Errors.ParametersInvalid, ["personId"]);
+        throw Errors.throw(Errors.ParametersInvalid, ["personId"]);
     }
 
     /// get Floor
@@ -34,7 +34,7 @@ export default new Action<Input>({
         floor = await new Parse.Query(Floors)
             .get(data.parameters.floorId);
     } catch(reason) {
-        return Errors.throw(Errors.ParametersInvalid, ["floorId"]);
+        throw Errors.throw(Errors.ParametersInvalid, ["floorId"]);
     }
 
     /// Log Event

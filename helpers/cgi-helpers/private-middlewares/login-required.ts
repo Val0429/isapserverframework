@@ -30,7 +30,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
     /// should contain sessionId
     var sessionId: string = req.parameters[sessionKey];
     if (!sessionId) {
-        return Errors.throw(Errors.ParametersRequired, [sessionKey]).resolve(res);
+        Errors.throw(Errors.ParametersRequired, [sessionKey]).resolve(res);
     }
 
     var session: Parse.Session;
@@ -45,7 +45,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
             
         /// session not match
         if (!session || session.getSessionToken() != sessionId) {
-            return Errors.throw(Errors.LoginRequired).resolve(res);
+            Errors.throw(Errors.LoginRequired).resolve(res);
         }
 
         /// get user instance
@@ -57,7 +57,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
                 .first() as Parse.Role;
 
     } catch(reason) {
-        return Errors.throw(Errors.SessionNotExists).resolve(res);
+        Errors.throw(Errors.SessionNotExists).resolve(res);
     }
 
     /// final

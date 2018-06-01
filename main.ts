@@ -5,6 +5,3 @@
 import './core/compiler';
 import './core/main.gen';
 import './workspace/main';
-
-import { configLoader } from './helpers/config/config-helper';
-configLoader();

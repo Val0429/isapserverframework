@@ -5,16 +5,17 @@ import parseServerConfig, { Config as parseServerConfigType } from './../workspa
 import frsConfig, { Config as frsConfigType } from './../workspace/config/custom/frs';
 
 
-interface Config {
+interface IConfig {
     core: coreConfigType;
     mongodb: mongodbConfigType;
     parseDashboard: parseDashboardConfigType;
     parseServer: parseServerConfigType;
     frs: frsConfigType;
 }
+export { IConfig };
 
 
-var Config: Config = {
+var Config: IConfig = {
     core: <any>coreConfig,
     mongodb: <any>mongodbConfig,
     parseDashboard: <any>parseDashboardConfig,

@@ -20,7 +20,7 @@ export default new Action<Input, Output>({
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.username) return Errors.throw(Errors.ParametersRequired, ["username"]);
+    if (!data.parameters.username) throw Errors.throw(Errors.ParametersRequired, ["username"]);
 
     /// Insert or Retrive
     var person: Person = new Person({
@@ -32,7 +32,7 @@ export default new Action<Input, Output>({
     if (status == "fetch") {
         /// Double check registration complete
         var events = await Events.fetchLast(EventList.RegistrationComplete, person);
-        if (events) return Errors.throw(Errors.VisitorAlreadyExists);
+        if (events) throw Errors.throw(Errors.VisitorAlreadyExists);
     }
 
     /// todo: Add to Role

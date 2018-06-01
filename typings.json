@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bluebird": "registry:npm/bluebird#3.5.0+20170314181206",
     "express": "registry:npm/express#4.14.0+20170217205433",
     "request": "registry:npm/request#2.69.0+20160428223725",
     "websocket": "registry:dt/websocket#0.0.0+20170217141817",

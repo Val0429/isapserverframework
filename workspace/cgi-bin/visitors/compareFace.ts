@@ -24,7 +24,7 @@ export default new Action<Input, Output>({
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.personId || !data.parameters.personId) return Errors.throw(Errors.ParametersRequired, ["personId, image"]);
+    if (!data.parameters.personId || !data.parameters.personId) throw Errors.throw(Errors.ParametersRequired, ["personId, image"]);
 
     var { personId, image } = data.parameters;
 
@@ -35,7 +35,7 @@ export default new Action<Input, Output>({
             .get(personId);
     } catch(reason) {
         /// Error if not exists
-        return Errors.throw(Errors.VisitorNotExists);
+        throw Errors.throw(Errors.VisitorNotExists);
     }
 
     /// Get Person pre-saved image

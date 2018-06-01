@@ -22,7 +22,7 @@ export default new Action<Input>({
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.personId) return Errors.throw(Errors.ParametersRequired, ["personId"]);
+    if (!data.parameters.personId) throw Errors.throw(Errors.ParametersRequired, ["personId"]);
 
     var { name, birthdate, idnumber, image } = data.parameters;
 
@@ -33,7 +33,7 @@ export default new Action<Input>({
             .get(data.parameters.personId);
     } catch(reason) {
         /// Error if not exists
-        return Errors.throw(Errors.VisitorNotExists);
+        throw Errors.throw(Errors.VisitorNotExists);
     }
 
     var comp = new EventScanIDCard({

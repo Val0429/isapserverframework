@@ -32,7 +32,7 @@ export namespace UserHelper {
 
         } catch(reason) {
             console.log('login failed', reason);
-            return Errors.throw(Errors.RequestFailed);
+            throw Errors.throw(Errors.RequestFailed);
         }
         
         return { sessionId, user, role };

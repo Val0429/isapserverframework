@@ -1,7 +1,5 @@
 import { RoleList, IRole } from './../../core/userRoles.gen';
 import * as Socket from 'ws';
-import { Errors } from './../../core/errors.gen';
-
 
 declare module 'helpers/cgi-helpers/core' {
     export interface ActionConfig {
@@ -30,7 +28,7 @@ declare module 'helpers/cgi-helpers/core' {
     }
 
     export interface ActionCallback<T, U> {
-        (data: ActionParam<T>): (U | Errors) | (Promise<U | Errors>);
+        (data: ActionParam<T>): U | Promise<U>;
     }
 
     export interface ActionParam<T> {

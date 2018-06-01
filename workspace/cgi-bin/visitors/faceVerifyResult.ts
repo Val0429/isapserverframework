@@ -19,7 +19,7 @@ export default new Action<Input>({
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.personId) return Errors.throw(Errors.ParametersRequired, ["personId"]);
+    if (!data.parameters.personId) throw Errors.throw(Errors.ParametersRequired, ["personId"]);
 
     var { personId, image, result } = data.parameters;
 
@@ -28,7 +28,7 @@ export default new Action<Input>({
         .get(personId);
 
     /// Error if not exists
-    if (!person) return Errors.throw(Errors.VisitorNotExists);
+    if (!person) throw Errors.throw(Errors.VisitorNotExists);
 
     var comp = new EventFaceVerifyResult({
         owner: data.user,

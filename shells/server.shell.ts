@@ -14,7 +14,6 @@ import { noCache } from './../helpers/middlewares/no-cache';
 import { routerLoader } from './../helpers/routers/router-loader';
 import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
-import { configLoader } from './../helpers/config/config-helper';
 
 import { Config } from './../core/config.gen';
 
@@ -23,7 +22,6 @@ let app: express.Application = expressWsRoutes();
 
 var tFuncStart = `
 /// (async () => {
-///  await configLoader();
 `;
 
 var tDisableCache = `

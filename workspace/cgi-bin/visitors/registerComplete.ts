@@ -10,17 +10,13 @@ export interface Input {
     personId: string;
 }
 
-export interface Output {
-    personId: string;
-}
-
-export default new Action<Input, Output>({
+export default new Action<Input>({
     loginRequired: true,
     permission: [RoleList.Kiosk]
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.personId) return Errors.throw(Errors.ParametersRequired, ["personId"]);
+    if (!data.parameters.personId) throw Errors.throw(Errors.ParametersRequired, ["personId"]);
 
     var { personId } = data.parameters;
 
@@ -31,7 +27,7 @@ export default new Action<Input, Output>({
             .get(personId);
     } catch(reason) {
         /// Error if not exists
-        return Errors.throw(Errors.VisitorNotExists);
+        throw Errors.throw(Errors.VisitorNotExists);
     }
 
     /// todo: Add to Role

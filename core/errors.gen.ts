@@ -12,6 +12,7 @@ export class Errors {
     static RequestFailed: ErrorObject = { statusCode: 404, message: "Request failed." };
     static PermissionDenined: ErrorObject = { statusCode: 404, message: "Permission denined." };
     static SessionNotExists: ErrorObject = { statusCode: 404, message: "Session not exists." };
+    static Custom: ErrorObject = { statusCode: 500, message: "{0}" };
     static VisitorAlreadyExists: ErrorObject = { statusCode: 400, message: "An visitor with this key already exists." };
     static VisitorNotExists: ErrorObject = { statusCode: 400, message: "An visitor with this key not exists." };
 

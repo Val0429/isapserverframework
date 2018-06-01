@@ -21,7 +21,7 @@ export default new Action<Input, Output>({
 })
 .post(async (data) => {
     /// Check param requirement
-    if (!data.parameters.username) return Errors.throw(Errors.ParametersRequired, ["username"]);
+    if (!data.parameters.username) throw Errors.throw(Errors.ParametersRequired, ["username"]);
 
     /// Insert or Retrive
     var person: Person = await new Parse.Query(Person)
@@ -29,7 +29,7 @@ export default new Action<Input, Output>({
         .first();
 
     /// Error if not exists
-    if (!person) return Errors.throw(Errors.VisitorNotExists);
+    if (!person) throw Errors.throw(Errors.VisitorNotExists);
 
     var comp = new EventTryCheckIn({
         owner: data.user,

@@ -32,7 +32,9 @@ var userRoles: Config[] = [
          * Name of this kiosk.
          */
         name: string;
-    `]
+    `],
+
+    [99, "SystemAdministrator"]
 ];
 
 export default userRoles;

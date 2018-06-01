@@ -33,119 +33,115 @@ export class Action<T = any, U = any> {
         this.config = config;
     }
 
-    private funcAllPath: string;
+    _get(type, arg1, arg2 = null) {
+        var callback = arg2 || arg1; if (arg2) this[`func${type}Config`] = typeof arg1 === 'string' ? { path: arg1 } : arg1; this[`func${type}`] = <any>callback; return this;
+    }
+
+    private funcAllConfig: ActionConfig;
     private funcAll: ActionCallback<T, U>;
     all(callback: ActionCallback<T, U>): Action<T, U> { this.funcAll = callback; return this; }
 
-    private funcGetPath: string;
+    private funcGetConfig: ActionConfig;
     private funcGet: ActionCallback<T, U>;
-    get<K = null, V = null>(path: string, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    get<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     get<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
-    get(arg1, arg2 = null) { const type = "Get"; var callback = arg2 || arg1; if (arg2) this[`func${type}Path`] = arg1; this[`func${type}`] = <any>callback; return this; }
+    get(arg1, arg2 = null) { return this._get("Get", arg1, arg2); }
 
-    private funcPostPath: string;
+    private funcPostConfig: ActionConfig;
     private funcPost: ActionCallback<T, U>;
-    post<K = null, V = null>(path: string, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    post<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     post<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
-    post(arg1, arg2 = null) { const type = "Post"; var callback = arg2 || arg1; if (arg2) this[`func${type}Path`] = arg1; this[`func${type}`] = <any>callback; return this; }
+    post(arg1, arg2 = null) { return this._get("Post", arg1, arg2); }
 
-    private funcPutPath: string;
+    private funcPutConfig: ActionConfig;
     private funcPut: ActionCallback<T, U>;
-    put<K = null, V = null>(path: string, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    put<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     put<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
-    put(arg1, arg2 = null) { const type = "Put"; var callback = arg2 || arg1; if (arg2) this[`func${type}Path`] = arg1; this[`func${type}`] = <any>callback; return this; }
+    put(arg1, arg2 = null) { return this._get("Put", arg1, arg2); }
 
-    private funcDeletePath: string;
+    private funcDeleteConfig: ActionConfig;
     private funcDelete: ActionCallback<T, U>;
-    delete<K = null, V = null>(path: string, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    delete<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     delete<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
-    delete(arg1, arg2 = null) { const type = "Delete"; var callback = arg2 || arg1; if (arg2) this[`func${type}Path`] = arg1; this[`func${type}`] = <any>callback; return this; }
+    delete(arg1, arg2 = null) { return this._get("Delete", arg1, arg2); }
 
-    private funcWsPath: string;
+    private funcWsConfig: ActionConfig;
     private funcWs: ActionCallback<T, U>;
-    ws<K = null, V = null>(path: string, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    ws<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
-    ws(arg1, arg2 = null) { const type = "Ws"; var callback = arg2 || arg1; if (arg2) this[`func${type}Path`] = arg1; this[`func${type}`] = <any>callback; return this; }
+    ws(arg1, arg2 = null) { return this._get("Ws", arg1, arg2); }
+
+    /// translate ActionConfig to array of middlewares
+    static configTranslate(config: ActionConfig): any[] {
+        var middlewares = [];
+        if (!config) return middlewares;
+        /////////////////////////////////////////////
+        /// mount middlewares
+        /// 1) bodyParser
+        middlewares.push(
+            VBodyParserJson( config.postSizeLimit ? { limit: config.postSizeLimit } : null )
+        );
+
+        /// 2) login
+        config.loginRequired && middlewares.push(loginRequired);
+        /// 3) permission
+        config.permission && middlewares.push(permissionCheck(config.permission));
+        /// mount others
+        config.middlewares && (middlewares = [...middlewares, ...config.middlewares]);
+        /////////////////////////////////////////////
+
+        return middlewares;        
+    }
 
     mount(): Router {
         var router: Router = express.Router();
 
-        /////////////////////////////////////////////
         /// mount middlewares
-        /// 1) bodyParser
-        router.use(VBodyParserJson(
-            this.config.postSizeLimit ? { limit: this.config.postSizeLimit } : null
-        ));
-        /// 2) login
-        if (this.config.loginRequired) router.use(loginRequired);
-        /// 3) permission
-        if (this.config.permission) router.use(permissionCheck(this.config.permission));
-        /// mount others
-        if (this.config.middlewares) for (var middleware of this.config.middlewares) router.use(middleware);
-        /////////////////////////////////////////////
+        router.use(Action.configTranslate(this.config));
 
         var funcs = ["All", "Get", "Post", "Put", "Delete"];
         for (var func of funcs) {
             if (this[`func${func}`]) {
                 let realfunc = this[`func${func}`];
-                let realpath = this[`func${func}Path`] || "*";
-                router[func.toLowerCase()](realpath, mergeParams, async (request: Request, response: Response) => {
-                    // var result = await realfunc({...request, request, response});
-                    // if (result instanceof Errors) {
-                    //     result.resolve(response);
-                    // } else {
-                    //     response.send(result);
-                    // }
-                    try {
-                        var result = await realfunc({...request, request, response});
-                        response.send(result);
-                    } catch(reason) {
-                        if (reason instanceof Errors) reason.resolve(response);
-                        else {
-                            Errors.throw(Errors.Custom, [reason.toString()]).resolve(response);
+                let config: ActionConfig = this[`func${func}Config`];
+                let realpath = (config ? config.path : "*") || "*";
+                router[func.toLowerCase()](realpath, Action.configTranslate(config), mergeParams,
+                    async (request: Request, response: Response) => {
+                        try {
+                            var result = await realfunc({...request, request, response});
+                            response.send(result);
+                        } catch(reason) {
+                            if (reason instanceof Errors) reason.resolve(response);
+                            else {
+                                Errors.throw(Errors.Custom, [reason.toString()]).resolve(response);
+                            }
                         }
                     }
-                });
+                );
             }
         }
         /// ws
         if (this.funcWs) {
             let realfunc = this.funcWs;
-            let realpath = this.funcWsPath || "*";
-            router["websocket"](realpath, mergeParams, (info: ExpressWsRouteInfo, cb: ExpressWsCb) => {
-                cb( async (socket: Socket) => {
-                    var request = <any>info.req;
-                    var response = <any>info.res;
-                    // var result = await realfunc({...request, socket, request, response});
-                    // if (result instanceof Errors) {
-                    //     result.resolve(response);
-                    // } else {
-                    //     socket.send(JSON.stringify(result));
-                    // }
-                    try {
-                        var result = await realfunc({...request, request, response});
-                        socket.send(JSON.stringify(result));
-                    } catch(reason) {
-                        if (reason instanceof Errors) reason.resolve(response);
-                        else {
+            let config: ActionConfig = this.funcWsConfig;
+            let realpath = (config ? config.path : "*") || "*";
+            router["websocket"](realpath, Action.configTranslate(config), mergeParams,
+                (info: ExpressWsRouteInfo, cb: ExpressWsCb) => {
+                    cb( async (socket: Socket) => {
+                        var request = <any>info.req;
+                        var response = <any>info.res;
+                        try {
+                            var result = await realfunc({...request, request, response});
                             socket.send(JSON.stringify(result));
+                        } catch(reason) {
+                            if (reason instanceof Errors) reason.resolve(response);
+                            else {
+                                socket.send(JSON.stringify(result));
+                            }
                         }
-                    }
-                });
-            });
-
-            // console.log('who?', 'got');
-            // router["ws"]("*", async (ws, request) => {
-            //     console.log('got??');
-            //     ws.send('gotgotecho');
-            //     var result = await this.funcWs({...request, ws, request});
-            //     if (result instanceof Errors) {
-            //         ws.send(JSON.stringify(result.resolve()));
-            //         /// todo: ws end?
-            //     } else {
-            //         ws.send(JSON.stringify(result));
-            //     }
-            // });
+                    });
+                }
+            );
         }
         return router;
     }

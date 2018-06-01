@@ -4,6 +4,12 @@ import * as Socket from 'ws';
 declare module 'helpers/cgi-helpers/core' {
     export interface ActionConfig {
         /**
+         * Which path apply to route?
+         * Default = *
+         */
+        path?: string;
+
+        /**
          * Is this action require login?
          * Default = true.
          */

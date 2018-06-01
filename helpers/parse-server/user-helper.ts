@@ -11,13 +11,13 @@ export namespace UserHelper {
     export interface OutputLogin {
         sessionId: string;
         user: Parse.User;
-        role: Parse.Role;
+        role: Parse.Role[];
     }
     /**
      * Helper that login into user, get back user / role / sessionId.
      */
     export async function login(options: InputLogin): Promise<OutputLogin> {
-        var user: Parse.User, role: Parse.Role, sessionId: string;
+        var user: Parse.User, role: Parse.Role[], sessionId: string;
         
         try {
             user = await Parse.User.logIn(options.username, options.password);
@@ -28,7 +28,7 @@ export namespace UserHelper {
             /// Get Role
             role = await new Parse.Query(Parse.Role)
                 .equalTo("users", user)
-                .first();
+                .find();
 
         } catch(reason) {
             console.log('login failed', reason);

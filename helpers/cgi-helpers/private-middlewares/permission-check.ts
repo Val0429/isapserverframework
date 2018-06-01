@@ -11,9 +11,9 @@ import './../core';
 /// permissionCheck ////////////////////////////////////////
 export function permissionCheck(permissions: RoleList[]): RequestHandler {
     return <any>((req: Request, res: Response, next: NextFunction) => {
-        if (permissions.indexOf(<RoleList>req.role.get("name")) < 0) {
-            Errors.throw(Errors.PermissionDenined).resolve(res);
-        }
+        var roles = req.role.filter( (element) => permissions.indexOf(element.get("name")) >= 0 );
+
+        if (roles.length == 0) return Errors.throw(Errors.PermissionDenined).resolve(res);
         next();
     });
 }

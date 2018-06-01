@@ -13,7 +13,7 @@ declare module "helpers/cgi-helpers/core" {
     export interface ActionParam<T> {
         session: Parse.Session;
         user: Parse.User;
-        role: Parse.Role;
+        role: Parse.Role[];
     }
 }
 
@@ -21,7 +21,7 @@ declare module 'express/lib/request' {
     interface Request {
         session: Parse.Session;
         user: Parse.User;
-        role: Parse.Role;
+        role: Parse.Role[];
     }
 }
 export async function loginRequired(req: Request, res: Response, next: NextFunction) {
@@ -30,12 +30,12 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
     /// should contain sessionId
     var sessionId: string = req.parameters[sessionKey];
     if (!sessionId) {
-        Errors.throw(Errors.ParametersRequired, [sessionKey]).resolve(res);
+        return Errors.throw(Errors.ParametersRequired, [sessionKey]).resolve(res);
     }
 
     var session: Parse.Session;
     var user: Parse.User;
-    var role: Parse.Role;
+    var role: Parse.Role[];
     try {
         /// get session instance
         session = await new Parse.Query("_Session")
@@ -45,7 +45,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
             
         /// session not match
         if (!session || session.getSessionToken() != sessionId) {
-            Errors.throw(Errors.LoginRequired).resolve(res);
+            return Errors.throw(Errors.LoginRequired).resolve(res);
         }
 
         /// get user instance
@@ -54,10 +54,10 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
         /// get user role
         role = await new Parse.Query(Parse.Role)
                 .equalTo("users", user)
-                .first() as Parse.Role;
+                .find();
 
     } catch(reason) {
-        Errors.throw(Errors.SessionNotExists).resolve(res);
+        return Errors.throw(Errors.SessionNotExists).resolve(res);
     }
 
     /// final

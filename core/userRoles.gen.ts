@@ -8,7 +8,8 @@ export enum RoleList {
     Administrator = "0",
     Tenant = "1",
     Visitor = "2",
-    Kiosk = "3"
+    Kiosk = "3",
+    SystemAdministrator = "99"
 }
 
 
@@ -17,6 +18,7 @@ export type UserType<T> =
     T extends "1" ? IUserTenant :
     T extends "2" ? IUserVisitor :
     T extends "3" ? IUserKiosk :
+    T extends "99" ? IUserSystemAdministrator :
     never;
 
 
@@ -76,4 +78,12 @@ export interface IUserKioskData {
     
 }
 export type IUserKiosk = ParseTypedGetterSetter<IUser<IUserKioskData>> & Parse.User;
+////////////////////////////////////////////////////
+
+
+/// UserSystemAdministrator: 99 ///////////////////////////////////
+export interface IUserSystemAdministratorData {
+        
+}
+export type IUserSystemAdministrator = ParseTypedGetterSetter<IUser<IUserSystemAdministratorData>> & Parse.User;
 ////////////////////////////////////////////////////

@@ -30,14 +30,10 @@ export default new Action<Input, Output>({
     /// Try login
     var obj = await UserHelper.login({ ...data.parameters });
 
-    if (obj instanceof Errors) {
-        return <Errors>obj;
-    } else {
-        return {
-            sessionId: obj.sessionId,
-            serverTime: new Date().valueOf(),
-            role: obj.role,
-            user: obj.user,
-        }
+    return {
+        sessionId: obj.sessionId,
+        serverTime: new Date().valueOf(),
+        role: obj.role,
+        user: obj.user,
     }
 });

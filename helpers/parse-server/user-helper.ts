@@ -16,7 +16,7 @@ export namespace UserHelper {
     /**
      * Helper that login into user, get back user / role / sessionId.
      */
-    export async function login(options: InputLogin): Promise<OutputLogin | Errors> {
+    export async function login(options: InputLogin): Promise<OutputLogin> {
         var user: Parse.User, role: Parse.Role, sessionId: string;
         
         try {

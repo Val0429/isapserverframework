@@ -6,6 +6,13 @@ import { Config } from './../../../models/events/events.define';
 /// 3000 for Visitor
 /// 4000 for Kiosk
 var events: Config[] = [
+    /// 100~ for system ////////////////////////
+    [101, "ConfigChanged", `
+        key: string;
+        value: any;
+    `],
+    ////////////////////////////////////////////
+
     /// 3000 for Visitor ///////////////////////
     /// 3600 - Register
     [3601, "TryRegister"],

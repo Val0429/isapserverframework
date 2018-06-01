@@ -1,26 +1,15 @@
 import {
     express, Response, Router,
     Parse, IRole, IUser, RoleList,
-    Action, Errors,
+    Action, Errors, Events, EventConfigChanged,
     Config, IConfig,
 } from './../../../core/cgi-package';
 
-// export interface Input {
-//     sessionId: string;
-// }
-
-// export interface FloorUnit {
-//     objectId: string;
-//     floor: number;
-//     unitNo: string;
-//     phone: string[];
-// }
 
 var action = new Action({
     loginRequired: true,
     permission: [RoleList.SystemAdministrator]
 });
-
 
 /// GET: get config /////////////////////////////////////
 export interface InputGet {
@@ -76,6 +65,14 @@ action.post<InputPost>("/:key(\\w{0,})", async (data) => {
     await updateConfig(key, content);
     /// update memory
     Config[key] = { ...Config[key], ...content };
+
+    /// write event
+    var event = new EventConfigChanged({
+        owner: data.user,
+        key,
+        value: content
+    });
+    await Events.save(event);
 
     return;
 });

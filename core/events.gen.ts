@@ -11,6 +11,7 @@ export * from './../workspace/custom/models/index';
 export enum EventList {
     Login = 1,
     Logout = 2,
+    ConfigChanged = 101,
     TryRegister = 3601,
     PickFloor = 3602,
     ScanIDCard = 3603,
@@ -24,6 +25,7 @@ export enum EventList {
 export type EventType<T> =
     T extends 1 ? EventLogin :
     T extends 2 ? EventLogout :
+    T extends 101 ? EventConfigChanged :
     T extends 3601 ? EventTryRegister :
     T extends 3602 ? EventPickFloor :
     T extends 3603 ? EventScanIDCard :
@@ -36,6 +38,7 @@ export type EventType<T> =
 export type EventsType<T> =
     T extends 1 ? Events<IEvents<IEventLogin>> :
     T extends 2 ? Events<IEvents<IEventLogout>> :
+    T extends 101 ? Events<IEvents<IEventConfigChanged>> :
     T extends 3601 ? Events<IEvents<IEventTryRegister>> :
     T extends 3602 ? Events<IEvents<IEventPickFloor>> :
     T extends 3603 ? Events<IEvents<IEventScanIDCard>> :
@@ -71,6 +74,18 @@ export interface IEventLogout extends IEventEntity {
     
 }
 @registerSubclass() export class EventLogout extends ParseObject<IEventLogout> { constructor(data?: Omit<IEventLogout, 'action'>) { super({ action: 2, ...data }) } }
+////////////////////////////////////////////////////
+
+
+/// Event101: ConfigChanged //////////////////////////////////
+export interface IEventConfigChanged extends IEventEntity {
+    action: 101;
+        
+    key: string;
+    value: any;
+    
+}
+@registerSubclass() export class EventConfigChanged extends ParseObject<IEventConfigChanged> { constructor(data?: Omit<IEventConfigChanged, 'action'>) { super({ action: 101, ...data }) } }
 ////////////////////////////////////////////////////
 
 

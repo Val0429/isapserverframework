@@ -30,11 +30,11 @@ export function routerLoader(app, path, first = true, level = 0) {
 
     } else {
         var route: Action = require(`${path}`).default;
-        if (name == defaultPath) name = "";
+        var routename = name === defaultPath ? (name = "", "($)") : name;
 
         var types = [];
         if (route instanceof Action) {
-            app.use(`/${name}`, route.mount());
+            app.use(`/${routename}`, route.mount());
             /// message ///
             var protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];
             for (var proto of protos)
@@ -42,7 +42,7 @@ export function routerLoader(app, path, first = true, level = 0) {
                     types.push(proto.toUpperCase());
             ///////////////
 
-        } else app.use(`/${name}`, route);
+        } else app.use(`/${routename}`, route);
 
         /// message ///
         console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");

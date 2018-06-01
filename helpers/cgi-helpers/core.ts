@@ -19,6 +19,7 @@ import * as Middlewares from './../../helpers/middlewares/index';
 /// Helpers
 export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
+import * as prune from 'json-prune';
 
 /// private middlewares
 import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
@@ -110,6 +111,7 @@ export class Action<T = any, U = any> {
                         try {
                             var result = await realfunc({...request, request, response});
                             response.send(result);
+                            
                         } catch(reason) {
                             if (reason instanceof Errors) reason.resolve(response);
                             else {
@@ -146,8 +148,6 @@ export class Action<T = any, U = any> {
         return router;
     }
 }
-
-
 
 
 // import config from './../../workspace/config/default/core';

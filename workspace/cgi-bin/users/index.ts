@@ -22,8 +22,6 @@ export interface InputGet {
 export type OutputGet = Parse.User[];
 
 action.get<InputGet, OutputGet>(async (data) => {
-    /// Check param requirement
-
     /// get users
     var query = new Parse.Query(Parse.User);
     if (data.parameters.username) query.equalTo("username", data.parameters.username);

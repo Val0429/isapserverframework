@@ -18,12 +18,10 @@ export interface Input {
 export default new Action<Input>({
     loginRequired: true,
     postSizeLimit: 1024*1024*100,   /// 100MB
+    requiredParameters: ["personId"],
     permission: [RoleList.Kiosk]
 })
 .post(async (data) => {
-    /// Check param requirement
-    if (!data.parameters.personId) throw Errors.throw(Errors.ParametersRequired, ["personId"]);
-
     var { name, birthdate, idnumber, image } = data.parameters;
 
     /// Get Person

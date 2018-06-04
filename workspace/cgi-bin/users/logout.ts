@@ -13,8 +13,6 @@ export default new Action<Input>({
     loginRequired: true
 })
 .post(async (data) => {
-    /// Check param requirement
-
     /// Perform Logout
     data.session.destroy({ sessionToken: data.parameters.sessionId });
 });

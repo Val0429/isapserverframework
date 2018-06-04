@@ -9,11 +9,6 @@ declare module 'helpers/cgi-helpers/core' {
         path?: string;
 
         /**
-         * How many bytes allowed for the post body?
-         */
-        postSizeLimit?: number;
-
-        /**
          * Which middlewares should be injected into route?
          * Default = none.
          */

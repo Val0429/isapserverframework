@@ -20,12 +20,10 @@ export interface Output {
 
 export default new Action<Input, Output>({
     loginRequired: true,
+    requiredParameters: ["personId", "image"],
     permission: [RoleList.Kiosk]
 })
 .post(async (data) => {
-    /// Check param requirement
-    if (!data.parameters.personId || !data.parameters.personId) throw Errors.throw(Errors.ParametersRequired, ["personId, image"]);
-
     var { personId, image } = data.parameters;
 
     /// Get Person

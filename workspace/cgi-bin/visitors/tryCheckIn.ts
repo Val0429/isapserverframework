@@ -17,12 +17,10 @@ export interface Output {
 
 export default new Action<Input, Output>({
     loginRequired: true,
+    requiredParameters: ["username"],
     permission: [RoleList.Kiosk]
 })
 .post(async (data) => {
-    /// Check param requirement
-    if (!data.parameters.username) throw Errors.throw(Errors.ParametersRequired, ["username"]);
-
     /// Insert or Retrive
     var person: Person = await new Parse.Query(Person)
         .equalTo("username", data.parameters.username)

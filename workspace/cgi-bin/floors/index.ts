@@ -24,8 +24,6 @@ export default new Action<Input>({
     permission: [RoleList.Kiosk]
 })
 .get(async (data) => {
-    /// Check param requirement
-
     var floors = await new Parse.Query(Floors)
         .find();
 

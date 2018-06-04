@@ -21,12 +21,10 @@ export interface Output {
 
 export default new Action<Input, Output>({
     loginRequired: false,
+    requiredParameters: ["username"],
     middlewares: []
 })
 .all(async (data) => {
-    /// Check param requirement
-    if (!data.parameters.username) throw Errors.throw(Errors.ParametersRequired, ["username"]);
-
     /// Try login
     var obj = await UserHelper.login({ ...data.parameters });
 

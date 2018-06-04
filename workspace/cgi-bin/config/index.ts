@@ -22,8 +22,6 @@ export interface InputGet {
 }
 export type OutputGet = IConfig | IConfig[keyof IConfig];
 action.get<InputGet, OutputGet>("/:key(\\w{0,})", async (data) => {
-    /// Check param requirement
-
     var key = data.parameters.key;
     var config = key ? Config[key] : Config;
     if (!config) throw Errors.throw(Errors.ParametersInvalid, ["key"]);
@@ -46,10 +44,11 @@ export interface InputPost {
      */
     data: object;
 }
-action.post<InputPost>("/:key(\\w{0,})", async (data) => {
-    /// Check param requirement
-    if (!data.parameters.key) throw Errors.throw(Errors.ParametersRequired, ["key"]);
-
+action.post<InputPost>({
+    path: "/:key(\\w{0,})",
+    requiredParameters: ["key"],
+    }, async (data) => {
+    
     /// check key
     var key = data.parameters.key;
     var config = Config[key];

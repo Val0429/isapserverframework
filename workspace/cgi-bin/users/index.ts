@@ -55,9 +55,16 @@ export interface InputPost extends IUser {
 
 action.post<InputPost>(async (data) => {
     /// Check param requirement
+    if (!data.parameters.username || !data.parameters.password) throw Errors.throw(Errors.ParametersRequired, ["username", "password"]);
 
     /// 1) Create Users
-    //new Parse.User()
+    var user = new Parse.User();
+
+    /// 2) Signup Users
+    let { sessionId, roles, ...remain } = data.parameters;
+    user = await user.signUp(remain);
+    
+    return;
 });
 ////////////////////////////////////
 

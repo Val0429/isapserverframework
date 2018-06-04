@@ -15,6 +15,14 @@ declare module "helpers/cgi-helpers/core" {
         user: Parse.User;
         role: Parse.Role[];
     }
+
+    export interface ActionConfig {
+        /**
+         * Is this action require login?
+         * Default = true.
+         */
+        loginRequired?: boolean;
+    }
 }
 
 declare module 'express/lib/request' {

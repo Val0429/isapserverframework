@@ -15,9 +15,6 @@ import { Config } from './../core/config.gen';
 let app: express.Application = expressWsRoutes();
 
 
-/// (async () => {
-
-
 /// Disable Cache
 if (Config.core.disableCache) app.use(noCache);
 
@@ -40,17 +37,17 @@ app.use(Config.parseServer.serverPath, ParseServer);
 
 /// run parse dashboard ////
 if (Config.parseDashboard.enable) {
-  var Dashboard = new ParseDashboard({
+var Dashboard = new ParseDashboard({
     "apps": [
-      {
+    {
         "serverURL": `http://localhost:${Config.core.port}${Config.parseServer.serverPath}`,
         "appId": Config.parseServer.appId,
         "masterKey": Config.parseServer.masterKey,
         "appName": Config.parseDashboard.appName
-      }
+    }
     ]
-  });
-  app.use(Config.parseDashboard.serverPath, Dashboard);
+});
+app.use(Config.parseDashboard.serverPath, Dashboard);
 }
 ////////////////////////////
 
@@ -58,9 +55,6 @@ if (Config.parseDashboard.enable) {
 app.listen(Config.core.port, () => {
     console.log(`Server running at port ${Config.core.port}.`);
 });
-
-
-/// })();
 
 export {
   app

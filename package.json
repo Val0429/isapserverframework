@@ -26,6 +26,7 @@
     "express-ws": "^3.0.0",
     "express-ws-routes": "^1.1.0",
     "json-prune": "^1.1.0",
+    "mongodb": "^3.0.10",
     "network": "^0.3.2",
     "parse": "^1.11.0",
     "parse-dashboard": "^1.2.0",

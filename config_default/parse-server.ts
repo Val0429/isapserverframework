@@ -1,5 +1,4 @@
 var config: Config = {
-    collection: "FRS",
     appId: "APPLICATIONKEY",
     masterKey: "MASTERKEY",
     fileKey: "FILEKEY",
@@ -8,10 +7,6 @@ var config: Config = {
 export default config;
 
 export interface Config {
-    /**
-     * Database / Collection used for app.
-     */
-    collection: string;
     appId: string;
     masterKey: string;
     fileKey: string;

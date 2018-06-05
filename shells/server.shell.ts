@@ -12,6 +12,7 @@ import { expressWsRoutes } from './../helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
 import { noCache } from './../helpers/middlewares/no-cache';
 import { routerLoader } from './../helpers/routers/router-loader';
+import { makeServerReady } from './../core/pending-tasks';
 import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
 
@@ -33,7 +34,7 @@ routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`);
 var tRunParseServer = `
 /// run parse server ////
 var ParseServer = new parse.ParseServer({
-    databaseURI: \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.parseServer.collection}\`,
+    databaseURI: \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`,
     appId: Config.parseServer.appId,
     masterKey: Config.parseServer.masterKey,
     fileKey: Config.parseServer.fileKey,
@@ -64,6 +65,7 @@ app.use(Config.parseDashboard.serverPath, Dashboard);
 var tRunServer = `
 app.listen(Config.core.port, () => {
     console.log(\`Server running at port \${Config.core.port}.\`);
+    makeServerReady();
 });
 
 export {

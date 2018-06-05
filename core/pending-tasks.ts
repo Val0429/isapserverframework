@@ -4,3 +4,6 @@ var {
     makeSubjectReady: makeServerReady,
     waitSubjectReady: waitServerReady,
 } = makeSubject();
+
+export { makeServerReady, waitServerReady }
+

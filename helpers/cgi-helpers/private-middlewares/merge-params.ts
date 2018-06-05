@@ -6,7 +6,13 @@ import './v-body-parser-json';
 
 /// mergeParams --> + parameters ///////////////////////////
 export function mergeParams(req: Request, res: Response, next: NextFunction) {
-    req.parameters = { ...req.params, ...req.parameters };
+    var params = {};
+    for (var key in req.params) {
+        var value = req.params[key];
+        if (+key == <any>key) continue;
+        params[key] = value;
+    }
+    req.parameters = { ...params, ...req.parameters };
     next();
 }
 ////////////////////////////////////////////////////////////

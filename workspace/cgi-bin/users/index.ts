@@ -2,7 +2,7 @@ import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
     Action, Errors,
-    getEnumKey,
+    getEnumKey, omitObject,
 } from './../../../core/cgi-package';
 
 import { Floors } from './../../custom/models/floors';
@@ -50,18 +50,86 @@ export interface InputPost extends IUser {
 
     roles: RoleList[];
 }
+var userfields = ["username", "password", "email", "data"];
 
-action.post<InputPost>(async (data) => {
-    /// Check param requirement
-    if (!data.parameters.username || !data.parameters.password) throw Errors.throw(Errors.ParametersRequired, ["username", "password"]);
-
+action.post<InputPost>({
+    requiredParameters: ["username", "password", "roles"],
+    },async (data) => {
+    
     /// 1) Create Users
+    let { sessionId, roles, ...remain } = data.parameters;
+    let userdata = omitObject(remain, userfields);
     var user = new Parse.User();
 
-    /// 2) Signup Users
-    let { sessionId, roles, ...remain } = data.parameters;
-    user = await user.signUp(remain);
+    /// 2) Check Role
+    var roleNames: string[] = [];
+    for (var r of roles) {
+        var name: string = RoleList[r];
+        if (!name) throw Errors.throw(Errors.Custom, [`Role <${r}> not found.`]);
+        roleNames.push(name);
+    }
+
+    /// 3) Signup Users
+    user = await user.signUp(userdata, {useMasterKey: true});
+
+    /// 4) Add to Role
+    for (var name of roleNames) {
+        var role = await new Parse.Query(Parse.Role)
+            .equalTo("name", name)
+            .first();
+        role.getUsers().add(user);
+        role.save();
+    }
     
+    return;
+});
+////////////////////////////////////
+
+/// modify users ///////////////////
+var usermfields = ["password", "email", "data"];
+export interface InputPut extends IUser {
+    sessionId: string;
+}
+
+action.put<InputPost>({
+    requiredParameters: ["username"],
+    },async (data) => {
+    
+    var { username } = data.parameters;
+    /// 1) Get User
+    var user = await new Parse.Query(Parse.User)
+        .equalTo("username", username)
+        .first();
+    if (!user) throw Errors.throw(Errors.Custom, [`User <${username}> not exists.`]);
+
+    /// 2) Modify
+    let userdata = omitObject(data.parameters, usermfields);
+    await user.save(userdata, { useMasterKey: true });
+    
+    return;
+});
+////////////////////////////////////
+
+/// delete users ///////////////////
+export interface InputDelete extends IUser {
+    sessionId: string;
+
+    username: string;
+}
+
+action.delete<InputDelete>({
+    requiredParameters: ["username"]
+}, async (data) => {
+
+    /// 1) Get User
+    var { username } = data.parameters;
+    var user = await new Parse.Query(Parse.User)
+        .equalTo("username", data.parameters.username)
+        .first();
+    if (!user) throw Errors.throw(Errors.Custom, [`User <${username}> not exists.`]);
+
+    user.destroy({ useMasterKey: true });
+
     return;
 });
 ////////////////////////////////////

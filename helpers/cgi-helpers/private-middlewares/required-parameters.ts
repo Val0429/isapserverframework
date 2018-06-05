@@ -20,7 +20,7 @@ declare module "helpers/cgi-helpers/core" {
 export function requiredParameters(parameters: string[]): RequestHandler {
     return <any>((req: Request, res: Response, next: NextFunction) => {
         for (var parameter of parameters) {
-            if (!req.parameters[parameter]) return Errors.throw(Errors.ParametersRequired, parameters).resolve(res);
+            if (!req.parameters[parameter]) return Errors.throw(Errors.ParametersRequired, [parameter]).resolve(res);
         }
 
         next();

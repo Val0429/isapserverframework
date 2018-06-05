@@ -26,7 +26,7 @@ declare module 'express/lib/request' {
 export function VBodyParserJson(options = null): RequestHandler {
     return <any>((req: Request, res: Response, next: NextFunction): any => {
         return bodyParser.json(options)(req, res, () => {
-            req.parameters = { ...req.params, ...req.query, ...req.body };
+            req.parameters = { ...req.query, ...req.body };
             next();
         });
     })

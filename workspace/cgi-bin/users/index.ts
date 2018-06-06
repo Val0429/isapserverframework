@@ -78,7 +78,7 @@ action.post<InputPost>({
             .equalTo("name", name)
             .first();
         role.getUsers().add(user);
-        role.save();
+        role.save(null, {useMasterKey: true});
     }
     
     return;

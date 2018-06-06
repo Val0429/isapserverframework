@@ -63,6 +63,7 @@ export class FRSService {
                     console.log(`FRS compare face failed.`, err);
                     return reject(err);
                 }
+                if (!body.score) return reject(body);
                 resolve(body.score);
             });
         });

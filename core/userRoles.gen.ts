@@ -7,8 +7,7 @@ export * from './../models/userRoles/userRoles.base';
 export enum RoleList {
     Administrator = "0",
     Tenant = "1",
-    Visitor = "2",
-    Kiosk = "3",
+    Kiosk = "2",
     SystemAdministrator = "99"
 }
 
@@ -16,8 +15,7 @@ export enum RoleList {
 export type UserType<T> =
     T extends "0" ? IUserAdministrator :
     T extends "1" ? IUserTenant :
-    T extends "2" ? IUserVisitor :
-    T extends "3" ? IUserKiosk :
+    T extends "2" ? IUserKiosk :
     T extends "99" ? IUserSystemAdministrator :
     never;
 
@@ -55,20 +53,7 @@ export type IUserTenant = ParseTypedGetterSetter<IUser<IUserTenantData>> & Parse
 ////////////////////////////////////////////////////
 
 
-/// UserVisitor: 2 ///////////////////////////////////
-export interface IUserVisitorData {
-        
-    /**
-    * Name of this visitor.
-    */
-    name: string;
-    
-}
-export type IUserVisitor = ParseTypedGetterSetter<IUser<IUserVisitorData>> & Parse.User;
-////////////////////////////////////////////////////
-
-
-/// UserKiosk: 3 ///////////////////////////////////
+/// UserKiosk: 2 ///////////////////////////////////
 export interface IUserKioskData {
         
     /**
@@ -87,3 +72,4 @@ export interface IUserSystemAdministratorData {
 }
 export type IUserSystemAdministrator = ParseTypedGetterSetter<IUser<IUserSystemAdministratorData>> & Parse.User;
 ////////////////////////////////////////////////////
+

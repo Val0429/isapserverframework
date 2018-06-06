@@ -27,6 +27,7 @@ import { permissionCheck } from './private-middlewares/permission-check';
 import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { requiredParameters } from './private-middlewares/required-parameters';
+import { accessControlAllowOrigin } from './private-middlewares/access-control-allow-origin';
 
 export class Action<T = any, U = any> {
     config: ActionConfig;
@@ -79,6 +80,9 @@ export class Action<T = any, U = any> {
         if (!config) return middlewares;
         /////////////////////////////////////////////
         /// mount middlewares
+        /// todo
+        middlewares.push(accessControlAllowOrigin);
+
         /// 1) bodyParser
         middlewares.push(
             VBodyParserJson( config.postSizeLimit ? { limit: config.postSizeLimit } : null )

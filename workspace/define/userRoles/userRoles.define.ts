@@ -20,14 +20,7 @@ var userRoles: Config[] = [
         contactNumber: string;
     `],
 
-    [2, "Visitor", `
-        /**
-         * Name of this visitor.
-         */
-        name: string;
-    `],
-
-    [3, "Kiosk", `
+    [2, "Kiosk", `
         /**
          * Name of this kiosk.
          */

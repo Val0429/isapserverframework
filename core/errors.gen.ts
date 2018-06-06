@@ -1,6 +1,7 @@
 
 import { ErrorObject } from './../models/cgis/errors.base';
 export * from './../models/cgis/errors.base';
+export * from './../models/cgis/cgis.base';
 import { Response } from 'express/lib/response';
 import { ExpressWsSocket } from './../helpers/middlewares/express-ws-routes';
 

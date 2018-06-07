@@ -1,5 +1,7 @@
 import * as Parse from 'parse/node';
 import { Errors } from './../../core/errors.gen';
+import { RoleList } from './../../core/userRoles.gen';
+import { getEnumKey } from './../utility/get-enum-key';
 
 export namespace UserHelper {
 
@@ -33,5 +35,16 @@ export namespace UserHelper {
         return { sessionId, user };
     }
     //////////////////////////////////////////////////////////////////////
+
+    export async function transformHumanRoles(user: Parse.User) {
+        var roles = user.get("roles");
+        if (!roles) return;
+        /// get user role
+        var roles = roles
+            .map( (value) => {
+                return { name: getEnumKey(RoleList, value.get("name")) }
+            });
+        user.set("roles", roles);
+    }
 
 }

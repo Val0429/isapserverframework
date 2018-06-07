@@ -28,11 +28,7 @@ export default new Action<Input, Output>({
     var obj = await UserHelper.login({ ...data.parameters });
 
     /// Map role name back to human form
-    var roles = obj.user.get("roles")
-        .map( (role: Parse.Role) => {
-            return { name: getEnumKey(RoleList, role.get("name")) }
-        });
-    obj.user.set("roles", roles);
+    UserHelper.transformHumanRoles(obj.user);
 
     return {
         sessionId: obj.sessionId,

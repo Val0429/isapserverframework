@@ -2,7 +2,7 @@ import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
     Action, Errors,
-    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful
+    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful, UserHelper
 } from './../../../core/cgi-package';
 
 import { Floors } from './../../custom/models/floors';
@@ -21,77 +21,88 @@ export interface InputGet extends IInputPaging {
 
 export type OutputGet = IOutputPaging<Parse.User[]> | Parse.User;
 
-action.get<InputGet, OutputGet>(async (data) => {
-    var getRole = async (user: Parse.User) => {
-        /// get user role
-        var roles = (await new Parse.Query(Parse.Role)
-                .equalTo("users", user)
-                .find())
-                .map( (value) => {
-                    return { name: getEnumKey(RoleList, value.get("name")) }
-                });
-        user.set("roles", roles);
-    }
+action.get<InputGet, OutputGet>(funcGet(false));
 
-    if (data.parameters.username) {
-        /// get users
-        var query = new Parse.Query(Parse.User);
-        if (data.parameters.username) query.equalTo("username", data.parameters.username);
-        var user = await query.first();
-        if (!user) throw Errors.throw(Errors.Custom, [`User not exists <${data.parameters.username}>.`]);
-        await getRole(user);
-        return user;
-    }
+export function funcGet(kiosk: boolean) {
+    return async (data) => {
+        var kioskRole = await new Parse.Query(Parse.Role)
+            .equalTo("name", RoleList.Kiosk)
+            .first();
 
-    return Restful.SingleOrPagination<Parse.User>( new Parse.Query(Parse.User), data.parameters, async (data) => {
-        await getRole(data);
-    });
-});
+        var query = new Parse.Query(Parse.User).include("roles");
+        if (kiosk) query.equalTo("roles", kioskRole);
+        else query.notEqualTo("roles", kioskRole);
+        if (data.parameters.username) {
+            /// get users
+            if (data.parameters.username) query.equalTo("username", data.parameters.username);
+            var user = await query.first();
+            if (!user) throw Errors.throw(Errors.Custom, [`User not exists <${data.parameters.username}>.`]);
+            await UserHelper.transformHumanRoles(user);
+            return user;
+        }
+
+        return Restful.SingleOrPagination<Parse.User>( query, data.parameters, async (data) => await UserHelper.transformHumanRoles(data) );
+    }
+}
+
 ////////////////////////////////////
 
 /// create users ///////////////////
 export interface InputPost extends IUser {
     sessionId: string;
 }
+export type OutputPost = Parse.User;
 var userfields = ["username", "password", "email", "data"];
 
-action.post<InputPost>({
+action.post<InputPost, OutputPost>({
     requiredParameters: ["username", "password", "roles"],
-    },async (data) => {
-    
-    /// 1) Create Users
-    let { sessionId, roles, ...remain } = data.parameters;
-    let userdata = omitObject(remain, userfields);
-    var user = new Parse.User();
+}, funcPost(false));
 
-    /// 2) Check Role
-    var roleNames: string[] = [];
-    for (var r of <any>roles) {
-        var name: string = RoleList[r];
-        if (!name) throw Errors.throw(Errors.Custom, [`Role <${r}> not found.`]);
-        roleNames.push(name);
+export function funcPost(kiosk: boolean) {
+    return async (data) => {
+        /// 1) Create Users
+        let { sessionId, roles, ...remain } = data.parameters;
+        let userdata = omitObject(remain, userfields);
+        var user = new Parse.User();
+
+        /// 2) Check Role
+        var roleNames: string[] = [];
+        for (var r of <any>roles) {
+            var name: string = RoleList[r];
+            if (!name) throw Errors.throw(Errors.Custom, [`Role <${r}> not found.`]);
+            /// available role check
+            if (
+                (!kiosk && name === RoleList.Kiosk) ||
+                (kiosk && name !== RoleList.Kiosk)
+            ) throw Errors.throw(Errors.Custom, [`Role <${r}> not available.`]);
+
+            roleNames.push(name);
+        }
+
+        /// 3) Signup Users
+        user = await user.signUp(userdata, {useMasterKey: true});
+
+        /// 4) Add to Role
+        var roleAry = [];
+        for (var name of roleNames) {
+            var role = await new Parse.Query(Parse.Role)
+                .equalTo("name", name)
+                .first();
+            role.getUsers().add(user);
+            role.save(null, {useMasterKey: true});
+            roleAry.push(role);
+        }
+
+        /// 5) Add Role to User
+        user.set("roles", roleAry);
+        await user.save(null, { useMasterKey: true });
+
+        /// 6) human roles
+        UserHelper.transformHumanRoles(user);
+
+        return user;
     }
-
-    /// 3) Signup Users
-    user = await user.signUp(userdata, {useMasterKey: true});
-
-    /// 4) Add to Role
-    var roleAry = [];
-    for (var name of roleNames) {
-        var role = await new Parse.Query(Parse.Role)
-            .equalTo("name", name)
-            .first();
-        role.getUsers().add(user);
-        role.save(null, {useMasterKey: true});
-        roleAry.push(role);
-    }
-
-    /// 5) Add Role to User
-    user.set("roles", roleAry);
-    await user.save(null, { useMasterKey: true });
-
-    return;
-});
+}
 ////////////////////////////////////
 
 /// modify users ///////////////////
@@ -99,10 +110,12 @@ var usermfields = ["password", "email", "data"];
 export interface InputPut extends IUser {
     sessionId: string;
 }
+export type OutputPut = Parse.User;
 
-action.put<InputPost>({
+action.put<InputPut, OutputPut>({
     requiredParameters: ["username"],
-    },async (data) => {
+}, funcPut);
+export async function funcPut(data) {
     
     var { username } = data.parameters;
     /// 1) Get User
@@ -114,9 +127,12 @@ action.put<InputPost>({
     /// 2) Modify
     let userdata = omitObject(data.parameters, usermfields);
     await user.save(userdata, { useMasterKey: true });
+
+    /// 3) human roles
+    UserHelper.transformHumanRoles(user);
     
-    return;
-});
+    return user;
+}
 ////////////////////////////////////
 
 /// delete users ///////////////////
@@ -125,10 +141,12 @@ export interface InputDelete extends IUser {
 
     username: string;
 }
+export type OutputDelete = Parse.User;
 
-action.delete<InputDelete>({
+action.delete<InputDelete, OutputDelete>({
     requiredParameters: ["username"]
-}, async (data) => {
+}, funcDelete);
+export async function funcDelete(data) {
 
     /// 1) Get User
     var { username } = data.parameters;
@@ -139,8 +157,11 @@ action.delete<InputDelete>({
 
     user.destroy({ useMasterKey: true });
 
-    return;
-});
+    /// 2) human roles
+    UserHelper.transformHumanRoles(user);
+
+    return user;
+}
 ////////////////////////////////////
 
 export default action;

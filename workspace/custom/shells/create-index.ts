@@ -15,10 +15,22 @@ waitServerReady(async () => {
     var instance = db.collection('_Session');
     var name = "expiresTTL";
     if (!(await instance.indexExists(name))) {
-        console.log(`Indexing <_Session>...`);
+        console.log(`Make index on <Session>.`);
         instance.createIndex({
             expiresAt: -1
         }, {expireAfterSeconds: 0, background: true, name});
+    }
+    /// Kiosk
+    var instance = db.collection('_User');
+    var name = "kioskUniqueID";
+    if (!(await instance.indexExists(name))) {
+        console.log(`Make index on <Kiosk>.`);
+        instance.createIndex({
+            "data.kioskId": 1
+        }, {
+            unique: true, background: true, name,
+            partialFilterExpression: { "data.kioskId": { $exists: true } }
+        });
     }
     ////////////////////////////
 

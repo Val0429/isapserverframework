@@ -3,6 +3,7 @@ import { registerSubclass, ParseObject } from './../../../helpers/parse-server/p
 /// Floors /////////////////////////////////////////
 export interface IFloors {
     floor: number;
+    name: string;
     unitNo: string;
     phone: string[];
 }

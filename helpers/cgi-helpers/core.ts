@@ -11,7 +11,7 @@ import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-rou
 import * as Parse from 'parse/node';
 import { RoleList, IRole } from './../../core/userRoles.gen';
 import * as Socket from 'ws';
-import { Errors } from './../../core/errors.gen';
+import { Errors, IInputPaging, IOutputPaging } from './../../core/errors.gen';
 
 /// Middlewares
 import * as Middlewares from './../../helpers/middlewares/index';
@@ -19,7 +19,8 @@ import * as Middlewares from './../../helpers/middlewares/index';
 /// Helpers
 export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
-import * as prune from 'json-prune';
+import { omitObject } from './../../helpers/utility/omit-object';
+import { ParseObject } from './../../helpers/parse-server/parse-helper';
 
 /// private middlewares
 import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
@@ -156,6 +157,251 @@ export class Action<T = any, U = any> {
     }
 }
 
+export type InputRestfulC<T = {}> = {
+    sessionId: string;
+} & T;
+export type OutputRestfulC<T = {}> = ParseObject<T>;
+
+export interface InputRestfulR<T = {}> extends IInputPaging {
+    sessionId: string;
+    objectId?: string;
+}
+export type OutputRestfulR<T> = IOutputPaging<ParseObject<T>[]> | ParseObject<T>;
+
+export type InputRestfulU<T = {}> = {
+    sessionId: string;
+    objectId: string;
+} & T;
+type OutputRestfulU<T> = ParseObject<T>;
+
+export type InputRestfulD<T> = {
+    sessionId: string;
+    objectId: string;
+} & T;
+export type OutputRestfulD<T = {}> = ParseObject<T>;
+
+export class Restful {
+    /**
+     * C: prototype
+     */
+    // action.post<InputPost>({
+    //     requiredParameters: ["floor", "phone", "unitNo"],
+    // }, async (data) => {
+    //     var floor = new Floors({
+    //         floor: data.parameters.floor,
+    //         phone: data.parameters.phone,
+    //         unitNo: data.parameters.unitNo,
+    //     });
+    //     await floor.save();
+
+    //     return floor;
+
+    // });
+
+    // action.post<InputPost, OutputPost>({
+    //     requiredParameters: ["floor", "phone", "unitNo"],
+    // }, RestfulC(Floors, ["floor", "phone", "unitNo"]));
+
+    // function RestfulC<T extends Parse.Object>(type: new(...args: any[])=> T, keys: string[]) {
+    //     return async <U>(data: U): Promise<T> => {
+    //         var o = new type(omitObject((<any>data).parameters, keys));
+    //         await o.save();
+    //         return o;
+    //     }
+    // }
+
+    static C<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {}) {
+        action.post<InputRestfulC<T>, OutputRestfulC<T>>(options, async <U>(data: U): Promise<ParseObject<T>> => {
+            var o = new type(omitObject((<any>data).parameters, acceptParameters));
+            await o.save();
+            return o;
+        });
+    }
+
+    /**
+     * R: prototype
+     */
+    // action.get<InputGet, OutputGet>(async (data) => {
+    //     var page = +(data.parameters.page || 1);
+    //     var pageSize = +(data.parameters.pageSize || 20);
+
+    //     var floors = await new Parse.Query(Floors)
+    //         .limit(pageSize)
+    //         .skip( (page-1) * pageSize )
+    //         .find();
+
+    //     var total = await new Parse.Query(Floors).count();
+    //     var totalPages = Math.ceil(total / pageSize);
+
+    //     return {
+    //         page, pageSize,
+    //         total, totalPages,
+    //         results: floors
+    //     }
+    // });
+    // static R<T extends Parse.Object>(type: new(...args: any[])=> T) {
+    //     return async <U>(data: U): Promise<IOutputPaging<T[]>> => {
+    //         var param = (<any>data).parameters;
+    //         var page = +(param.page || 1);
+    //         var pageSize = +(param.pageSize || 20);
+    //         var o = await new Parse.Query(type)
+    //             .limit(pageSize)
+    //             .skip( (page-1) * pageSize )
+    //             .find();
+    //         var total = await new Parse.Query(type).count();
+    //         var totalPages = Math.ceil(total / pageSize);
+    //         return {
+    //             page, pageSize,
+    //             total, totalPages,
+    //             results: o
+    //         }
+    //     }
+    // }
+
+    static R<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, options: ActionConfig = {}) {
+        action.get<InputRestfulR<T>, OutputRestfulR<T>>(options, async (data): Promise<OutputRestfulR<T>> => {
+            return await this.SingleOrPagination<ParseObject<T>>( new Parse.Query(type), data.parameters );
+        });
+    }
+
+    /**
+     * U: prototype
+     */
+    // action.put<InputPut, OutputPut>({
+    //     requiredParameters: ["objectId"],
+    // }, async (data) => {
+    //     var floor = await new Parse.Query(Floors)
+    //         .get(data.parameters.objectId);
+
+    //     await floor.save( omitObject(data.parameters, ["floor", "phone", "unitNo"]) );
+    //     return floor;
+    // });
+    // action.put<InputPut, OutputPut>({
+    //     requiredParameters: ["objectId"],
+    // }, RestfulU(Floors, ["floor", "phone", "unitNo"]));
+
+    // function RestfulU<T extends Parse.Object>(type: new(...args: any[])=> T, keys: string[]) {
+    //     return async <U>(data: U): Promise<T> => {
+    //         var param = (<any>data).parameters;
+    //         var o = await new Parse.Query(type)
+    //             .get(param.objectId);
+    //         await o.save( omitObject(param, keys) );
+    //         return o;
+    //     }
+    // }
+
+    static U<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {}) {
+        const key = "objectId";
+        options.requiredParameters = (options.requiredParameters || []).concat(key);
+
+        action.put<InputRestfulU<T>, OutputRestfulU<T>>(options, async (data): Promise<OutputRestfulU<T>> => {
+            var param = (<any>data).parameters;
+            var o = await new Parse.Query(type)
+                .get(param.objectId);
+            await o.save( omitObject(param, acceptParameters) );
+            return o;
+        });
+    }
+
+    /**
+     * D: prototype
+     */
+    // action.delete<InputDelete>({
+    //     requiredParameters: ["objectId"],
+    // }, async (data) => {
+    //     var floor = await new Parse.Query(Floors)
+    //         .get(data.parameters.objectId);
+    //     await floor.destroy();
+
+    //     return;
+    // });
+    // action.delete<InputDelete, OutputDelete>({
+    //     requiredParameters: ["objectId"],
+    // }, RestfulD(Floors));
+
+    // function RestfulD<T extends Parse.Object>(type: new(...args: any[])=> T) {
+    //     return async <U>(data: U): Promise<T> => {
+    //         var param = (<any>data).parameters;
+    //         var o = await new Parse.Query(type)
+    //             .get(param.objectId);
+    //         await o.destroy();
+    //         return o;
+    //     }
+    // }
+
+    static D<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, options: ActionConfig = {}) {
+        const key = "objectId";
+        options.requiredParameters = (options.requiredParameters || []).concat(key);
+
+        action.delete<InputRestfulD<T>, OutputRestfulD<T>>(options, async (data): Promise<OutputRestfulD<T>> => {
+            var param = (<any>data).parameters;
+            var o = await new Parse.Query(type)
+                .get(param.objectId);
+            await o.destroy();
+            return o;
+        });
+    }
+
+    static CRUD<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, requiredParameters: string[], acceptParameters: string[] = null) {
+        acceptParameters = acceptParameters || requiredParameters;
+
+        this.C<T>(action, type, acceptParameters, {requiredParameters});
+        this.R<T>(action, type);
+        this.U<T>(action, type, acceptParameters);
+        this.D<T>(action, type);
+    }
+
+            // /// multiple
+            // var param = (<any>data).parameters;
+            // var page = +(param.page || 1);
+            // var pageSize = +(param.pageSize || 20);
+            // var o = await new Parse.Query(type)
+            //     .limit(pageSize)
+            //     .skip( (page-1) * pageSize )
+            //     .find();
+            // var total = await new Parse.Query(type).count();
+            // var totalPages = Math.ceil(total / pageSize);
+            // return {
+            //     page, pageSize,
+            //     total, totalPages,
+            //     results: o
+            // }
+
+    static async Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging,
+        postScript: (obj: T) => Promise<void> = null): Promise<IOutputPaging<T[]>> {
+
+        var page = +(paging.page || 1);
+        var pageSize = +(paging.pageSize || 20);
+        var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
+        var total = await query.count();
+        var totalPages = Math.ceil(total / pageSize);
+
+        if (postScript) {
+            for (var i of o) await postScript(<any>i);
+        }
+
+        return {
+            page, pageSize,
+            total, totalPages,
+            results: o
+        }
+    }
+
+    static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },
+        postScript: (obj: T) => Promise<void> = null): Promise<IOutputPaging<T[]> | T> {
+        /// single
+        if (paging.objectId) {
+            var o = await query.get(paging.objectId);
+            if (postScript) {
+                await postScript(o);
+            }
+            return o;
+        }
+        return this.Pagination(query, paging, postScript);
+    }
+}
+
+    
 
 // import config from './../../workspace/config/default/core';
 

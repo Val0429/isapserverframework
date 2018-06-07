@@ -2,7 +2,7 @@ import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
     Action, Errors,
-    getEnumKey, omitObject,
+    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful
 } from './../../../core/cgi-package';
 
 import { Floors } from './../../custom/models/floors';
@@ -14,22 +14,15 @@ var action = new Action({
 });
 
 /// get users //////////////////////
-export interface InputGet {
+export interface InputGet extends IInputPaging {
     sessionId: string;
     username?: string;
 }
 
-export type OutputGet = Parse.User[];
+export type OutputGet = IOutputPaging<Parse.User[]> | Parse.User;
 
 action.get<InputGet, OutputGet>(async (data) => {
-    /// get users
-    var query = new Parse.Query(Parse.User);
-    if (data.parameters.username) query.equalTo("username", data.parameters.username);
-    var users = await query.find();
-    if (users.length == 0) throw Errors.throw(Errors.RequestFailed);
-
-    /// get roles
-    for (var user of users) {
+    var getRole = async (user: Parse.User) => {
         /// get user role
         var roles = (await new Parse.Query(Parse.Role)
                 .equalTo("users", user)
@@ -40,7 +33,19 @@ action.get<InputGet, OutputGet>(async (data) => {
         user.set("roles", roles);
     }
 
-    return users;
+    if (data.parameters.username) {
+        /// get users
+        var query = new Parse.Query(Parse.User);
+        if (data.parameters.username) query.equalTo("username", data.parameters.username);
+        var user = await query.first();
+        if (!user) throw Errors.throw(Errors.Custom, [`User not exists <${data.parameters.username}>.`]);
+        await getRole(user);
+        return user;
+    }
+
+    return Restful.SingleOrPagination<Parse.User>( new Parse.Query(Parse.User), data.parameters, async (data) => {
+        await getRole(data);
+    });
 });
 ////////////////////////////////////
 

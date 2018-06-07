@@ -7,3 +7,4 @@ export interface IOutputPaging<T> extends IInputPaging {
     totalPages: number;
     results: T;
 }
+

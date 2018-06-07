@@ -52,8 +52,6 @@ action.get<InputGet, OutputGet>(async (data) => {
 /// create users ///////////////////
 export interface InputPost extends IUser {
     sessionId: string;
-
-    roles: RoleList[];
 }
 var userfields = ["username", "password", "email", "data"];
 
@@ -68,7 +66,7 @@ action.post<InputPost>({
 
     /// 2) Check Role
     var roleNames: string[] = [];
-    for (var r of roles) {
+    for (var r of <any>roles) {
         var name: string = RoleList[r];
         if (!name) throw Errors.throw(Errors.Custom, [`Role <${r}> not found.`]);
         roleNames.push(name);

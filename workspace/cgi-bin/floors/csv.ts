@@ -24,7 +24,6 @@ var action = new Action<InputPost>({
     csv.fromString(content)
         .on("data", (data) => {
             if ((<any>data[0]).length === 0) return;
-            console.log(data);
         })
         .on("end", () => {
             console.log("end");

@@ -59,10 +59,9 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
         /// get user instance
         user = session.get("user");
 
-        /// get user role
-        role = await new Parse.Query(Parse.Role)
-                .equalTo("users", user)
-                .find();
+        /// get user roles
+        for (var r of user.get("roles")) await r.fetch();
+        role = user.get("roles");
 
     } catch(reason) {
         return Errors.throw(Errors.SessionNotExists).resolve(res);

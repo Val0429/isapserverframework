@@ -11,4 +11,5 @@ export interface IUser<T = {}> {
     password: string;
     email?: string;
     data?: T & IUserData;
+    roles: IRole;
 }

@@ -78,14 +78,20 @@ action.post<InputPost>({
     user = await user.signUp(userdata, {useMasterKey: true});
 
     /// 4) Add to Role
+    var roleAry = [];
     for (var name of roleNames) {
         var role = await new Parse.Query(Parse.Role)
             .equalTo("name", name)
             .first();
         role.getUsers().add(user);
         role.save(null, {useMasterKey: true});
+        roleAry.push(role);
     }
-    
+
+    /// 5) Add Role to User
+    user.set("roles", roleAry);
+    await user.save(null, { useMasterKey: true });
+
     return;
 });
 ////////////////////////////////////

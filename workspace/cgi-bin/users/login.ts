@@ -16,7 +16,6 @@ export interface Output {
     sessionId: string;
     serverTime: number;
     user: Parse.User;
-    role: IRole[];
 }
 
 export default new Action<Input, Output>({
@@ -28,12 +27,16 @@ export default new Action<Input, Output>({
     /// Try login
     var obj = await UserHelper.login({ ...data.parameters });
 
+    /// Map role name back to human form
+    var roles = obj.user.get("roles")
+        .map( (role: Parse.Role) => {
+            return { name: getEnumKey(RoleList, role.get("name")) }
+        });
+    obj.user.set("roles", roles);
+
     return {
         sessionId: obj.sessionId,
         serverTime: new Date().valueOf(),
-        role: obj.role.map( (value) => {
-            return { name: getEnumKey(RoleList, value.get("name")) }
-        }),
         user: obj.user,
     }
 });

@@ -372,6 +372,7 @@ export class Restful {
 
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
+        if ("true" === paging.all) pageSize = Number.MAX_SAFE_INTEGER;
         var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
@@ -380,11 +381,8 @@ export class Restful {
             for (var i of o) await postScript(<any>i);
         }
 
-        return {
-            page, pageSize,
-            total, totalPages,
-            results: o
-        }
+        if (paging.all === "true") return { total, results: o };
+        return { page, pageSize, total, totalPages, results: o };
     }
 
     static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },

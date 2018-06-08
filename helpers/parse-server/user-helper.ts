@@ -47,4 +47,9 @@ export namespace UserHelper {
         return getEnumKey(RoleList, roleName);
     }
 
+    export var ruleUserRole = {
+        roles: {
+            users: null, roles: null, name: UserHelper.transformHumanRoleName
+        }
+    }
 }

@@ -30,12 +30,7 @@ export default new Action<Input, Output>({
     return {
         sessionId: obj.sessionId,
         serverTime: new Date(),
-        user: ParseObject.toOutputJSON.call(obj.user, {
-            roles: {
-                name: UserHelper.transformHumanRoleName,
-                users: null, roles: null, ACL: null,
-            }
-        })
+        user: ParseObject.toOutputJSON.call(obj.user, UserHelper.ruleUserRole)
     }
 });
 

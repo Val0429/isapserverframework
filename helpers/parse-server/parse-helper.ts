@@ -92,7 +92,7 @@ export class ParseObject<T> extends Parse.Object {
         return ParseObject.toOutputJSON.call(this, ...arguments);
     }
 
-    static toOutputJSON(this: Parse.Object | Parse.Object[], rules?: {[index: string]: (any) => any | object}, seen = null) {
+    static toOutputJSON(this: Parse.Object | Parse.Object[], rules?: ParseObjectJSONRule, seen = null) {
         if (Array.isArray(this)) {
             return this.map( (value) => ParseObject.toOutputJSON.call(value, rules, seen) );
         }
@@ -145,3 +145,7 @@ export interface ParseTypedGetterSetter<T> {
 
 export type StringLiteralDiff<T, U extends string> = ({[P in keyof T]: P } & {[P in U]: never } & { [x: string]: never })[keyof T];
 export type Omit<T, K extends keyof T> = Pick<T, StringLiteralDiff<T, K>>;
+
+export interface ParseObjectJSONRule {
+    [index: string]: ParseObjectJSONRule | null | ((any) => any);
+}

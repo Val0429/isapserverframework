@@ -21,7 +21,7 @@ export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
 export * from './../parse-server/parse-helper';
 import { omitObject } from './../../helpers/utility/omit-object';
-import { ParseObject } from './../../helpers/parse-server/parse-helper';
+import { ParseObject, ParseObjectJSONRule } from './../../helpers/parse-server/parse-helper';
 
 /// private middlewares
 import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
@@ -352,24 +352,8 @@ export class Restful {
         this.D<T>(action, type);
     }
 
-            // /// multiple
-            // var param = (<any>data).parameters;
-            // var page = +(param.page || 1);
-            // var pageSize = +(param.pageSize || 20);
-            // var o = await new Parse.Query(type)
-            //     .limit(pageSize)
-            //     .skip( (page-1) * pageSize )
-            //     .find();
-            // var total = await new Parse.Query(type).count();
-            // var totalPages = Math.ceil(total / pageSize);
-            // return {
-            //     page, pageSize,
-            //     total, totalPages,
-            //     results: o
-            // }
-
     static async Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging,
-        postScript: (obj: T) => Promise<void> = null): Promise<IOutputPaging<T[]>> {
+        rules: ParseObjectJSONRule = null): Promise<IOutputPaging<T[]>> {
 
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
@@ -378,26 +362,20 @@ export class Restful {
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
 
-        if (postScript) {
-            for (var i of o) await postScript(<any>i);
-        }
-
-        if (paging.all === "true") return { total, results: o };
-        return { page, pageSize, total, totalPages, results: o };
+        if (paging.all === "true") return { total, results: ParseObject.toOutputJSON.call(o, rules) };
+        return { page, pageSize, total, totalPages, results: ParseObject.toOutputJSON.call(o, rules) };
     }
 
     static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },
-        postScript: (obj: T) => Promise<void> = null): Promise<IOutputPaging<T[]> | T> {
+        rules: ParseObjectJSONRule = null): Promise<IOutputPaging<T[]> | T> {
         /// single
         if (paging.objectId) {
             var o = await query.get(paging.objectId);
-            if (postScript) {
-                await postScript(o);
-            }
-            return o;
+            return ParseObject.toOutputJSON.call(o, rules);
         }
-        return this.Pagination(query, paging, postScript);
+        return this.Pagination(query, paging, rules);
     }
+
 }
 
     

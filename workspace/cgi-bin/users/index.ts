@@ -2,7 +2,7 @@ import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
     Action, Errors,
-    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful, UserHelper
+    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful, UserHelper, ParseObject,
 } from './../../../core/cgi-package';
 
 import { Floors } from './../../custom/models/floors';
@@ -37,12 +37,10 @@ export function funcGet(kiosk: boolean) {
             if (data.parameters.username) query.equalTo("username", data.parameters.username);
             var user = await query.first();
             if (!user) throw Errors.throw(Errors.Custom, [`User not exists <${data.parameters.username}>.`]);
-            //await UserHelper.transformHumanRoles(user);
-            return user;
+            return ParseObject.toOutputJSON.call(user, UserHelper.ruleUserRole);
         }
 
-        //return Restful.SingleOrPagination<Parse.User>( query, data.parameters, async (data) => await UserHelper.transformHumanRoles(data) );
-        return Restful.SingleOrPagination<Parse.User>( query, data.parameters );
+        return Restful.SingleOrPagination<Parse.User>( query, data.parameters, UserHelper.ruleUserRole );
     }
 }
 
@@ -98,10 +96,7 @@ export function funcPost(kiosk: boolean) {
         user.set("roles", roleAry);
         await user.save(null, { useMasterKey: true });
 
-        /// 6) human roles
-        //UserHelper.transformHumanRoles(user);
-
-        return user;
+        return ParseObject.toOutputJSON.call(user, UserHelper.ruleUserRole);
     }
 }
 ////////////////////////////////////
@@ -129,10 +124,7 @@ export async function funcPut(data) {
     let userdata = omitObject(data.parameters, usermfields);
     await user.save(userdata, { useMasterKey: true });
 
-    /// 3) human roles
-    //UserHelper.transformHumanRoles(user);
-    
-    return user;
+    return ParseObject.toOutputJSON.call(user, UserHelper.ruleUserRole);
 }
 ////////////////////////////////////
 
@@ -158,10 +150,7 @@ export async function funcDelete(data) {
 
     user.destroy({ useMasterKey: true });
 
-    /// 2) human roles
-    //UserHelper.transformHumanRoles(user);
-
-    return user;
+    return ParseObject.toOutputJSON.call(user, UserHelper.ruleUserRole);
 }
 ////////////////////////////////////
 

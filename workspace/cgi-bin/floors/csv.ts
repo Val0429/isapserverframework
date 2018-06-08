@@ -7,7 +7,8 @@ import {
 
 import { Floors, IFloors } from './../../custom/models/floors';
 
-import * as csv from 'fast-csv';
+//import * as csv from 'fast-csv';
+import * as parseCsv from 'node-csv-parse';
 
 export interface InputPost {
     sessionId: string;
@@ -19,15 +20,26 @@ var action = new Action<InputPost>({
     postSizeLimit: 1024*1024*10,
     permission: [RoleList.Administrator, RoleList.Kiosk]
 })
-.post( (data) => {
+.post( async (data) => {
     var content = new Buffer(data.parameters.data, 'base64').toString();
-    csv.fromString(content)
-        .on("data", (data) => {
-            if ((<any>data[0]).length === 0) return;
-        })
-        .on("end", () => {
-            console.log("end");
-        });
+    var result = parseCsv(content);
+
+    var floors: Floors[] = result.asObjects()
+        .reduce( (final, value) => {
+            do {
+                if (!value.floor || !value.name) break;
+                final.push(new Floors({
+                    floor: +value.floor,
+                    unitNo: value.unitNo,
+                    name: value.name,
+                    phone: value.phone.split(",")
+                }));
+            } while(0);
+            return final;
+        }, []);
+
+    await Parse.Object.saveAll(floors);
+    
     return;
 });
 

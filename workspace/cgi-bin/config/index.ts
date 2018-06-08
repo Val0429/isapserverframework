@@ -37,7 +37,7 @@ export interface InputPost {
     /**
      * can be from params: config sub catagory
      */
-    key: string;
+    key?: string;
 
     /**
      * { key: value } to update the config.
@@ -46,32 +46,55 @@ export interface InputPost {
 }
 action.post<InputPost>({
     path: "/:key(\\w{0,})",
-    requiredParameters: ["key"],
-    }, async (data) => {
+}, async (data) => {
     
-    /// check key
-    var key = data.parameters.key;
-    var config = Config[key];
-    if (!config) throw Errors.throw(Errors.ParametersInvalid, ["key"]);
+    var updateSingleKey = async (key: string, data) => {
+        /// check key
+        var config = Config[key];
+        if (!config) throw Errors.throw(Errors.ParametersInvalid, ["key"]);
+        
+        /// check data
+        for (var k in data) {
+            if (config[k] === undefined) throw Errors.throw(Errors.ParametersInvalid, [`data.${k}`]);
+        }
 
-    /// check data
-    var content = data.parameters.data;
-    for (var k in content) {
-        if (!config[k]) throw Errors.throw(Errors.ParametersInvalid, [`data.${k}`]);
+        /// update data
+        await updateConfig(key, data);
+        /// update memory
+        Config[key] = { ...Config[key], ...data };
     }
 
-    /// update data
-    await updateConfig(key, content);
-    /// update memory
-    Config[key] = { ...Config[key], ...content };
-
     /// write event
+    var { key, data: value } = data.parameters;
     var event = new EventConfigChanged({
         owner: data.user,
-        key,
-        value: content
+        key, value
     });
     await Events.save(event);
+
+    /// update
+    if (key) await updateSingleKey(key, value);
+    else {
+        for (var key in value) {
+            await updateSingleKey(key, value[key]);
+        }
+    }
+
+    // /// check key
+    // var key = data.parameters.key;
+    // var config = Config[key];
+    // if (!config) throw Errors.throw(Errors.ParametersInvalid, ["key"]);
+
+    // /// check data
+    // var content = data.parameters.data;
+    // for (var k in content) {
+    //     if (config[k] === undefined) throw Errors.throw(Errors.ParametersInvalid, [`data.${k}`]);
+    // }
+
+    // /// update data
+    // await updateConfig(key, content);
+    // /// update memory
+    // Config[key] = { ...Config[key], ...content };
 
     return;
 });
@@ -88,12 +111,15 @@ import { promisify } from 'bluebird';
 async function updateConfig(key: string, data: object) {
     /// 1) find real path of workspace config
     var result;
+    var regex = /[A-Z]/g;
+    var dashedKey = key.replace(regex, (a, b) => `-${a.toLowerCase()}`);
+
     for (var dir of [wsDefPath, wsCustomPath]) {
         var files: string[] = <any>await promisify(fs.readdir)(dir);
         for (var file of files) {
             var name = p.parse(file).name;
-            if (name === key) {
-                result = `${dir}/${name}.ts`;
+            if (name === dashedKey) {
+                result = `${dir}/${dashedKey}.ts`;
                 break;
             }
         }

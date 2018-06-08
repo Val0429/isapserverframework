@@ -1,7 +1,7 @@
 import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
-    Action, Errors, Person,
+    Action, Errors, Person, Config,
     Events, FileHelper, EventList, EventsType, EventType
 } from './../../../core/cgi-package';
 
@@ -44,7 +44,10 @@ export default new Action<Input, Output>({
     var score = 0;
     var imageFiles: Parse.File[] = event.getValue("image");
     for (var imageFile of imageFiles) {
-        var res = await Parse.Cloud.httpRequest({ url: imageFile.url() });
+        var url = imageFile.url();
+        /// todo, make it right.
+        url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
+        var res = await Parse.Cloud.httpRequest({ url });
         var b64image = res.buffer.toString('base64');
         var result = await FRS.compareFace(b64image, image);
         score = Math.max(score, result);

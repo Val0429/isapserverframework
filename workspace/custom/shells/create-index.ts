@@ -59,13 +59,17 @@ waitServerReady(async () => {
             password: "123456",
         });
         /// Add <Administrator> and <SystemAdministrator> as default
+        var roles = [];
         for (name of [RoleList.Administrator, RoleList.SystemAdministrator]) {
             role = await new Parse.Query(Parse.Role)
                 .equalTo("name", name)
                 .first();
             role.getUsers().add(user);
             await role.save(null, { useMasterKey: true });
+            roles.push(role);
         }
+        user.set("roles", roles);
+        await user.save(null, { useMasterKey: true });
         console.log("Default User created.");
     }
     ////////////////////////////

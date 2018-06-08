@@ -37,11 +37,12 @@ export function funcGet(kiosk: boolean) {
             if (data.parameters.username) query.equalTo("username", data.parameters.username);
             var user = await query.first();
             if (!user) throw Errors.throw(Errors.Custom, [`User not exists <${data.parameters.username}>.`]);
-            await UserHelper.transformHumanRoles(user);
+            //await UserHelper.transformHumanRoles(user);
             return user;
         }
 
-        return Restful.SingleOrPagination<Parse.User>( query, data.parameters, async (data) => await UserHelper.transformHumanRoles(data) );
+        //return Restful.SingleOrPagination<Parse.User>( query, data.parameters, async (data) => await UserHelper.transformHumanRoles(data) );
+        return Restful.SingleOrPagination<Parse.User>( query, data.parameters );
     }
 }
 
@@ -98,7 +99,7 @@ export function funcPost(kiosk: boolean) {
         await user.save(null, { useMasterKey: true });
 
         /// 6) human roles
-        UserHelper.transformHumanRoles(user);
+        //UserHelper.transformHumanRoles(user);
 
         return user;
     }
@@ -129,7 +130,7 @@ export async function funcPut(data) {
     await user.save(userdata, { useMasterKey: true });
 
     /// 3) human roles
-    UserHelper.transformHumanRoles(user);
+    //UserHelper.transformHumanRoles(user);
     
     return user;
 }
@@ -158,7 +159,7 @@ export async function funcDelete(data) {
     user.destroy({ useMasterKey: true });
 
     /// 2) human roles
-    UserHelper.transformHumanRoles(user);
+    //UserHelper.transformHumanRoles(user);
 
     return user;
 }

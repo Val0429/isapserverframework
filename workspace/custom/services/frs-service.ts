@@ -61,9 +61,9 @@ export class FRSService {
             }, (err, res, body) => {
                 if (err) {
                     console.log(`FRS compare face failed.`, err);
-                    return reject(err);
+                    reject(err); return;
                 }
-                if (!body.score) return reject(body);
+                if (body.score === undefined) { reject(body); return; }
                 resolve(body.score);
             });
         });

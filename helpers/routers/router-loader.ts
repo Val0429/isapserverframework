@@ -34,6 +34,8 @@ export function routerLoader(app, path, first = true, level = 0) {
 
         var types = [];
         if (route instanceof Action) {
+            // if (routename == 'alive') app["websocket"]('/alive', () => console.log(123));
+            // else app.use(`/${routename}`, route.mount());
             app.use(`/${routename}`, route.mount());
             /// message ///
             var protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];

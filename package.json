@@ -1,13 +1,15 @@
 {
-  "name": "testserver",
+  "name": "isap-vms-service",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index",
+  "main": "test",
   "typings": "dist/index",
   "scripts": {
     "start": "npm run build:live",
     "build:live": "nodemon --exec ts-node main.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install-windows-service": "winser -i -s -c -a --startwithnpm",
+    "uninstall-windows-service": "winser -r -x -s"
   },
   "author": "",
   "license": "ISC",
@@ -26,10 +28,10 @@
     "express": "^4.15.2",
     "express-ws": "^3.0.0",
     "express-ws-routes": "^1.1.0",
-    "fast-csv": "^2.4.1",
     "json-prune": "^1.1.0",
     "mongodb": "^3.0.10",
     "network": "^0.3.2",
+    "node-csv-parse": "^1.2.0",
     "parse": "^1.11.0",
     "parse-dashboard": "^1.2.0",
     "parse-server": "^2.7.2",

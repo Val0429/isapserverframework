@@ -25,7 +25,7 @@ action.get<InputGet, OutputGet>(funcGet(true));
 /// create users ///////////////////
 var userfields = ["username", "password", "email", "data"];
 action.post<InputPost, OutputPost>({
-    requiredParameters: ["username", "password", "roles", "data.kioskId"],
+    requiredParameters: ["username", "password", "roles", "data.kioskId", "data.kioskName"],
 }, async (data) => {
     try {
         return await funcPost(true)(data);

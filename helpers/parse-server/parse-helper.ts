@@ -87,6 +87,52 @@ export class ParseObject<T> extends Parse.Object {
         } while(0);
         return Promise.resolve({object: this, status: "insert" as SaveStatus});
     }
+
+    toJSON(): any {
+        return ParseObject.toOutputJSON.call(this, ...arguments);
+    }
+
+    static toOutputJSON(this: Parse.Object | Parse.Object[], rules?: {[index: string]: (any) => any | object}, seen = null) {
+        if (Array.isArray(this)) {
+            return this.map( (value) => ParseObject.toOutputJSON.call(value, rules, seen) );
+        }
+
+        var seenEntry = this.id ? `${this.className}:${this.id}` : this;
+        var seen = seen || [seenEntry];
+        var rules = rules || {};
+        var json = {};
+        var attrs = this.attributes;
+        for (var attr in attrs) {
+            if (attr === 'ACL') {
+                /// do nothing
+            }
+            else if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
+                json[attr] = attrs[attr].toJSON();
+            } else {
+                var inst = attrs[attr];
+                var rule = rules[attr];
+                if (rule !== undefined) {
+                    if (typeof rule === 'function') json[attr] = rule(inst);
+                    else if (rule === null) { /* do nothing */ }
+                    else json[attr] = ParseObject.toOutputJSON.call(inst, rule, seen);
+                }
+                else if (inst instanceof Parse.Object) json[attr] = ParseObject.toOutputJSON.call(inst, rules, seen);
+                else json[attr] = (<any>0, (<any>Parse)._encode)(inst, false, false, seen);
+            }
+        }
+
+        if (this instanceof Parse.Object) {
+            var pending = (<any>this)._getPendingOps();
+            for (var attr in pending[0]) {
+                json[attr] = pending[0][attr].toJSON();
+            }
+        }
+
+        if (this.id) {
+            json["objectId"] = this.id;
+        }
+        return json;
+    }    
 }
 
 /**

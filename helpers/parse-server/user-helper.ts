@@ -36,15 +36,15 @@ export namespace UserHelper {
     }
     //////////////////////////////////////////////////////////////////////
 
-    export async function transformHumanRoles(user: Parse.User) {
-        var roles = user.get("roles");
-        if (!roles) return;
-        /// get user role
-        var roles = roles
-            .map( (value) => {
-                return { name: getEnumKey(RoleList, value.get("name")) }
-            });
-        user.set("roles", roles);
+    export function transformHumanRoles(roles: Parse.Role | Parse.Role[]) {
+        if (Array.isArray(roles)) {
+            return roles.map( (value) => transformHumanRoles(value) );
+        }
+        return { name: transformHumanRoleName(roles.get("name")) };
+    }
+
+    export function transformHumanRoleName(roleName: string) {
+        return getEnumKey(RoleList, roleName);
     }
 
 }

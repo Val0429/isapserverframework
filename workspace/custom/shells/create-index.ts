@@ -1,37 +1,16 @@
 import { waitServerReady } from './../../../core/pending-tasks';
-import { MongoClient } from 'mongodb';
 import { Config } from './../../../core/config.gen';
 import { RoleList } from './../../../core/userRoles.gen';
+import { createIndex } from './../../../helpers/parse-server/parse-helper';
 
 waitServerReady(async () => {
-    let { ip, port, collection } = Config.mongodb;
-    const url = `mongodb://${ip}:${port}`;
-
-    let client = await MongoClient.connect(url);
-    let db = client.db(collection);
 
     /// indexes ////////////////
-    /// Session
-    var instance = db.collection('_Session');
-    var name = "expiresTTL";
-    if (!(await instance.indexExists(name))) {
-        console.log(`Make index on <Session>.`);
-        instance.createIndex({
-            expiresAt: -1
-        }, {expireAfterSeconds: 0, background: true, name});
-    }
     /// Kiosk
-    var instance = db.collection('_User');
-    var name = "kioskUniqueID";
-    if (!(await instance.indexExists(name))) {
-        console.log(`Make index on <Kiosk>.`);
-        instance.createIndex({
-            "data.kioskId": 1
-        }, {
-            unique: true, background: true, name,
-            partialFilterExpression: { "data.kioskId": { $exists: true } }
-        });
-    }
+    createIndex("_User", "kioskUniqueID",
+        { "data.kioskId": 1 },
+        { unique: true, partialFilterExpression: { "data.kioskId": { $exists: true } } }
+    );
     ////////////////////////////
 
     /// default ////////////////

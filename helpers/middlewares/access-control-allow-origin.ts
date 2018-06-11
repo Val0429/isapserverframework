@@ -1,6 +1,6 @@
 import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
-import { Errors } from './../../../core/errors.gen';
+import { Errors } from './../../core/errors.gen';
 
 /// accessControlAllowOrigin ///////////////////////////////
 export function accessControlAllowOrigin(req: Request, res: Response, next: NextFunction) {

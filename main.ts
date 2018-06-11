@@ -3,5 +3,6 @@
 "use strict";
 
 import './core/compiler';
+import './core/create-index';
 import './core/main.gen';
 import './workspace/main';

@@ -149,3 +149,26 @@ export type Omit<T, K extends keyof T> = Pick<T, StringLiteralDiff<T, K>>;
 export interface ParseObjectJSONRule {
     [index: string]: ParseObjectJSONRule | null | ((any) => any);
 }
+
+/**
+ * Create index helper.
+ */
+import { Config } from './../../core/config.gen';
+import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
+
+export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions) {
+    let { ip, port, collection } = Config.mongodb;
+    const url = `mongodb://${ip}:${port}`;
+
+    let client = await MongoClient.connect(url);
+    let db = client.db(collection);
+
+    var instance = db.collection(collectionName);
+    try {
+        if (!await instance.indexExists(indexName)) throw null;
+    } catch(reason) {
+        var showname = collectionName.replace(/^\_/, '');
+        console.log(`Make index on <${showname}.${indexName}>`);
+        instance.createIndex(fieldOrSpec, {background: true, name: indexName, ...options});
+    }
+}

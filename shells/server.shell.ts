@@ -11,6 +11,7 @@ import * as express from 'express';
 import { expressWsRoutes } from './../helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
 import { noCache } from './../helpers/middlewares/no-cache';
+import { accessControlAllowOrigin } from './../helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from './../helpers/routers/router-loader';
 import { makeServerReady } from './../core/pending-tasks';
 import * as parse from 'parse-server';
@@ -24,6 +25,11 @@ let app: express.Application = expressWsRoutes();
 var tDisableCache = `
 /// Disable Cache
 if (Config.core.disableCache) app.use(noCache);
+`;
+
+var tAccessControlAllowOrigin = `
+/// Allow Origin Access
+if (Config.core.accessControlAllowOrigin) app.use(<any>accessControlAllowOrigin);
 `;
 
 var tLoadRouter = `
@@ -91,6 +97,10 @@ function main(): string {
 
     /// disable cache ///////////////////////////
     tmpstr.push(tDisableCache);
+    /////////////////////////////////////////////
+
+    /// access control //////////////////////////
+    tmpstr.push(tAccessControlAllowOrigin);
     /////////////////////////////////////////////
 
     /// load router /////////////////////////////

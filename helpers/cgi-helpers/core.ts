@@ -12,6 +12,7 @@ import * as Parse from 'parse/node';
 import { RoleList, IRole } from './../../core/userRoles.gen';
 import * as Socket from 'ws';
 import { Errors, IInputPaging, IOutputPaging } from './../../core/errors.gen';
+import { Config } from './../../core/config.gen';
 
 /// Middlewares
 import * as Middlewares from './../../helpers/middlewares/index';
@@ -29,7 +30,6 @@ import { permissionCheck } from './private-middlewares/permission-check';
 import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { requiredParameters } from './private-middlewares/required-parameters';
-import { accessControlAllowOrigin } from './private-middlewares/access-control-allow-origin';
 
 export class Action<T = any, U = any> {
     config: ActionConfig;
@@ -82,8 +82,6 @@ export class Action<T = any, U = any> {
         if (!config) return middlewares;
         /////////////////////////////////////////////
         /// mount middlewares
-        /// todo
-        middlewares.push(accessControlAllowOrigin);
 
         /// 1) bodyParser
         middlewares.push(

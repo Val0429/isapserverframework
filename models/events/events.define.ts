@@ -4,7 +4,7 @@
 /// 3000 for Visitor
 /// 4000 for Kiosk
 var events: Config[] = [
-    [1, "Login", `
+    ["1", "Login", `
         /**
          * owner: self User
          */
@@ -12,7 +12,7 @@ var events: Config[] = [
         /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
         target?: Parse.User;
     `],
-    [2, "Logout", `
+    ["2", "Logout", `
         /// owner: self User
         /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
     `],
@@ -20,4 +20,4 @@ var events: Config[] = [
 
 export default events;
 
-export type Config = [number, string, string, string[]] | [number, string, string] | [number, string];
+export type Config = [string, string, string, string[]] | [string, string, string] | [string, string];

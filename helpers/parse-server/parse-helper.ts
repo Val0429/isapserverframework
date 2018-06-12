@@ -168,7 +168,7 @@ export async function createIndex(collectionName: string, indexName: string, fie
         if (!await instance.indexExists(indexName)) throw null;
     } catch(reason) {
         var showname = collectionName.replace(/^\_/, '');
-        console.log(`Make index on <${showname}.${indexName}>`);
+        console.log(`Make index on <${showname}.${indexName}>.`);
         instance.createIndex(fieldOrSpec, {background: true, name: indexName, ...options});
     }
 }

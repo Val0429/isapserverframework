@@ -1,7 +1,7 @@
 var config: Config = {
     ip: "localhost",
     port: 27017,
-    collection: "FRS",   
+    collection: "VMS",   
 };
 export default config;
 

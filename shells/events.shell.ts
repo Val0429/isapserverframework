@@ -17,8 +17,8 @@ export * from './../workspace/custom/models/index';
 `;
 
 // export enum EventList {
-//     Login = 1,
-//     Logout = 2
+//     Login = "1",
+//     Logout = "2"
 // }
 var tEnum = `
 export enum EventList {
@@ -27,8 +27,8 @@ export enum EventList {
 `;
 
 // export type EventType<T> =
-//     T extends 1 ? EventLogin :
-//     T extends 2 ? EventLogout :
+//     T extends "1" ? EventLogin :
+//     T extends "2" ? EventLogout :
 //     never;
 var tType = `
 export type EventType<T> =
@@ -43,10 +43,10 @@ export type EventsType<T> =
 var tInterface = `
 /// Event{1}: {0} //////////////////////////////////
 export interface IEvent{0} extends IEvent {
-    action: {1};
+    action: "{1}";
     {2}
 }
-@registerSubclass() export class Event{0} extends ParseObject<IEvent{0}> { constructor(data?: Omit<IEvent{0}, 'action'>) { super({ action: {1}, ...data }) } }
+@registerSubclass() export class Event{0} extends ParseObject<IEvent{0}> { constructor(data?: Omit<IEvent{0}, 'action'>) { super({ action: "{1}", ...data }) } }
 ////////////////////////////////////////////////////
 `;
 // // Events.Login = EventLogin;
@@ -76,7 +76,7 @@ function main(events: Config): string {
     /// make enum ///////////////////////////////
     var tmp = [];
     for (var event of events) {
-        tmp.push(`${event[1]} = ${event[0]}`);
+        tmp.push(`${event[1]} = "${event[0]}"`);
     }
     tmpstr.push(
         tEnum.replace("{0}", tmp.join(",\r\n    "))
@@ -87,11 +87,11 @@ function main(events: Config): string {
     var tmp = [], tmp2 = [];
     for (var event of events) {
         tmp.push(
-            "    T extends {0} ? Event{1} :".replace("{0}", event[0].toString())
+            "    T extends \"{0}\" ? Event{1} :".replace("{0}", event[0].toString())
                                         .replace("{1}", event[1])
             );
         tmp2.push(
-            "    T extends {0} ? Events<IEvents<IEvent{1}>> :".replace("{0}", event[0].toString())
+            "    T extends \"{0}\" ? Events<IEvents<IEvent{1}>> :".replace("{0}", event[0].toString())
                                         .replace("{1}", event[1])
         );
     }

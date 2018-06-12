@@ -12,7 +12,7 @@ import { EventList, EventsType } from './../../core/events.gen';
 // }
 
 export interface IEvent {
-    action: number;
+    action: string;
     /**
      * Owner of this event, current user.
      */
@@ -32,7 +32,7 @@ export interface IEvent {
 }
 
 export interface IEvents<T = IEvent> {
-    action: number;
+    action: string;
     owner: Parse.User;
     relatedPerson: Person;
     entity: ParseObject<T>;

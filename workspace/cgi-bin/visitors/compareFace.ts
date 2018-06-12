@@ -38,6 +38,7 @@ export default new Action<Input, Output>({
 
     /// Get Person pre-saved image
     var events = await Events.fetchLast(EventList.ScanIDCard, person);
+    if (!events) throw Errors.throw(Errors.Custom, [`Person with id <${personId}> not yet registered with face image.`]);
     var event = await events.getValue("entity").fetch();
 
     /// Send compare

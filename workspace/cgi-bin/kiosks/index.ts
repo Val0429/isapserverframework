@@ -31,7 +31,7 @@ action.post<InputPost, OutputPost>({
         return await funcPost(true)(data);
     } catch(reason) {
         if (reason instanceof Parse.Error && reason.code === 203)
-            throw Errors.throw(Errors.Custom, ["<email> or <data.kioskId> already exists."]);
+            throw Errors.throw(Errors.Custom, ["<data.kioskId> already exists."]);
         throw reason;
     }
 });

@@ -7,7 +7,7 @@ import { Config } from './../models/events/events.define';
 var tHeader = `
 import * as Parse from 'parse/node';
 import { registerSubclass, ParseObject, Omit } from '../helpers/parse-server/parse-helper';
-import { Events, IEvents, IEventEntity } from './../models/events/events.base';
+import { Events, IEvents, IEvent } from './../models/events/events.base';
 export * from './../models/events/events.base';
 `;
 
@@ -42,7 +42,7 @@ export type EventsType<T> =
 
 var tInterface = `
 /// Event{1}: {0} //////////////////////////////////
-export interface IEvent{0} extends IEventEntity {
+export interface IEvent{0} extends IEvent {
     action: {1};
     {2}
 }

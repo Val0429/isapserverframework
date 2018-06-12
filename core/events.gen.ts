@@ -1,6 +1,6 @@
 import * as Parse from 'parse/node';
 import { registerSubclass, ParseObject, Omit } from '../helpers/parse-server/parse-helper';
-import { Events, IEvents, IEventEntity } from './../models/events/events.base';
+import { Events, IEvents, IEvent } from './../models/events/events.base';
 export * from './../models/events/events.base';
 
 
@@ -50,7 +50,7 @@ export type EventsType<T> =
 
 
 /// Event1: Login //////////////////////////////////
-export interface IEventLogin extends IEventEntity {
+export interface IEventLogin extends IEvent {
     action: 1;
         
     /**
@@ -66,7 +66,7 @@ export interface IEventLogin extends IEventEntity {
 
 
 /// Event2: Logout //////////////////////////////////
-export interface IEventLogout extends IEventEntity {
+export interface IEventLogout extends IEvent {
     action: 2;
         
     /// owner: self User
@@ -78,7 +78,7 @@ export interface IEventLogout extends IEventEntity {
 
 
 /// Event101: ConfigChanged //////////////////////////////////
-export interface IEventConfigChanged extends IEventEntity {
+export interface IEventConfigChanged extends IEvent {
     action: 101;
         
     key: string;
@@ -90,7 +90,7 @@ export interface IEventConfigChanged extends IEventEntity {
 
 
 /// Event3601: TryRegister //////////////////////////////////
-export interface IEventTryRegister extends IEventEntity {
+export interface IEventTryRegister extends IEvent {
     action: 3601;
         
 }
@@ -99,7 +99,7 @@ export interface IEventTryRegister extends IEventEntity {
 
 
 /// Event3602: PickFloor //////////////////////////////////
-export interface IEventPickFloor extends IEventEntity {
+export interface IEventPickFloor extends IEvent {
     action: 3602;
         
     /**
@@ -113,7 +113,7 @@ export interface IEventPickFloor extends IEventEntity {
 
 
 /// Event3603: ScanIDCard //////////////////////////////////
-export interface IEventScanIDCard extends IEventEntity {
+export interface IEventScanIDCard extends IEvent {
     action: 3603;
         
     /**
@@ -130,7 +130,7 @@ export interface IEventScanIDCard extends IEventEntity {
 
 
 /// Event3688: RegistrationComplete //////////////////////////////////
-export interface IEventRegistrationComplete extends IEventEntity {
+export interface IEventRegistrationComplete extends IEvent {
     action: 3688;
         
 }
@@ -139,7 +139,7 @@ export interface IEventRegistrationComplete extends IEventEntity {
 
 
 /// Event3701: TryCheckIn //////////////////////////////////
-export interface IEventTryCheckIn extends IEventEntity {
+export interface IEventTryCheckIn extends IEvent {
     action: 3701;
         
 }
@@ -148,7 +148,7 @@ export interface IEventTryCheckIn extends IEventEntity {
 
 
 /// Event3702: FaceVerifyResult //////////////////////////////////
-export interface IEventFaceVerifyResult extends IEventEntity {
+export interface IEventFaceVerifyResult extends IEvent {
     action: 3702;
         
     /**
@@ -163,7 +163,7 @@ export interface IEventFaceVerifyResult extends IEventEntity {
 
 
 /// Event3788: DoneCheckIn //////////////////////////////////
-export interface IEventDoneCheckIn extends IEventEntity {
+export interface IEventDoneCheckIn extends IEvent {
     action: 3788;
         
     /**

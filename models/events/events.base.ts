@@ -4,14 +4,14 @@ import { ParseObject, registerSubclass, retrievePrimaryClass } from './../../hel
 import { EventList, EventsType } from './../../core/events.gen';
 
 /// Base
-export interface IEvent<T = IEventEntity, U = IEventEntity> {
-    actions: number | number[];
-    owner: Parse.User;
-    target?: Parse.User;
-    entities: IEventEntity | IEventEntity[];
-}
+// export interface IEvent<T = IEvent, U = IEvent> {
+//     actions: number | number[];
+//     owner: Parse.User;
+//     target?: Parse.User;
+//     entities: IEvent | IEvent[];
+// }
 
-export interface IEventEntity {
+export interface IEvent {
     action: number;
     /**
      * Owner of this event, current user.
@@ -24,14 +24,14 @@ export interface IEventEntity {
     /**
      * Parent event related to this.
      */
-    parent?: IEventEntity;
+    parent?: IEvent;
     /**
      * Person related to this event.
      */
     relatedPerson?: Person;
 }
 
-export interface IEvents<T = IEventEntity> {
+export interface IEvents<T = IEvent> {
     action: number;
     owner: Parse.User;
     relatedPerson: Person;
@@ -39,7 +39,7 @@ export interface IEvents<T = IEventEntity> {
 }
 
 @registerSubclass() export class Events<T extends IEvents = IEvents> extends ParseObject<T> {
-    static async save(event: ParseObject<IEventEntity>): Promise<void> {
+    static async save(event: ParseObject<IEvent>): Promise<void> {
         if (!event.isNew) throw "currently doesn't support save of not new object.";
         /// save into specific Event
         await event.save();

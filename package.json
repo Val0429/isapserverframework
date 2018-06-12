@@ -1,14 +1,14 @@
 {
   "name": "isap-vms-service",
   "version": "1.0.0",
-  "description": "",
+  "description": "iSap VMS Service v1.00.00",
   "main": "test",
   "typings": "dist/index",
   "scripts": {
     "start": "npm run build:live",
     "build:live": "nodemon --exec ts-node main.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install-windows-service": "winser -i -s -c -a --startwithnpm",
+    "install-windows-service": "winser -i -s -c -a --startwithnpm --displayname \"iSap VMS Service\"",
     "uninstall-windows-service": "winser -r -x -s"
   },
   "author": "",
@@ -32,12 +32,16 @@
     "mongodb": "^3.0.10",
     "network": "^0.3.2",
     "node-csv-parse": "^1.2.0",
+    "nodemon": "^1.17.5",
     "parse": "^1.11.0",
     "parse-dashboard": "^1.2.0",
     "parse-server": "^2.7.2",
     "request": "^2.87.0",
     "rxjs": "^5.5.11",
+    "ts-node": "^3.3.0",
     "ts-transformer-keys": "^0.3.1",
-    "websocket": "^1.0.25"
+    "typings": "^2.1.1",
+    "websocket": "^1.0.25",
+    "winser": "^1.0.3"
   }
 }

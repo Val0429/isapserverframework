@@ -179,6 +179,10 @@ export type InputRestfulD<T> = {
 } & T;
 export type OutputRestfulD<T = {}> = ParseObject<T>;
 
+export interface RestfulTuner<T> {
+    (input: T): Promise<T> | T
+}
+
 export class Restful {
     /**
      * C: prototype
@@ -209,9 +213,13 @@ export class Restful {
     //     }
     // }
 
-    static C<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {}) {
+    static C<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {},
+        tuner?: RestfulTuner<T>
+        ) {
         action.post<InputRestfulC<T>, OutputRestfulC<T>>(options, async <U>(data: U): Promise<ParseObject<T>> => {
-            var o = new type(omitObject((<any>data).parameters, acceptParameters));
+            var params = (<any>data).parameters;
+            tuner && ( params = await tuner(params) );
+            var o = new type(omitObject(params, acceptParameters));
             await o.save();
             return o;
         });
@@ -257,9 +265,13 @@ export class Restful {
     //     }
     // }
 
-    static R<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, options: ActionConfig = {}) {
+    static R<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, options: ActionConfig = {},
+        tuner?: RestfulTuner<T>
+    ) {
         action.get<InputRestfulR<T>, OutputRestfulR<T>>(options, async (data): Promise<OutputRestfulR<T>> => {
-            return await this.SingleOrPagination<ParseObject<T>>( new Parse.Query(type), data.parameters );
+            var params = (<any>data).parameters;
+            tuner && ( params = await tuner(params) );
+            return await this.SingleOrPagination<ParseObject<T>>( new Parse.Query(type), params );
         });
     }
 
@@ -289,15 +301,19 @@ export class Restful {
     //     }
     // }
 
-    static U<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {}) {
+    static U<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {},
+        tuner?: RestfulTuner<T>
+    ) {
         const key = "objectId";
         options.requiredParameters = (options.requiredParameters || []).concat(key);
 
         action.put<InputRestfulU<T>, OutputRestfulU<T>>(options, async (data): Promise<OutputRestfulU<T>> => {
-            var param = (<any>data).parameters;
+            var params = (<any>data).parameters;
+            tuner && ( params = await tuner(params) );
+            
             var o = await new Parse.Query(type)
-                .get(param.objectId);
-            await o.save( omitObject(param, acceptParameters) );
+                .get(params.objectId);
+            await o.save( omitObject(params, acceptParameters) );
             return o;
         });
     }
@@ -328,14 +344,18 @@ export class Restful {
     //     }
     // }
 
-    static D<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, options: ActionConfig = {}) {
+    static D<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, options: ActionConfig = {},
+        tuner?: RestfulTuner<T>
+    ) {
         const key = "objectId";
         options.requiredParameters = (options.requiredParameters || []).concat(key);
 
         action.delete<InputRestfulD<T>, OutputRestfulD<T>>(options, async (data): Promise<OutputRestfulD<T>> => {
-            var param = (<any>data).parameters;
+            var params = (<any>data).parameters;
+            tuner && ( params = await tuner(params) );
+
             var o = await new Parse.Query(type)
-                .get(param.objectId);
+                .get(params.objectId);
             await o.destroy();
             return o;
         });

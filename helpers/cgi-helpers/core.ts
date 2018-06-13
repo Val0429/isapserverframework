@@ -270,8 +270,7 @@ export class Restful {
     ) {
         action.get<InputRestfulR<T>, OutputRestfulR<T>>(options, async (data): Promise<OutputRestfulR<T>> => {
             var params = (<any>data).parameters;
-            tuner && ( params = await tuner(params) );
-            return await this.SingleOrPagination<ParseObject<T>>( new Parse.Query(type), params );
+            return await this.SingleOrPagination<ParseObject<T>>( new Parse.Query(type), params, null, tuner );
         });
     }
 
@@ -305,6 +304,7 @@ export class Restful {
         tuner?: RestfulTuner<T>
     ) {
         const key = "objectId";
+        options = options || {};
         options.requiredParameters = (options.requiredParameters || []).concat(key);
 
         action.put<InputRestfulU<T>, OutputRestfulU<T>>(options, async (data): Promise<OutputRestfulU<T>> => {
@@ -371,7 +371,7 @@ export class Restful {
     }
 
     static async Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging,
-        rules: ParseObjectJSONRule = null): Promise<IOutputPaging<T[]>> {
+        rules: ParseObjectJSONRule = null, tuner?: RestfulTuner<any>): Promise<IOutputPaging<T[]>> {
 
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
@@ -380,18 +380,26 @@ export class Restful {
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
 
+        /// apply tuner
+        if (tuner) {
+            for (var u of o) {
+                u.set(await tuner(u.attributes));
+            }
+        }
+
         if (paging.all === "true") return { total, results: ParseObject.toOutputJSON.call(o, rules) };
         return { page, pageSize, total, totalPages, results: ParseObject.toOutputJSON.call(o, rules) };
     }
 
     static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },
-        rules: ParseObjectJSONRule = null): Promise<IOutputPaging<T[]> | T> {
+        rules: ParseObjectJSONRule = null, tuner?: RestfulTuner<any>): Promise<IOutputPaging<T[]> | T> {
         /// single
         if (paging.objectId) {
             var o = await query.get(paging.objectId);
+            tuner && o.set(await tuner(o.attributes));
             return ParseObject.toOutputJSON.call(o, rules);
         }
-        return this.Pagination(query, paging, rules);
+        return this.Pagination(query, paging, rules, tuner);
     }
 
 }

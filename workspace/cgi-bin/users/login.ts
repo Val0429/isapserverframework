@@ -14,7 +14,7 @@ export interface Input {
 
 export interface Output {
     sessionId: string;
-    serverTime: Date;
+    serverTime: number;
     user: Parse.User;
 }
 
@@ -29,7 +29,7 @@ export default new Action<Input, Output>({
 
     return {
         sessionId: obj.sessionId,
-        serverTime: new Date(),
+        serverTime: new Date().valueOf(),
         user: ParseObject.toOutputJSON.call(obj.user, UserHelper.ruleUserRole)
     }
 });

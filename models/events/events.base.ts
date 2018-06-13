@@ -84,3 +84,5 @@ export interface IEvents<T = IEvent> {
         return super.getValue(key);
     }
 }
+
+import './../schedulers/schedulers.base';

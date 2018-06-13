@@ -168,3 +168,4 @@ async function updateConfig(key: string, data: object) {
     /// 6) write back
     await (<any>promisify(fs.writeFile))(result, final);
 }
+

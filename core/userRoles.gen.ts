@@ -59,7 +59,8 @@ export interface IUserKioskData {
     /**
     * Name of this kiosk.
     */
-    name: string;
+    kioskId: string;
+    kioskName: string;
     
 }
 export type IUserKiosk = ParseTypedGetterSetter<IUser<IUserKioskData>> & Parse.User;
@@ -72,4 +73,3 @@ export interface IUserSystemAdministratorData {
 }
 export type IUserSystemAdministrator = ParseTypedGetterSetter<IUser<IUserSystemAdministratorData>> & Parse.User;
 ////////////////////////////////////////////////////
-

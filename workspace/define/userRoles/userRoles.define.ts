@@ -24,7 +24,8 @@ var userRoles: Config[] = [
         /**
          * Name of this kiosk.
          */
-        name: string;
+        kioskId: string;
+        kioskName: string;
     `],
 
     [99, "SystemAdministrator"]

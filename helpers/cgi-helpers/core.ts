@@ -213,13 +213,16 @@ export class Restful {
     //     }
     // }
 
-    static C<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {},
+    static C<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, requiredParameters: string[] = [], options: ActionConfig = {},
         tuner?: RestfulTuner<T>
         ) {
+        options = options || {};
+        options.requiredParameters = requiredParameters;
+            
         action.post<InputRestfulC<T>, OutputRestfulC<T>>(options, async <U>(data: U): Promise<ParseObject<T>> => {
             var params = (<any>data).parameters;
             tuner && ( params = await tuner(params) );
-            var o = new type(omitObject(params, acceptParameters));
+            var o = new type(omitObject(params, requiredParameters));
             await o.save();
             return o;
         });
@@ -266,7 +269,7 @@ export class Restful {
     // }
 
     static R<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, options: ActionConfig = {},
-        tuner?: RestfulTuner<T>
+        tuner?: RestfulTuner<ParseObject<T>>
     ) {
         action.get<InputRestfulR<T>, OutputRestfulR<T>>(options, async (data): Promise<OutputRestfulR<T>> => {
             var params = (<any>data).parameters;
@@ -348,6 +351,7 @@ export class Restful {
         tuner?: RestfulTuner<T>
     ) {
         const key = "objectId";
+        options = options || {};
         options.requiredParameters = (options.requiredParameters || []).concat(key);
 
         action.delete<InputRestfulD<T>, OutputRestfulD<T>>(options, async (data): Promise<OutputRestfulD<T>> => {
@@ -382,9 +386,7 @@ export class Restful {
 
         /// apply tuner
         if (tuner) {
-            for (var u of o) {
-                u.set(await tuner(u.attributes));
-            }
+            for (var u of o) await tuner(u);
         }
 
         if (paging.all === "true") return { total, results: ParseObject.toOutputJSON.call(o, rules) };
@@ -396,7 +398,7 @@ export class Restful {
         /// single
         if (paging.objectId) {
             var o = await query.get(paging.objectId);
-            tuner && o.set(await tuner(o.attributes));
+            tuner && await tuner(o);
             return ParseObject.toOutputJSON.call(o, rules);
         }
         return this.Pagination(query, paging, rules, tuner);

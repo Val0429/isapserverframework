@@ -9,6 +9,27 @@ var defaultPath = "index";
 export function routerLoader(app, path, first = true, level = 0) {
     var name = p.parse(path).name;
 
+    var getTypesFromAction = (route: Action) => {
+        if (route === null) return null;
+        var types = [];
+        var protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];
+        for (var proto of protos)
+            if (route[`func${proto}`])
+                types.push(proto.toUpperCase());
+        return types;
+    }
+
+    var loadRouteFromPath = (path: string) => {
+        try {
+            var route: Action = require(`${path}`).default;
+            return route;
+        } catch(e) {
+            return null;
+        }
+    }
+
+    var getTypesFromPath = (path: string) => getTypesFromAction( loadRouteFromPath(path) );
+
     /// message ///
     if (first) console.log("\x1b[35m", "Mounting Cgi Tree...", "\x1b[0m");
     ///////////////
@@ -20,7 +41,12 @@ export function routerLoader(app, path, first = true, level = 0) {
             app.use(`/${name}`, router);
             app = router;
             /// message ///
-            console.log("\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m");
+            var msg = ["\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m"];
+            var types = getTypesFromPath(`${path}/${defaultPath}`);
+            if (types) {
+                msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`, "\x1b[0m"];
+            }
+            console.log(...msg);
             ///////////////
         }
 
@@ -34,20 +60,15 @@ export function routerLoader(app, path, first = true, level = 0) {
 
         var types = [];
         if (route instanceof Action) {
-            // if (routename == 'alive') app["websocket"]('/alive', () => console.log(123));
-            // else app.use(`/${routename}`, route.mount());
             app.use(`/${routename}`, route.mount());
             /// message ///
-            var protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];
-            for (var proto of protos)
-                if (route[`func${proto}`])
-                    types.push(proto.toUpperCase());
+            types = getTypesFromAction(route);
             ///////////////
 
         } else app.use(`/${routename}`, route);
 
         /// message ///
-        console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
+        if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
         ///////////////
     }
 }

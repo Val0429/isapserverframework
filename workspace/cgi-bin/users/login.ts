@@ -2,7 +2,7 @@ import {
     express, Request, Response, Router,
     IRole, IUser, RoleList,
     Action, Errors,
-    bodyParserJson,
+    bodyParserJson, EventLogin, Events,
     UserHelper, getEnumKey, ParseObject,
 } from './../../../core/cgi-package';
 
@@ -26,6 +26,11 @@ export default new Action<Input, Output>({
 .all(async (data) => {
     /// Try login
     var obj = await UserHelper.login({ ...data.parameters });
+
+    var ev = new EventLogin({
+        owner: obj.user
+    });
+    await Events.save(ev);
 
     return {
         sessionId: obj.sessionId,

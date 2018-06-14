@@ -32,6 +32,7 @@ export const retrievePrimaryKey = (target: (new () => typeof target) | object): 
 
 export type SaveStatus = "update" | "insert" | "fetch";
 export class ParseObject<T> extends Parse.Object {
+    attributes: T;
     constructor(data?: Partial<T>) {
         super();
         Parse.Object.call(this, this.constructor.name);
@@ -73,8 +74,8 @@ export class ParseObject<T> extends Parse.Object {
                 do {
                     if (dontUpdate) break;
                     /// do update
-                    for (var key in this.attributes)
-                        obj.set(key, this.get(key));
+                    for (var key2 in this.attributes)
+                        obj.set(key2, this.get(key2));
                     await obj.save();
                 } while(0);
 

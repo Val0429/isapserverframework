@@ -1,7 +1,7 @@
 import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
-    Action, Errors,
+    Action, Errors, Events, EventLogout
 } from './../../../core/cgi-package';
 
 
@@ -15,4 +15,9 @@ export default new Action<Input>({
 .post(async (data) => {
     /// Perform Logout
     data.session.destroy({ sessionToken: data.parameters.sessionId });
+
+    var ev = new EventLogout({
+        owner: data.user
+    });
+    await Events.save(ev);
 });

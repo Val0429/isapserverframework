@@ -1,4 +1,4 @@
-import { shellWriter2, autoPad } from './../helpers/shells/shell-writer';
+import { shellWriter, shellWriter2, autoPad } from './../helpers/shells/shell-writer';
 import { Config } from './../models/events/events.define';
 
 // import {
@@ -49,7 +49,42 @@ export interface IEvent{0} extends IEvent {
 @registerSubclass() export class Event{0} extends ParseObject<IEvent{0}> { constructor(data?: Omit<IEvent{0}, 'action'>) { super({ action: "{1}", ...data }) } }
 ////////////////////////////////////////////////////
 `;
-// // Events.Login = EventLogin;
+
+var tSubjects = `
+import { waitServerReady } from './pending-tasks';
+import { Config } from './config.gen';
+import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
+import { Subject } from 'rxjs';
+import { retrievePrimaryClass } from '../helpers/parse-server/parse-helper';
+import { promisify } from 'bluebird';
+
+export var EventSubjects: {
+{0}
+} = {
+{1}
+};
+
+waitServerReady(async () => {
+    let { ip, port, collection } = Config.mongodb;
+    const url = \`mongodb://\${ip}:\${port}\`;
+    let client = await MongoClient.connect(url);
+    let db = client.db(collection);
+
+    let events = [{2}];
+    for (let event of events) {
+        var instance = db.collection(event);
+        var stream = instance.watch();
+        stream.on("change", (change) => {
+            if (change.operationType !== 'insert') return;
+            var type = retrievePrimaryClass(event);
+            var rtn: any = new type();
+            rtn.id = change.documentKey._id;
+            EventSubjects[event].next(rtn);
+        });
+    }
+});
+`;
+
 
 function main(events: Config): string {
     var tmpstr = [];
@@ -114,6 +149,21 @@ function main(events: Config): string {
     tmpstr.push(tmp.join("\r\n"));
     /////////////////////////////////////////////
 
+    /// make subjects ///////////////////////////
+    var tmp0 = [], tmp1 = [], tmp2 = [];
+    for (var event of events) {
+        var name = event[1];
+        tmp0.push( `Event${name}: Subject<ParseObject<IEvent${name}>>` );
+        tmp1.push( `Event${name}: new Subject<ParseObject<IEvent${name}>>()` );
+        tmp2.push( `'Event${name}'` );
+    }
+    tmpstr.push(
+        tSubjects.replace(/\{0\}/g, autoPad(tmp0.join(";\n"), 4))
+                 .replace(/\{1\}/g, autoPad(tmp1.join(",\n"), 4))
+                 .replace(/\{2\}/g, tmp2.join(","))
+    );
+    /////////////////////////////////////////////
+
     /// concat
     return tmpstr.join("\r\n");
 }
@@ -128,20 +178,20 @@ var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
 
-// shellWriter(
-//     [defPath, tmplPath, customDefPath],
-//     genFilePath,
-//     () => {
-//         var merged: Config = <any>[...events, ...cevents];
-//         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
-//         console.log("<Generated> Event file updated!");        
-//     }
-// );
-
-shellWriter2(
+shellWriter(
+    [defPath, tmplPath, customDefPath],
     genFilePath,
-    main(<any>[...events, ...cevents]),
     () => {
-        console.log("<Generated> Event file updated!");
+        var merged: Config = <any>[...events, ...cevents];
+        fs.writeFileSync(genFilePath, main(merged), "UTF-8");
+        console.log("<Generated> Event file updated!");        
     }
 );
+
+// shellWriter2(
+//     genFilePath,
+//     main(<any>[...events, ...cevents]),
+//     () => {
+//         console.log("<Generated> Event file updated!");
+//     }
+// );

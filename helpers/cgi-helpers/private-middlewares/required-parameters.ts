@@ -23,7 +23,15 @@ export function requiredParameters(parameters: string[]): RequestHandler {
             if (keys.length === 0) return true;
             var key = keys.shift();
             var value = params[key];
-            if (value) return paramExists(value, keys);
+            if (value) {
+                if (Array.isArray(value)) {
+                    for (var o of value) {
+                        if (!paramExists(o, [...keys])) return false;
+                    }
+                    return true;
+                }
+                return paramExists(value, keys);
+            }
             return false;
         }
 

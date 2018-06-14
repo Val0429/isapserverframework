@@ -174,3 +174,55 @@ export interface IEventDoneCheckIn extends IEvent {
 }
 @registerSubclass() export class EventDoneCheckIn extends ParseObject<IEventDoneCheckIn> { constructor(data?: Omit<IEventDoneCheckIn, 'action'>) { super({ action: "3788", ...data }) } }
 ////////////////////////////////////////////////////
+
+
+import { waitServerReady } from './pending-tasks';
+import { Config } from './config.gen';
+import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
+import { Subject } from 'rxjs';
+import { retrievePrimaryClass } from '../helpers/parse-server/parse-helper';
+import { promisify } from 'bluebird';
+
+export var EventSubjects: {
+    EventLogin: Subject<ParseObject<IEventLogin>>;
+    EventLogout: Subject<ParseObject<IEventLogout>>;
+    EventConfigChanged: Subject<ParseObject<IEventConfigChanged>>;
+    EventTryRegister: Subject<ParseObject<IEventTryRegister>>;
+    EventPickFloor: Subject<ParseObject<IEventPickFloor>>;
+    EventScanIDCard: Subject<ParseObject<IEventScanIDCard>>;
+    EventRegistrationComplete: Subject<ParseObject<IEventRegistrationComplete>>;
+    EventTryCheckIn: Subject<ParseObject<IEventTryCheckIn>>;
+    EventFaceVerifyResult: Subject<ParseObject<IEventFaceVerifyResult>>;
+    EventDoneCheckIn: Subject<ParseObject<IEventDoneCheckIn>>
+} = {
+    EventLogin: new Subject<ParseObject<IEventLogin>>(),
+    EventLogout: new Subject<ParseObject<IEventLogout>>(),
+    EventConfigChanged: new Subject<ParseObject<IEventConfigChanged>>(),
+    EventTryRegister: new Subject<ParseObject<IEventTryRegister>>(),
+    EventPickFloor: new Subject<ParseObject<IEventPickFloor>>(),
+    EventScanIDCard: new Subject<ParseObject<IEventScanIDCard>>(),
+    EventRegistrationComplete: new Subject<ParseObject<IEventRegistrationComplete>>(),
+    EventTryCheckIn: new Subject<ParseObject<IEventTryCheckIn>>(),
+    EventFaceVerifyResult: new Subject<ParseObject<IEventFaceVerifyResult>>(),
+    EventDoneCheckIn: new Subject<ParseObject<IEventDoneCheckIn>>()
+};
+
+waitServerReady(async () => {
+    let { ip, port, collection } = Config.mongodb;
+    const url = `mongodb://${ip}:${port}`;
+    let client = await MongoClient.connect(url);
+    let db = client.db(collection);
+
+    let events = ['EventLogin','EventLogout','EventConfigChanged','EventTryRegister','EventPickFloor','EventScanIDCard','EventRegistrationComplete','EventTryCheckIn','EventFaceVerifyResult','EventDoneCheckIn'];
+    for (let event of events) {
+        var instance = db.collection(event);
+        var stream = instance.watch();
+        stream.on("change", (change) => {
+            if (change.operationType !== 'insert') return;
+            var type = retrievePrimaryClass(event);
+            var rtn: any = new type();
+            rtn.id = change.documentKey._id;
+            EventSubjects[event].next(rtn);
+        });
+    }
+});

@@ -4,5 +4,6 @@
 
 import './core/compiler';
 import './core/create-index';
+import './core/scheduler-loader';
 import './core/main.gen';
 import './workspace/main';

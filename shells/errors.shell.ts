@@ -1,4 +1,4 @@
-import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
+import { shellWriter2, autoPad } from './../helpers/shells/shell-writer';
 
 var tHeader = `
 import { ErrorObject } from './../models/cgis/errors.base';
@@ -94,12 +94,20 @@ var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
 
-shellWriter(
-    [defPath, tmplPath, customDefPath],
+// shellWriter(
+//     [defPath, tmplPath, customDefPath],
+//     genFilePath,
+//     () => {
+//         var merged = [...events, ...cevents];
+//         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
+//         console.log("<Generated> Error file updated!");        
+//     }
+// );
+
+shellWriter2(
     genFilePath,
+    main([...events, ...cevents]),
     () => {
-        var merged = [...events, ...cevents];
-        fs.writeFileSync(genFilePath, main(merged), "UTF-8");
-        console.log("<Generated> Error file updated!");        
+        console.log("<Generated> Error file updated!");
     }
 );

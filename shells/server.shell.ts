@@ -1,4 +1,4 @@
-import { shellWriter } from './../helpers/shells/shell-writer';
+import { shellWriter2 } from './../helpers/shells/shell-writer';
 
 import { Config } from './../core/config.gen';
 
@@ -129,11 +129,10 @@ const tmplPath = `${__dirname}/server.shell.ts`;
 
 import * as fs from 'fs';
 
-shellWriter(
-    [tmplPath],
+shellWriter2(
     genFilePath,
+    main(),
     () => {
-        fs.writeFileSync(genFilePath, main(), "UTF-8");
-        console.log("<Generated> Server file updated!");        
+        console.log("<Generated> Server file updated!");
     }
 );

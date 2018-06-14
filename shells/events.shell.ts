@@ -1,4 +1,4 @@
-import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
+import { shellWriter2, autoPad } from './../helpers/shells/shell-writer';
 import { Config } from './../models/events/events.define';
 
 // import {
@@ -128,12 +128,20 @@ var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
 
-shellWriter(
-    [defPath, tmplPath, customDefPath],
+// shellWriter(
+//     [defPath, tmplPath, customDefPath],
+//     genFilePath,
+//     () => {
+//         var merged: Config = <any>[...events, ...cevents];
+//         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
+//         console.log("<Generated> Event file updated!");        
+//     }
+// );
+
+shellWriter2(
     genFilePath,
+    main(<any>[...events, ...cevents]),
     () => {
-        var merged: Config = <any>[...events, ...cevents];
-        fs.writeFileSync(genFilePath, main(merged), "UTF-8");
-        console.log("<Generated> Event file updated!");        
+        console.log("<Generated> Event file updated!");
     }
 );

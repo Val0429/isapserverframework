@@ -1,4 +1,4 @@
-import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
+import { shellWriter2, autoPad } from './../helpers/shells/shell-writer';
 
 var tHeader = `
 import * as Parse from 'parse/node';
@@ -105,12 +105,20 @@ const customDefPath = `${__dirname}/../workspace/define/userRoles/personRoles.de
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
 
-shellWriter(
-    [tmplPath, customDefPath],
+// shellWriter(
+//     [tmplPath, customDefPath],
+//     genFilePath,
+//     () => {
+//         var merged = [/*...events,*/ ...cevents];
+//         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
+//         console.log("<Generated> PersonRole file updated!");        
+//     }
+// );
+
+shellWriter2(
     genFilePath,
+    main([...cevents]),
     () => {
-        var merged = [/*...events,*/ ...cevents];
-        fs.writeFileSync(genFilePath, main(merged), "UTF-8");
-        console.log("<Generated> PersonRole file updated!");        
+        console.log("<Generated> PersonRole file updated!");
     }
 );

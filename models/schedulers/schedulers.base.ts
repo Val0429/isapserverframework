@@ -17,7 +17,7 @@ export class Schedulers {
 export type ScheduleEvent = ParseObject<IEvent>;
 
 export enum ScheduleTimeType {
-    Hour = 0, Day = 1, Week = 2
+    Minute = 0, Hour = 1, Day = 2, Week = 3
 }
 
 export interface IScheduleTime {
@@ -158,6 +158,8 @@ function checkSchedule(options: IScheduleTime, date: Date): boolean {
     const onehour = 60*oneminute;
     const oneday = 24*onehour;
     switch (options.type) {
+        case ScheduleTimeType.Minute:
+            magic = oneminute; break;
         case ScheduleTimeType.Hour:
             magic = onehour; break;
         case ScheduleTimeType.Day:
@@ -178,6 +180,8 @@ function checkSchedule(options: IScheduleTime, date: Date): boolean {
     return false;
 }
 
+var sjTestSchedule = new BehaviorSubject(false);
+
 console.time("123");
 var result;
 for (var i=0; i<1000; ++i) {
@@ -188,12 +192,12 @@ for (var i=0; i<1000; ++i) {
     //     interval: 1
     // }, new Date());
 
-    result = checkSchedule({
-        start: getUTCDateKeepHours( new Date(2018,5,10,15,30,0) ),
-        end: getUTCDateKeepHours( new Date(2018,5,10,15,58,0) ),
-        type: ScheduleTimeType.Day,
-        unitsOfType: 1
-    }, new Date());
+    // result = checkSchedule({
+    //     start: getUTCDateKeepHours( new Date(2018,5,10,15,30,0) ),
+    //     end: getUTCDateKeepHours( new Date(2018,5,10,15,58,0) ),
+    //     type: ScheduleTimeType.Day,
+    //     unitsOfType: 1
+    // }, new Date());
 
     // result = checkSchedule({
     //     start: new Date(2018,5,6,15,30,0),
@@ -201,7 +205,67 @@ for (var i=0; i<1000; ++i) {
     //     type: "week",
     //     interval: 1
     // }, new Date());
-
 }
 console.timeEnd("123");
-console.log(result);
+// console.log(result);
+
+export namespace Scheduler {
+    function getUTCDateKeepHours(date: Date): Date {
+        return new Date(date.getTime() - date.getTimezoneOffset());
+    }
+    function getUTCNow(): Date {
+        return getUTCDateKeepHours( new Date() );
+    }
+
+    /**
+     * Global time object.
+     */
+    var sjGlobalTimer = new BehaviorSubject<Date>(getUTCNow());
+    Observable.timer(0, 1000)
+        .map( value => getUTCNow() )
+        .subscribe(sjGlobalTimer);
+
+    /**
+     * Schedule for Observable.
+     */
+    export function scheduleObservable(options: IScheduleTime, isUTC: boolean = false): Observable<boolean> {
+        if (!isUTC) {
+            options.start = getUTCDateKeepHours(options.start);
+            options.end = getUTCDateKeepHours(options.end);
+        }
+        let last = false;
+        let date = getUTCNow();
+
+        var rtn = Observable.from(sjGlobalTimer)
+            .map( (date) => checkSchedule(options, date) );
+
+        if (options.triggerInterval) {
+            rtn = rtn.filter( (value) => {
+                try {
+                    if (value !== last) { date = getUTCNow(); return true; }
+                    else if (value === false) return false;
+                    else {
+                        let ndate = getUTCNow();
+                        if (ndate.getTime() - date.getTime() >= options.triggerInterval) { date = getUTCNow(); return true; }
+                        return false;
+                    }
+                } catch(e) {} finally { last = value; }
+            });
+
+        } else {
+            rtn = rtn.distinctUntilChanged();
+        }
+        return rtn;
+    }
+}
+
+    Scheduler.scheduleObservable({
+        start: new Date(2018,5,10,19,35,0),
+        end: new Date(2018,5,10,19,36,0),
+        type: ScheduleTimeType.Minute,
+        unitsOfType: 2,
+        triggerInterval: 1000
+    })
+    .subscribe( (data) => {
+        console.log("!!!", data);
+    });

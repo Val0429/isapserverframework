@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+
 /**
  * Check for detects[] update time, chance to gen data, write to target.
  */
@@ -15,6 +16,15 @@ export function shellWriter(detects: string[], target: string, ready: () => void
         }
     }
 }
+
+export async function shellWriter2(path: string, data: string, ready: () => void) {
+     var origin = fs.existsSync(path) ? fs.readFileSync(path, "UTF-8") : "";
+     if (origin !== data) {
+         fs.writeFileSync(path, data, "UTF-8");
+         ready();
+     }
+}
+
 
 /**
  * Replace input, padding number of <value>'s spaces at front.

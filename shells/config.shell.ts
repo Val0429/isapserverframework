@@ -1,4 +1,4 @@
-import { shellWriter, autoPad } from './../helpers/shells/shell-writer';
+import { autoPad } from './../helpers/shells/shell-writer';
 import * as fs from 'fs';
 import * as p from 'path';
 

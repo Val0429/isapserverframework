@@ -26,15 +26,15 @@ action.post<InputPost, OutputPost>({
     var { event, time, actions } = data.parameters;
 
     /// check event exists
-    if (!EventSubjects[event]) throw Errors.throw(Errors.Custom, [`Event <${event}> not exists.`]);
+    if (!EventSubjects[event]) throw Errors.throw(Errors.CustomNotExists, [`Event <${event}> not exists.`]);
 
     /// check action valid
-    if (!Array.isArray(actions)) throw Errors.throw(Errors.Custom, [`<actions> should be array type.`]);
+    if (!Array.isArray(actions)) throw Errors.throw(Errors.CustomInvalid, [`<actions> should be array type.`]);
 
     var st = undefined;
     if (time) {
         if (time.start===undefined || time.end===undefined || time.type===undefined || time.unitsOfType===undefined)
-            throw Errors.throw(Errors.Custom, [`Time object should contain <start, end, type, unitsOfType>.`]);
+            throw Errors.throw(Errors.CustomInvalid, [`Time object should contain <start, end, type, unitsOfType>.`]);
 
         time.start = new Date(time.start);
         time.end = new Date(time.end);

@@ -13,9 +13,10 @@ import * as fs from 'fs';
 import { noCache } from './../helpers/middlewares/no-cache';
 import { accessControlAllowOrigin } from './../helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from './../helpers/routers/router-loader';
-import { makeServerReady } from './../core/pending-tasks';
+import { makeServerReady, waitServerReady } from './../core/pending-tasks';
 import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
+import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 
 import { Config } from './../core/config.gen';
 
@@ -69,8 +70,17 @@ app.use(Config.parseDashboard.serverPath, Dashboard);
 `;
 
 var tRunServer = `
-app.listen(Config.core.port, () => {
+app.listen(Config.core.port, async () => {
     console.log(\`Server running at port \${Config.core.port}.\`);
+
+    /// todo: this is a workaround. create database at the beginning.
+    let { ip, port, collection } = Config.mongodb;
+    const url = \`mongodb://\${ip}:\${port}/\${collection}\`;
+    let client = await MongoClient.connect(url);
+    let db = client.db(collection);
+    await db.createCollection("_SCHEMA");
+    ////////////////////////////////////////////////////////////////
+
     makeServerReady();
 });
 

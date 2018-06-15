@@ -36,7 +36,7 @@ export function funcGet(kiosk: boolean) {
             /// get users
             if (data.parameters.username) query.equalTo("username", data.parameters.username);
             var user = await query.first();
-            if (!user) throw Errors.throw(Errors.Custom, [`User not exists <${data.parameters.username}>.`]);
+            if (!user) throw Errors.throw(Errors.CustomNotExists, [`User not exists <${data.parameters.username}>.`]);
             return ParseObject.toOutputJSON.call(user, UserHelper.ruleUserRole);
         }
 
@@ -68,12 +68,12 @@ export function funcPost(kiosk: boolean) {
         var roleNames: string[] = [];
         for (var r of <any>roles) {
             var name: string = RoleList[r];
-            if (!name) throw Errors.throw(Errors.Custom, [`Role <${r}> not found.`]);
+            if (!name) throw Errors.throw(Errors.CustomNotExists, [`Role <${r}> not found.`]);
             /// available role check
             if (
                 (!kiosk && name === RoleList.Kiosk) ||
                 (kiosk && name !== RoleList.Kiosk)
-            ) throw Errors.throw(Errors.Custom, [`Role <${r}> not available.`]);
+            ) throw Errors.throw(Errors.CustomInvalid, [`Role <${r}> not available.`]);
 
             roleNames.push(name);
         }
@@ -118,7 +118,7 @@ export async function funcPut(data) {
     var user = await new Parse.Query(Parse.User)
         .equalTo("username", username)
         .first();
-    if (!user) throw Errors.throw(Errors.Custom, [`User <${username}> not exists.`]);
+    if (!user) throw Errors.throw(Errors.CustomNotExists, [`User <${username}> not exists.`]);
 
     /// 2) Modify
     let userdata = omitObject(data.parameters, usermfields);
@@ -146,7 +146,7 @@ export async function funcDelete(data) {
     var user = await new Parse.Query(Parse.User)
         .equalTo("username", data.parameters.username)
         .first();
-    if (!user) throw Errors.throw(Errors.Custom, [`User <${username}> not exists.`]);
+    if (!user) throw Errors.throw(Errors.CustomNotExists, [`User <${username}> not exists.`]);
 
     user.destroy({ useMasterKey: true });
 

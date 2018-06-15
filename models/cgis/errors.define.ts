@@ -7,6 +7,9 @@ var errors: Config[] = [
     ["PermissionDenined", 404, "Permission denined."],
     ["SessionNotExists", 404, "Session not exists."],
 
+    ["CustomAlreadyExists", 400, "{0}"],
+    ["CustomNotExists", 404, "{0}"],
+    ["CustomInvalid", 404, "{0}"],
     ["Custom", 500, "{0}"],
 ];
 

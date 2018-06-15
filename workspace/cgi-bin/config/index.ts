@@ -125,7 +125,7 @@ async function updateConfig(key: string, data: object) {
         }
         if (result) break;
     }
-    if (!result) throw Errors.throw(Errors.Custom, [`config path not found <${key}>`]);
+    if (!result) throw Errors.throw(Errors.CustomNotExists, [`config path not found <${key}>`]);
 
     /// 2) read file
     var content: string = await (promisify(fs.readFile) as any)(result, "UTF-8");
@@ -133,13 +133,13 @@ async function updateConfig(key: string, data: object) {
     /// 2) match export default {0}
     var regex = /export default ([^\s;]+)/;
     var matches = content.match(regex);
-    if (matches.length < 2) throw Errors.throw(Errors.Custom, [`config path format error <${key}>`]);
+    if (matches.length < 2) throw Errors.throw(Errors.CustomInvalid, [`config path format error <${key}>`]);
     var token = matches[1];
 
     /// 3) match {0} with var {0}: any = { }.
     var regex = new RegExp(` ${token}[\: \=]`);
     var found = content.search(regex);
-    if (found < 0) throw Errors.throw(Errors.Custom, [`config path format error <${key}>`]);
+    if (found < 0) throw Errors.throw(Errors.CustomInvalid, [`config path format error <${key}>`]);
 
     /// 4) get content of 3) inside braclets as {1}
     var start, end, ct = 1;
@@ -149,7 +149,7 @@ async function updateConfig(key: string, data: object) {
         switch (tok) { case '{': ct++; break; case '}': ct--; break; default: break; }
         if (ct === 0) { end = i+1; break; }
     }
-    if (!start || !end) throw Errors.throw(Errors.Custom, [`config path format error <${key}>`]);
+    if (!start || !end) throw Errors.throw(Errors.CustomInvalid, [`config path format error <${key}>`]);
     var innerContent = content.substring(start, end);
     var parser = (input: string): object => {
         /// remove trailing comma

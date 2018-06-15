@@ -17,10 +17,14 @@ export interface Input {
 }
 export type Output = string[];
 
-action.get<Input, Output>( async (data) => {
+export function getEvents() {
     var results = [];
     for (var event in EventSubjects) results.push(event);
     return results;
+}
+
+action.get<Input, Output>( async (data) => {
+    return getEvents();
 });
 /////////////////////////////////////////////////////
 

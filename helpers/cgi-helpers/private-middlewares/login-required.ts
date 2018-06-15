@@ -49,6 +49,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
         session = await new Parse.Query("_Session")
                 .descending("createdAt")
                 .include("user")
+                .include("user.roles")
                 .first({sessionToken: sessionId}) as Parse.Session;
             
         /// session not match
@@ -60,7 +61,6 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
         user = session.get("user");
 
         /// get user roles
-        for (var r of user.get("roles")) await r.fetch();
         role = user.get("roles");
 
     } catch(reason) {
@@ -71,6 +71,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
     req.session = session;
     req.user = user;
     req.role = role;
+    
     next();
 }
 ////////////////////////////////////////////////////////////

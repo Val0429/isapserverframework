@@ -157,7 +157,7 @@ export interface ParseObjectJSONRule {
 import { Config } from './../../core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 
-export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions) {
+export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions = {}) {
     let { ip, port, collection } = Config.mongodb;
     const url = `mongodb://${ip}:${port}`;
 

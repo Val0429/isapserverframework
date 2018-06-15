@@ -17,13 +17,17 @@ export interface Input {
 }
 export type Output = string[];
 
-action.get<Input, Output>( async (data) => {
+export function getTemplates() {
     var results = [];
     var list = DynamicLoader.all();
     for (var o in list) {
          list[o].prototype instanceof ScheduleTemplateBase && results.push(o);
     }
     return results;
+}
+
+action.get<Input, Output>( async (data) => {
+    return getTemplates();
 });
 /////////////////////////////////////////////////////
 

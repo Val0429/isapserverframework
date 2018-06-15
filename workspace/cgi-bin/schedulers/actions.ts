@@ -17,13 +17,17 @@ export interface Input {
 }
 export type Output = string[];
 
-action.get<Input, Output>( async (data) => {
+export function getActions() {
     var results = [];
     var list = DynamicLoader.all();
     for (var o in list) {
          list[o].prototype instanceof ScheduleActionBase && results.push(o);
     }
     return results;
+}
+
+action.get<Input, Output>( async (data) => {
+    return getActions();
 });
 /////////////////////////////////////////////////////
 

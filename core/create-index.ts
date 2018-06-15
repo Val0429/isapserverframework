@@ -11,6 +11,9 @@ waitServerReady(async () => {
         { expiresAt: -1 },
         { expireAfterSeconds: 0 }
     );
+    createIndex("_Session", "createdAt",
+        { createdAt: -1 }
+    );
     ////////////////////////////
 });
 

@@ -161,10 +161,10 @@ export type InputRestfulC<T = {}> = {
 } & T;
 export type OutputRestfulC<T = {}> = ParseObject<T>;
 
-export interface InputRestfulR<T = {}> extends IInputPaging {
+export type InputRestfulR<T = {}> = IInputPaging & {
     sessionId: string;
     objectId?: string;
-}
+} & T;
 export type OutputRestfulR<T> = IOutputPaging<ParseObject<T>[]> | ParseObject<T>;
 
 export type InputRestfulU<T = {}> = {

@@ -2,10 +2,10 @@ import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
     Action, Errors,
-    Restful, EventSubjects
+    Restful, EventSubjects, InputRestfulR, OutputRestfulR
 } from './../../../core/cgi-package';
 
-import { IScheduleTimes, IScheduleActions, Schedulers, ScheduleTimes, ScheduleActions } from './../../../models/schedulers/schedulers.base';
+import { IScheduleTimes, IScheduleActions, ISchedulers, Schedulers, ScheduleTimes, ScheduleActions } from './../../../models/schedulers/schedulers.base';
 
 var action = new Action({
     loginRequired: true,
@@ -55,6 +55,21 @@ action.post<InputPost, OutputPost>({
     await ss.save();
 
     return ss;
+});
+/////////////////////////////////////////////////////
+
+/// R: get //////////////////////////////////////////
+export type InputGet = InputRestfulR<{
+    event?: string;
+}>;
+export type OutputGet = OutputRestfulR<ISchedulers>;
+
+action.get<InputGet, OutputGet>(async (data) => {
+    var params = data.parameters;
+    var query = new Parse.Query(Schedulers).include("actions").include("time");
+    params.event && query.equalTo("event", params.event);
+
+    return await Restful.SingleOrPagination( query, params, null );
 });
 /////////////////////////////////////////////////////
 

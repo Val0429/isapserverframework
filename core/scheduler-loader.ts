@@ -37,9 +37,10 @@ class Scheduler {
                 /// resolve action
                 this.resolve(value);
             });
-        console.log(`Schedule loaded with <${event}>, do <${actions.map(data => data.attributes.action).join(", ")}>.`);
+        var previous = this.hashKey[value.id];
+        console.log(`Schedule ${previous ? "re" : ""}loaded with <${event}>, do <${actions.map(data => data.attributes.action).join(", ")}>.`);
 
-        this.hashKey[value.id] && this.hashKey[value.id].unsubscribe();
+        previous && previous.unsubscribe();
         this.hashKey[value.id] = sj;
     }
 
@@ -69,37 +70,7 @@ class Scheduler {
 var scheduler = new Scheduler();
 
 waitServerReady(async () => {
-    // var st = new ScheduleTimes({
-    //     start: new Date(),
-    //     end: new Date(),
-    //     type: ScheduleTimeType.Minute,
-    //     unitsOfType: 2,
-    //     triggerInterval: 1000
-    // });
-    // await st.save();
-
-    // var sa = new ScheduleActions({
-    //     action: "ScheduleAction.SMS",
-    //     data: ["0928240310"],
-    //     template: "ScheduleTemplate.SMS"
-    // });
-    // await sa.save();
-    // var sa2 = new ScheduleActions({
-    //     action: "ScheduleAction.Email",
-    //     data: ["val@unitedvouchers.com"],
-    //     template: "ScheduleTemplate.Email"
-    // });
-    // await sa2.save();
-
-    // var ss = new Schedulers({
-    //     event: "EventLogin",
-    //     time: st,
-    //     action: [sa, sa2]
-    // });
-    // await ss.save();
-
-
-    /// get all Schedulers
+    /// get all Schedulers, register
     var objs = await new Parse.Query(Schedulers)
         .include("time")
         .include("actions")
@@ -108,24 +79,15 @@ waitServerReady(async () => {
         scheduler.register(obj);
     }
 
-    // EventSubjects.EventLogin.subscribe( async (data) => {
-    //     console.log('login!', data.attributes);
-    //     await data.fetch();
-    //     console.log('fetch!', data.attributes);
+    /// listen for Schedulers change
+    // var instance = db.collection(event);
+    // var stream = instance.watch();
+    // stream.on("change", (change) => {
+    //     if (change.operationType !== 'insert') return;
+    //     var type = retrievePrimaryClass(event);
+    //     var rtn: any = new type();
+    //     rtn.id = change.documentKey._id;
+    //     EventSubjects[event].next(rtn);
     // });
-
-    // var ob = ScheduleHelper.scheduleObservable({
-    //     start: new Date(2018,5,10,19,35,0),
-    //     end: new Date(2018,5,10,19,36,0),
-    //     type: ScheduleTimeType.Minute,
-    //     unitsOfType: 2,
-    //     triggerInterval: 1000
-    // });
-    // EventSubjects.EventLogin.withLatestFrom(ob)
-    //     .filter( (value) => value[1] )
-    //     .subscribe(([event, schedule]) => {
-    //         console.log('triggered', event, schedule);
-    //     });
-        
-
+    
 });

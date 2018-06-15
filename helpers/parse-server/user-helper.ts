@@ -22,13 +22,13 @@ export namespace UserHelper {
         
         try {
             user = await Parse.User.logIn(options.username, options.password);
-            for (var role of user.get("roles")) await role.fetch();
+            /// fetch all roles
+            await Promise.all(user.get("roles").map( r => r.fetch() ) );
             
             /// Success
             sessionId = user.getSessionToken();
 
         } catch(reason) {
-            console.log('login failed', reason);
             throw Errors.throw(Errors.RequestFailed);
         }
         

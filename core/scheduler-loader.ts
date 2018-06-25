@@ -1,7 +1,7 @@
 import * as Parse from 'parse/node';
 import { waitServerReady } from './pending-tasks';
 import { DynamicLoader } from './../helpers/dynamic-loader/dynamic-loader';
-import { EventLogin, Events } from './events.gen';
+import { EventLogin, Events, IEvent } from './events.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Config } from './config.gen';
 import { EventSubjects } from './events.gen';
@@ -35,7 +35,7 @@ class Scheduler {
             .subscribe(([event, schedule]) => {
                 //console.log('???', event, schedule);
                 /// resolve action
-                this.resolve(value);
+                this.resolve(value, event);
             });
         var previous = this.hashKey[value.id];
         console.log(`Schedule ${previous ? "re" : ""}loaded with <${event}>, do <${actions.map(data => data.attributes.action).join(", ")}>.`);
@@ -49,8 +49,8 @@ class Scheduler {
         this.hashKey[value.id] = undefined;
     }
 
-    resolve(value: Schedulers) {
-        var event = value.getValue("event");
+    resolve(value: Schedulers, event: ParseObject<IEvent>) {
+        //var event = value.getValue("event");
         var time = value.getValue("time");
         var actions = value.getValue("actions");
 

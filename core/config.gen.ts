@@ -2,7 +2,9 @@ import coreConfig, { Config as coreConfigType } from './../workspace/config/defa
 import mongodbConfig, { Config as mongodbConfigType } from './../workspace/config/default/mongodb';
 import parseDashboardConfig, { Config as parseDashboardConfigType } from './../workspace/config/default/parse-dashboard';
 import parseServerConfig, { Config as parseServerConfigType } from './../workspace/config/default/parse-server';
+import cmsConfig, { Config as cmsConfigType } from './../workspace/config/custom/cms';
 import frsConfig, { Config as frsConfigType } from './../workspace/config/custom/frs';
+import ftsConfig, { Config as ftsConfigType } from './../workspace/config/custom/fts';
 
 
 interface IConfig {
@@ -10,7 +12,9 @@ interface IConfig {
     mongodb: mongodbConfigType;
     parseDashboard: parseDashboardConfigType;
     parseServer: parseServerConfigType;
+    cms: cmsConfigType;
     frs: frsConfigType;
+    fts: ftsConfigType;
 }
 export { IConfig };
 
@@ -20,7 +24,9 @@ var Config: IConfig = {
     mongodb: <any>mongodbConfig,
     parseDashboard: <any>parseDashboardConfig,
     parseServer: <any>parseServerConfig,
+    cms: <any>cmsConfig,
     frs: <any>frsConfig,
+    fts: <any>ftsConfig,
 }
 
 export { Config };

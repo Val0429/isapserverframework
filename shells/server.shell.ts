@@ -35,7 +35,7 @@ if (Config.core.accessControlAllowOrigin) app.use(<any>accessControlAllowOrigin)
 
 var tLoadRouter = `
 /// Load Routers!
-routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`);
+routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.core.cgiPath);
 `;
 
 var tRunParseServer = `
@@ -67,6 +67,10 @@ var Dashboard = new ParseDashboard({
 app.use(Config.parseDashboard.serverPath, Dashboard);
 }
 ////////////////////////////
+`;
+
+var tRunWeb = `
+app.use('/', express.static(\`\${__dirname}/../workspace/custom/web\`));
 `;
 
 var tRunServer = `
@@ -124,7 +128,11 @@ function main(): string {
     /// run parse dashboard /////////////////////
     if (Config.parseDashboard.enable) tmpstr.push(tRunParseDashboard);
     /////////////////////////////////////////////
-    
+
+    /// run web /////////////////////////////////
+    tmpstr.push(tRunWeb);
+    /////////////////////////////////////////////
+
     /// run server //////////////////////////////
     tmpstr.push(tRunServer);
     /////////////////////////////////////////////

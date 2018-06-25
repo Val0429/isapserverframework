@@ -1,4 +1,5 @@
 import * as Parse from 'parse/node';
+import { Config } from './../../core/config.gen';
 // import { Errors } from './../../core/errors.gen';
 
 export namespace FileHelper {
@@ -21,6 +22,13 @@ export namespace FileHelper {
         var file = new Parse.File(`image.b64`, { base64: input });
         await file.save();
         return <any>file;
+    }
+
+    export function getURL(file: Parse.File): string {
+        var url = file.url();
+        /// todo, make it right.
+        url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
+        return url;
     }
 
 }

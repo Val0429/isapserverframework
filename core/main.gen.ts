@@ -27,7 +27,7 @@ if (Config.core.accessControlAllowOrigin) app.use(<any>accessControlAllowOrigin)
 
 
 /// Load Routers!
-routerLoader(app, `${__dirname}/../workspace/cgi-bin`);
+routerLoader(app, `${__dirname}/../workspace/cgi-bin`, Config.core.cgiPath);
 
 
 /// run parse server ////
@@ -57,6 +57,9 @@ var Dashboard = new ParseDashboard({
 app.use(Config.parseDashboard.serverPath, Dashboard);
 }
 ////////////////////////////
+
+
+app.use('/', express.static(`${__dirname}/../workspace/custom/web`));
 
 
 app.listen(Config.core.port, async () => {

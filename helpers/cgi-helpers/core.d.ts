@@ -1,4 +1,5 @@
 import * as Socket from 'ws';
+import { Response } from '~express/lib/response';
 
 declare module 'helpers/cgi-helpers/core' {
     export interface ActionConfig {

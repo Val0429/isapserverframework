@@ -27,7 +27,7 @@ export interface IScheduleActions<T> {
 @registerSubclass() export class ScheduleActions<T = any> extends ParseObject<IScheduleActions<T>> {}
 
 export interface ISchedulersHandle<T> {
-    event: string;
+    event: ParseObject<IEvent>;
     time: ScheduleTimes;
     actions: IScheduleActions<T>;
 }

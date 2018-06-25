@@ -140,8 +140,8 @@ export class Action<T = any, U = any> {
                         var request = <any>info.req;
                         var response = <any>info.res;
                         try {
-                            var result = await realfunc({...request, request, response});
-                            socket.send(JSON.stringify(result));
+                            var result = await realfunc({...request, request, response, socket});
+                            ///socket.send(JSON.stringify(result));
                         } catch(reason) {
                             if (reason instanceof Errors) reason.resolve(response);
                             else {

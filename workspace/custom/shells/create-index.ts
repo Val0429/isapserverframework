@@ -11,6 +11,11 @@ waitServerReady(async () => {
         { "data.kioskId": 1 },
         { unique: true, partialFilterExpression: { "data.kioskId": { $exists: true } } }
     );
+    /// Floors
+    createIndex("Floors", "floorsUniqueFloor",
+        { "floor": 1 },
+        { unique: true }
+    );
     ////////////////////////////
 
     /// default ////////////////

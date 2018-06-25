@@ -1,4 +1,5 @@
 import * as Parse from 'parse/node';
+import { FileHelper } from './file-helper';
 
 /// decorators //////////////
 var primaryClassMap = {};
@@ -118,6 +119,7 @@ export class ParseObject<T> extends Parse.Object {
                     else json[attr] = ParseObject.toOutputJSON.call(inst, rule, seen);
                 }
                 else if (inst instanceof Parse.Object) json[attr] = ParseObject.toOutputJSON.call(inst, rules, seen);
+                else if (inst instanceof Parse.File) json[attr] = FileHelper.getURL(inst);
                 else json[attr] = (<any>0, (<any>Parse)._encode)(inst, false, false, seen);
             }
         }

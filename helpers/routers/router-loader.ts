@@ -6,7 +6,7 @@ import { autoPad } from './../../helpers/shells/shell-writer';
 
 var defaultPath = "index";
 
-export function routerLoader(app, path, first = true, level = 0) {
+export function routerLoader(app, path, cgiPath = null, first = true, level = 0) {
     var name = p.parse(path).name;
 
     var getTypesFromAction = (route: Action) => {
@@ -30,8 +30,29 @@ export function routerLoader(app, path, first = true, level = 0) {
 
     var getTypesFromPath = (path: string) => getTypesFromAction( loadRouteFromPath(path) );
 
-    /// message ///
-    if (first) console.log("\x1b[35m", "Mounting Cgi Tree...", "\x1b[0m");
+    var printChild = (name: string, types: Array<string>, root: boolean = true) => {
+        if (root) {
+            var msg = ["\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m"];
+            if (types) {
+                msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`, "\x1b[0m"];
+            }
+            console.log(...msg);
+
+        } else {
+            if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
+        }
+    }
+
+    if (first) {
+        /// message ///
+        console.log("\x1b[35m", "Mounting Cgi Tree...", "\x1b[0m");
+        /// normalize cgiPath
+        cgiPath = "/" + (cgiPath.match(/([a-z0-9].*)/gi) || [""])[0];
+        /// load sub directory
+        var router = express.Router();
+        app.use(cgiPath, router);
+        app = router;
+    }
     ///////////////
 
     if (fs.lstatSync(path).isDirectory()) {
@@ -41,17 +62,19 @@ export function routerLoader(app, path, first = true, level = 0) {
             app.use(`/${name}`, router);
             app = router;
             /// message ///
-            var msg = ["\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m"];
             var types = getTypesFromPath(`${path}/${defaultPath}`);
-            if (types) {
-                msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`, "\x1b[0m"];
-            }
-            console.log(...msg);
+            printChild(name, types, true);
+            // var msg = ["\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m"];
+            // var types = getTypesFromPath(`${path}/${defaultPath}`);
+            // if (types) {
+            //     msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`, "\x1b[0m"];
+            // }
+            // console.log(...msg);
             ///////////////
         }
 
         for (var file of files) {
-            routerLoader(app, `${path}/${file}`, false, first ? 0 : level+1);
+            routerLoader(app, `${path}/${file}`, cgiPath, false, first ? 0 : level+1);
         }
 
     } else {
@@ -68,7 +91,8 @@ export function routerLoader(app, path, first = true, level = 0) {
         } else app.use(`/${routename}`, route);
 
         /// message ///
-        if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
+        printChild(name, types, level === 0 ? true : false);
+        // if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
         ///////////////
     }
 }

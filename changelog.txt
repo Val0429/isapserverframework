@@ -1,0 +1,8 @@
+v2.0 upgrade
+
+Critical (Should modify code after upgrade):
+1. 
+
+Normal (No need modify code):
+1. Autoload web page from /workspace/custom/web
+2. 

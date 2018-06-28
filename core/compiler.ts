@@ -1,3 +1,5 @@
+import './../shells/package.shell';
+
 import './../shells/config.shell';
 
 import './../shells/server.shell';

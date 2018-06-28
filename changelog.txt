@@ -1,8 +1,8 @@
 v2.0 upgrade
 
 Critical (Should modify code after upgrade):
-1. 
+1. "workspace" now should contain `package.json` & `node_modules`.
 
 Normal (No need modify code):
-1. Autoload web page from /workspace/custom/web
-2. 
+1. Autoload web page from `/workspace/custom/web`.
+2. You can now config `cgi-bin` root dir via `Config.core.cgiPath`.

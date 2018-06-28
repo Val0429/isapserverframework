@@ -1,9 +1,10 @@
 {
-  "name": "isap-vms-service",
+  "name": "isap-vms-service2",
   "version": "1.0.0",
-  "config": { "displayname": "iSap VMS Service" },
-  "description": "iSap VMS Service v1.00.00",
-  
+  "config": {
+    "displayname": "iSap VMS Service2"
+  },
+  "description": "iSap VMS Service2 v1.00.00",
   "main": "test",
   "typings": "dist/index",
   "scripts": {
@@ -27,6 +28,7 @@
     "@types/parse": "^2.4.7",
     "bluebird": "^3.5.1",
     "body-parser": "^1.17.1",
+    "caller": "^1.0.1",
     "express": "^4.15.2",
     "express-ws": "^3.0.0",
     "express-ws-routes": "^1.1.0",
@@ -41,6 +43,7 @@
     "request": "^2.87.0",
     "rxjs": "^5.5.11",
     "ts-node": "^3.3.0",
+    "ts-simple-ast": "^12.4.0",
     "ts-transformer-keys": "^0.3.1",
     "typings": "^2.1.1",
     "websocket": "^1.0.25",

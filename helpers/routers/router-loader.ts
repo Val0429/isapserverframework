@@ -5,8 +5,10 @@ import { Action } from './../../core/cgi-package';
 import { autoPad } from './../../helpers/shells/shell-writer';
 
 var defaultPath = "index";
+var actions: Action[] = [];
 
-export function routerLoader(app, path, cgiPath = null, first = true, level = 0) {
+/// meant to be called only once
+export function routerLoader(app, path, cgiPath = null, first = true, level = 0): Action[] {
     var name = p.parse(path).name;
 
     var getTypesFromAction = (route: Action) => {
@@ -83,6 +85,7 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
 
         var types = [];
         if (route instanceof Action) {
+            actions.push(route);
             app.use(`/${routename}`, route.mount());
             /// message ///
             types = getTypesFromAction(route);
@@ -95,4 +98,6 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
         // if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
         ///////////////
     }
+
+    if (first) return actions;
 }

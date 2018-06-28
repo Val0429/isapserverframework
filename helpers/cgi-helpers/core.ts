@@ -30,11 +30,15 @@ import { permissionCheck } from './private-middlewares/permission-check';
 import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { requiredParameters } from './private-middlewares/required-parameters';
+import { inputType } from './private-middlewares/input-type';
+var caller = require('caller');
 
 export class Action<T = any, U = any> {
     config: ActionConfig;
+    caller: string;
 
     constructor(config: ActionConfig) {
+        this.caller = caller();
         this.config = config;
     }
 
@@ -42,42 +46,42 @@ export class Action<T = any, U = any> {
         var callback = arg2 || arg1; if (arg2) this[`func${type}Config`] = typeof arg1 === 'string' ? { path: arg1 } : arg1; this[`func${type}`] = <any>callback; return this;
     }
 
-    private funcAllConfig: ActionConfig;
+    public funcAllConfig: ActionConfig;
     private funcAll: ActionCallback<T, U>;
     all(callback: ActionCallback<T, U>): Action<T, U> { this.funcAll = callback; return this; }
 
-    private funcGetConfig: ActionConfig;
+    public funcGetConfig: ActionConfig;
     private funcGet: ActionCallback<T, U>;
     get<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     get<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     get(arg1, arg2 = null) { return this._get("Get", arg1, arg2); }
 
-    private funcPostConfig: ActionConfig;
+    public funcPostConfig: ActionConfig;
     private funcPost: ActionCallback<T, U>;
     post<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     post<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     post(arg1, arg2 = null) { return this._get("Post", arg1, arg2); }
 
-    private funcPutConfig: ActionConfig;
+    public funcPutConfig: ActionConfig;
     private funcPut: ActionCallback<T, U>;
     put<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     put<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     put(arg1, arg2 = null) { return this._get("Put", arg1, arg2); }
 
-    private funcDeleteConfig: ActionConfig;
+    public funcDeleteConfig: ActionConfig;
     private funcDelete: ActionCallback<T, U>;
     delete<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     delete<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     delete(arg1, arg2 = null) { return this._get("Delete", arg1, arg2); }
 
-    private funcWsConfig: ActionConfig;
+    public funcWsConfig: ActionConfig;
     private funcWs: ActionCallback<T, U>;
     ws<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws(arg1, arg2 = null) { return this._get("Ws", arg1, arg2); }
 
     /// translate ActionConfig to array of middlewares
-    static configTranslate(config: ActionConfig): any[] {
+    static configTranslate(config: ActionConfig, caller: string): any[] {
         var middlewares = [];
         if (!config) return middlewares;
         /////////////////////////////////////////////
@@ -94,18 +98,21 @@ export class Action<T = any, U = any> {
         config.permission && middlewares.push(permissionCheck(config.permission));
         /// 4) requiredParameters
         config.requiredParameters && middlewares.push(requiredParameters(config.requiredParameters));
+        /// 4) inputType
+        /// todo
+        // config.inputType && middlewares.push(inputType(caller, config.inputType));
         /// mount others
         config.middlewares && (middlewares = [...middlewares, ...config.middlewares]);
         /////////////////////////////////////////////
 
-        return middlewares;        
+        return middlewares;
     }
 
     mount(): Router {
         var router: Router = express.Router();
 
         /// mount middlewares
-        router.use(Action.configTranslate(this.config));
+        router.use(Action.configTranslate(this.config, this.caller));
 
         var funcs = ["All", "Get", "Post", "Put", "Delete"];
         for (var func of funcs) {
@@ -113,7 +120,7 @@ export class Action<T = any, U = any> {
                 let realfunc = this[`func${func}`];
                 let config: ActionConfig = this[`func${func}Config`];
                 let realpath = (config ? config.path : "*") || "*";
-                router[func.toLowerCase()](realpath, Action.configTranslate(config), mergeParams,
+                router[func.toLowerCase()](realpath, Action.configTranslate(config, this.caller), mergeParams,
                     async (request: Request, response: Response) => {
                         try {
                             var result = await realfunc({...request, request, response});
@@ -134,7 +141,7 @@ export class Action<T = any, U = any> {
             let realfunc = this.funcWs;
             let config: ActionConfig = this.funcWsConfig;
             let realpath = (config ? config.path : "*") || "*";
-            router["websocket"](realpath, ...Action.configTranslate(config), mergeParams,
+            router["websocket"](realpath, ...Action.configTranslate(config, this.caller), mergeParams,
                 (info: ExpressWsRouteInfo, cb: ExpressWsCb) => {
                     cb( async (socket: Socket) => {
                         var request = <any>info.req;

@@ -4,7 +4,7 @@
 import * as express from 'express';
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
-import { Router, RequestHandler } from 'express/lib/router/index';
+import { Router, NextFunction, RequestHandler } from 'express/lib/router/index';
 import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
 
 /// Parse & define
@@ -122,16 +122,12 @@ export class Action<T = any, U = any> {
                 let config: ActionConfig = this[`func${func}Config`];
                 let realpath = (config ? config.path : "*") || "*";
                 router[func.toLowerCase()](realpath, Action.configTranslate(config, this.caller), mergeParams,
-                    async (request: Request, response: Response) => {
+                    async (request: Request, response: Response, next: NextFunction) => {
                         try {
-                            var result = await realfunc({...request, request, response});
+                            var result = await realfunc({...request ,request, response});
                             response.send(result);
-                            
                         } catch(reason) {
-                            if (reason instanceof Errors) reason.resolve(response);
-                            else {
-                                Errors.throw(Errors.Custom, [reason.toString()]).resolve(response);
-                            }
+                            next(reason);
                         }
                     }
                 );
@@ -143,23 +139,15 @@ export class Action<T = any, U = any> {
             let config: ActionConfig = this.funcWsConfig;
             let realpath = (config ? config.path : "*") || "*";
             router["websocket"](realpath, ...Action.configTranslate(config, this.caller), mergeParams,
-                (info: ExpressWsRouteInfo, cb: ExpressWsCb) => {
-                    cb( async (socket) => {
-                        var request = <any>info.req;
-                        var response = <any>info.res;
-                        var wrappedSocket = new Socket(socket);
-                        try {
-                            var result = await realfunc({...request, request, response, socket: wrappedSocket});
-                            ///socket.send(JSON.stringify(result));
-                        } catch(reason) {
-                            if (reason instanceof Errors) reason.resolve(response);
-                            else {
-                                socket.send(JSON.stringify(result), (err) => {
-                                    socket.close();
-                                });
-                            }
-                        }
-                    });
+                async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {
+                    var request = <any>info.req;
+                    var response = <any>info.res;
+                    var socket = await Socket.get(info, cb);
+                    try {
+                        var result = await realfunc({...request, request, response, socket});
+                    } catch(reason) {
+                        next(reason);
+                    }
                 }
             );
         }

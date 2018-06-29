@@ -4,7 +4,6 @@ import { NextFunction, RequestHandler } from 'express/lib/router/index';
 import { RoleList } from './../../../core/userRoles.gen';
 import { Errors } from './../../../core/errors.gen';
 
-import config from './../../../workspace/config/default/core';
 import './../core';
 
 /// permissionCheck ////////////////////////////////////////
@@ -21,11 +20,12 @@ declare module "helpers/cgi-helpers/core" {
 export function permissionCheck(permissions: RoleList[]): RequestHandler {
     return <any>((req: Request, res: Response, next: NextFunction) => {
         /// if login not required, pass.
-        if (!req.role) { next(); return; }
+        if (!req.role) return next();
 
         var roles = req.role.filter( (element) => permissions.indexOf(element.get("name")) >= 0 );
 
-        if (roles.length == 0) return Errors.throw(Errors.PermissionDenined).resolve(res);
+        if (roles.length == 0) return next( Errors.throw(Errors.PermissionDenined) );
+
         next();
     });
 }

@@ -2,6 +2,7 @@ v2.0 upgrade
 
 Critical (Should modify code after upgrade):
 1. "workspace" now should contain `package.json` & `node_modules`.
+2. `ws` protocol `socket` is now wrapped by new class, add feature `closeGracefully()`.
 
 Normal (No need modify code):
 1. Autoload web page from `/workspace/custom/web`.
@@ -10,3 +11,4 @@ Normal (No need modify code):
 4. You can now `npm start` in workspace.
 5. Now cgi-bin Action won't check `permission` when `loginRequired` is false.
 6. You can now hook Schedulers without write into Mongo. Try `Scheduler.register()`.
+7. Add error messages when `ws` `socket` error.

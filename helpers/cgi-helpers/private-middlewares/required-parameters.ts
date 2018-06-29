@@ -35,13 +35,19 @@ export function requiredParameters(parameters: string[]): RequestHandler {
             return false;
         }
 
-        var params = req.parameters;
-        for (var keys of parameters) {
-            var key: string[] = keys.split(".");
-            if (!paramExists(params, key)) return Errors.throw(Errors.ParametersRequired, [keys]).resolve(res);
+        try {
+            var params = req.parameters;
+            for (var keys of parameters) {
+                var key: string[] = keys.split(".");
+                if (!paramExists(params, key)) throw Errors.throw(Errors.ParametersRequired, [keys]);
+            }
+
+            next();
+
+        } catch(reason) {
+            next(reason);
         }
 
-        next();
     });
 }
 ////////////////////////////////////////////////////////////

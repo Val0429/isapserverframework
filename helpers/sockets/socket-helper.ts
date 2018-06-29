@@ -1,11 +1,34 @@
 import * as WSSocket from 'ws';
 import { BehaviorSubject } from 'rxjs';
+import { Response } from 'express/lib/response';
+import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
 
 export class Socket {
     io: WSSocket;
     private sendCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
-    constructor(socket: WSSocket) {
+    static get(response: Response);
+    static get(info: ExpressWsRouteInfo, cb: ExpressWsCb);
+    static get(arg1: any, arg2?: any): Promise<Socket> {
+        return new Promise( (resolve) => {
+            var ws, info, cb;
+            if (!arg2) {
+                /// check response
+                ws = (<any>arg1)._websocket;
+                if (!ws) { resolve(null); return; }
+                info = ws.info; cb = ws.cb;
+            } else {
+                info = arg1; cb = arg2;
+            }
+            if (info.vsocket) { resolve(info.vsocket); return; }
+            cb( (socket) => {
+                info.vsocket = new Socket(socket);
+                resolve(info.vsocket);
+            });
+        });
+    }
+
+    private constructor(socket: WSSocket) {
         this.io = socket;
     }
 

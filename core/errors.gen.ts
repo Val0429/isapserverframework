@@ -4,6 +4,7 @@ export * from './../models/cgis/errors.base';
 export * from './../models/cgis/cgis.base';
 import { Response } from 'express/lib/response';
 import { ExpressWsSocket } from './../helpers/middlewares/express-ws-routes';
+import { Socket } from './../helpers/sockets/socket-helper';
 
 
 export class Errors {
@@ -44,14 +45,20 @@ export class Errors {
         } while(0);
         
         if (res) {
-            if ((<any>res)._websocket) {
-                var ws: ExpressWsSocket = (<any>res)._websocket;
-                ws.cb(false, this.detail.statusCode, message);
+            (async () => {
+                var socket: Socket;
+                if (socket = await Socket.get(res)) {
+                    socket.send(JSON.stringify({
+                        statusCode: this.detail.statusCode,
+                        message
+                    }));
+                    socket.closeGracefully();
 
-            } else {
-                res.status(this.detail.statusCode)
-                   .send(message);
-            }
+                } else {
+                    res.status(this.detail.statusCode)
+                    .send(message);
+                }
+            })();
         }
         return message;
     }

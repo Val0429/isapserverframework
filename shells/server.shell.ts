@@ -75,6 +75,16 @@ var tRunWeb = `
 app.use('/', express.static(\`\${__dirname}/../workspace/custom/web\`));
 `;
 
+var tFinalizeError = `
+import { Errors } from './../core/errors.gen';
+app.use( (reason, req, res, next) => {
+    if (reason instanceof Errors) reason.resolve(res);
+    else {
+        Errors.throw(Errors.Custom, [reason.toString()]).resolve(res);
+    }
+});
+`;
+
 var tRunServer = `
 app.listen(Config.core.port, async () => {
     console.log(\`Server running at port \${Config.core.port}.\`);
@@ -133,6 +143,10 @@ function main(): string {
 
     /// run web /////////////////////////////////
     tmpstr.push(tRunWeb);
+    /////////////////////////////////////////////
+
+    /// finalize error //////////////////////////
+    tmpstr.push(tFinalizeError);
     /////////////////////////////////////////////
 
     /// run server //////////////////////////////

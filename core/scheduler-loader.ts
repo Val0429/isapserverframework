@@ -10,11 +10,16 @@ import { retrievePrimaryClass, ParseObject } from './../helpers/parse-server/par
 import { Schedulers, ScheduleTimeType, ScheduleTimes, ScheduleActions, ScheduleActionBase } from './../models/schedulers/schedulers.base';
 import { Observable, Subscription } from 'rxjs';
 
-class Scheduler {
+const uuidv1 = require('uuid/v1');
+
+export class Scheduler {
     hashKey: { [index: string]: Subscription } = {};
 
     async register(value: Schedulers) {
         /// todo: currently only allow event + time(?)
+
+        /// code hook will have no id, generate one.
+        if (!value.id) value.id = uuidv1();
 
         /// parse event
         let event = value.getValue("event");
@@ -33,7 +38,6 @@ class Scheduler {
         var sj = subject.withLatestFrom(ob)
             .filter( (value) => value[1])
             .subscribe(([event, schedule]) => {
-                //console.log('???', event, schedule);
                 /// resolve action
                 this.resolve(value, event);
             });
@@ -50,6 +54,7 @@ class Scheduler {
     }
 
     resolve(value: Schedulers, event: ParseObject<IEvent>) {
+        /// Call Action & Template right here
         //var event = value.getValue("event");
         var time = value.getValue("time");
         var actions = value.getValue("actions");
@@ -68,6 +73,7 @@ class Scheduler {
     }
 }
 var scheduler = new Scheduler();
+export default scheduler;
 
 waitServerReady(async () => {
     /// get all Schedulers, register

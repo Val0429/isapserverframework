@@ -6,3 +6,7 @@ Critical (Should modify code after upgrade):
 Normal (No need modify code):
 1. Autoload web page from `/workspace/custom/web`.
 2. You can now config `cgi-bin` root dir via `Config.core.cgiPath`.
+3. You can now manage multiple project in workspace. just run `npm run create-project YourNewProjectName` in workspace.
+4. You can now `npm start` in workspace.
+5. Now cgi-bin Action won't check `permission` when `loginRequired` is false.
+6. You can now hook Schedulers without write into Mongo. Try `Scheduler.register()`.

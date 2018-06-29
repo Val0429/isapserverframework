@@ -10,7 +10,8 @@ import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-rou
 /// Parse & define
 import * as Parse from 'parse/node';
 import { RoleList, IRole } from './../../core/userRoles.gen';
-import * as Socket from 'ws';
+//import * as Socket from 'ws';
+import { Socket } from './../../helpers/sockets/socket-helper';
 import { Errors, IInputPaging, IOutputPaging } from './../../core/errors.gen';
 import { Config } from './../../core/config.gen';
 
@@ -143,16 +144,19 @@ export class Action<T = any, U = any> {
             let realpath = (config ? config.path : "*") || "*";
             router["websocket"](realpath, ...Action.configTranslate(config, this.caller), mergeParams,
                 (info: ExpressWsRouteInfo, cb: ExpressWsCb) => {
-                    cb( async (socket: Socket) => {
+                    cb( async (socket) => {
                         var request = <any>info.req;
                         var response = <any>info.res;
+                        var wrappedSocket = new Socket(socket);
                         try {
-                            var result = await realfunc({...request, request, response, socket});
+                            var result = await realfunc({...request, request, response, socket: wrappedSocket});
                             ///socket.send(JSON.stringify(result));
                         } catch(reason) {
                             if (reason instanceof Errors) reason.resolve(response);
                             else {
-                                socket.send(JSON.stringify(result));
+                                socket.send(JSON.stringify(result), (err) => {
+                                    socket.close();
+                                });
                             }
                         }
                     });

@@ -24,7 +24,7 @@ export interface IScheduleActions<T> {
     data: T;
     template: string;
 }
-@registerSubclass() export class ScheduleActions<T = any> extends ParseObject<IScheduleActions<T>> {}
+@registerSubclass() export class ScheduleActions<T = any[]> extends ParseObject<IScheduleActions<T>> {}
 
 export interface ISchedulersHandle<T> {
     event: ParseObject<IEvent>;

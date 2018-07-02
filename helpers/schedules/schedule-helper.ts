@@ -5,22 +5,52 @@ export namespace ScheduleHelper {
     /**
      * Global time object.
      */
-    var sjGlobalTimer = new BehaviorSubject<Date>(getUTCNow());
+    // var sjGlobalTimer = new BehaviorSubject<Date>(getUTCNow());
+    // Observable.timer(0, 1000)
+    //     .map( value => getUTCNow() )
+    //     .subscribe(sjGlobalTimer);
+
+    var sjGlobalTimer = new BehaviorSubject<Date>(new Date());
     Observable.timer(0, 1000)
-        .map( value => getUTCNow() )
+        .map( value => new Date() )
         .subscribe(sjGlobalTimer);
 
     /**
      * Schedule for Observable.
      */
     export function scheduleObservable(options: IScheduleTimes, isUTC: boolean = false): Observable<boolean> {
+        // options = {...options};
+        // if (!isUTC) {
+        //     options.start = getUTCDateKeepHours(options.start);
+        //     options.end = getUTCDateKeepHours(options.end);
+        // }
+        // let last = false;
+        // let date = getUTCNow();
+
+        // var rtn = Observable.from(sjGlobalTimer)
+        //     .map( (date) => checkSchedule(options, date) );
+
+        // if (options.triggerInterval) {
+        //     rtn = rtn.filter( (value) => {
+        //         try {
+        //             if (value !== last) { date = getUTCNow(); return true; }
+        //             else if (value === false) return false;
+        //             else {
+        //                 let ndate = getUTCNow();
+        //                 if (ndate.getTime() - date.getTime() >= options.triggerInterval) { date = getUTCNow(); return true; }
+        //                 return false;
+        //             }
+        //         } catch(e) {} finally { last = value; }
+        //     });
+
+        // } else {
+        //     rtn = rtn.distinctUntilChanged();
+        // }
+        // return rtn;
+
         options = {...options};
-        if (!isUTC) {
-            options.start = getUTCDateKeepHours(options.start);
-            options.end = getUTCDateKeepHours(options.end);
-        }
         let last = false;
-        let date = getUTCNow();
+        let date = new Date();
 
         var rtn = Observable.from(sjGlobalTimer)
             .map( (date) => checkSchedule(options, date) );
@@ -28,11 +58,11 @@ export namespace ScheduleHelper {
         if (options.triggerInterval) {
             rtn = rtn.filter( (value) => {
                 try {
-                    if (value !== last) { date = getUTCNow(); return true; }
+                    if (value !== last) { date = new Date(); return true; }
                     else if (value === false) return false;
                     else {
-                        let ndate = getUTCNow();
-                        if (ndate.getTime() - date.getTime() >= options.triggerInterval) { date = getUTCNow(); return true; }
+                        let ndate = new Date();
+                        if (ndate.getTime() - date.getTime() >= options.triggerInterval) { date = new Date(); return true; }
                         return false;
                     }
                 } catch(e) {} finally { last = value; }
@@ -42,14 +72,15 @@ export namespace ScheduleHelper {
             rtn = rtn.distinctUntilChanged();
         }
         return rtn;
+
     }
 
-    function getUTCDateKeepHours(date: Date): Date {
-        return new Date(date.getTime() - date.getTimezoneOffset());
-    }
-    function getUTCNow(): Date {
-        return getUTCDateKeepHours( new Date() );
-    }
+    // function getUTCDateKeepHours(date: Date): Date {
+    //     return new Date(date.getTime() - date.getTimezoneOffset());
+    // }
+    // function getUTCNow(): Date {
+    //     return getUTCDateKeepHours( new Date() );
+    // }
 
     /// important: Date must be same reference, all UTC or all local
     function checkSchedule(options: IScheduleTimes, date: Date): boolean {
@@ -59,23 +90,25 @@ export namespace ScheduleHelper {
         var stedDiffer = et - st;
 
         /// 2) calculate magic number, by options.type + interval
-        var magic = 0;
-        const oneminute = 60*1000;
-        const onehour = 60*oneminute;
-        const oneday = 24*onehour;
-        switch (options.type) {
-            case ScheduleTimeType.Minute:
-                magic = oneminute; break;
-            case ScheduleTimeType.Hour:
-                magic = onehour; break;
-            case ScheduleTimeType.Day:
-                magic = oneday; break;
-            case ScheduleTimeType.Week:
-                magic = oneday*7; break;
-            default:
-                throw `${options.type} is not a valid schedule type`;
+        var magic = 1;
+        if (options.type !== undefined && options.type !== null) {
+            const oneminute = 60*1000;
+            const onehour = 60*oneminute;
+            const oneday = 24*onehour;
+            switch (options.type) {
+                case ScheduleTimeType.Minute:
+                    magic = oneminute; break;
+                case ScheduleTimeType.Hour:
+                    magic = onehour; break;
+                case ScheduleTimeType.Day:
+                    magic = oneday; break;
+                case ScheduleTimeType.Week:
+                    magic = oneday*7; break;
+                default:
+                    throw `${options.type} is not a valid schedule type`;
+            }
+            magic *= options.unitsOfType || 1;
         }
-        magic *= options.unitsOfType;
         
         /// 3) if not after beginning
         if (st > dt) return false;

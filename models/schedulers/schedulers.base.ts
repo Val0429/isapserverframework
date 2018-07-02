@@ -10,8 +10,14 @@ export enum ScheduleTimeType {
 export interface IScheduleTimes {
     start: Date;
     end: Date;
-    type: ScheduleTimeType;
-    unitsOfType: number;
+    /**
+     * if no type, there are no loops.
+     */
+    type?: ScheduleTimeType;
+    /**
+     * with type, you can give multiply on it.
+     */
+    unitsOfType?: number;
     triggerInterval?: number;
 }
 @registerSubclass() export class ScheduleTimes extends ParseObject<IScheduleTimes> {}

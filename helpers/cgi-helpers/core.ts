@@ -170,7 +170,7 @@ export type InputRestfulU<T = {}> = {
     sessionId: string;
     objectId: string;
 } & T;
-type OutputRestfulU<T> = ParseObject<T>;
+export type OutputRestfulU<T> = ParseObject<T>;
 
 export type InputRestfulD<T> = {
     sessionId: string;

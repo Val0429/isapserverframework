@@ -12,3 +12,4 @@ Normal (No need modify code):
 5. Now cgi-bin Action won't check `permission` when `loginRequired` is false.
 6. You can now hook Schedulers without write into Mongo. Try `Scheduler.register()`.
 7. Add error messages when `ws` `socket` error.
+8. `Schedulers` now support fully CRUD.

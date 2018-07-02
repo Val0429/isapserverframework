@@ -21,6 +21,19 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
         return types;
     }
 
+    var gettypesFromActionClassic = (route: express.Router) => {
+        var router: any = route;
+        var stack = router.stack;
+        var methods = stack[0].route.methods;
+        var protos = ["get", "post", "put", "delete"];
+        if (methods["_all"]) types.push("ALL");
+        for (var proto of protos) {
+            if (methods[proto])
+                types.push(proto.toUpperCase());
+        }
+        return types;
+    }
+
     var loadRouteFromPath = (path: string) => {
         try {
             var route: Action = require(`${path}`).default;
@@ -91,7 +104,10 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
             types = getTypesFromAction(route);
             ///////////////
 
-        } else app.use(`/${routename}`, route);
+        } else {
+            app.use(`/${routename}`, route);
+            types = gettypesFromActionClassic(route);
+        }
 
         /// message ///
         printChild(name, types, level === 0 ? true : false);

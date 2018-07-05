@@ -19,3 +19,4 @@ console.time("workspace/main");  /// 6
 import './workspace/main';
 console.timeEnd("workspace/main");
 
+import './services/ast-services/ast-client';

@@ -19,6 +19,10 @@ import { Config } from './../core/config.gen';
 let app: express.Application = expressWsRoutes();
 
 
+var lj = require('longjohn');
+lj.async_trace_limit = 20;
+
+
 /// Disable Cache
 if (Config.core.disableCache) app.use(noCache);
 

@@ -33,6 +33,7 @@
     "express-ws": "^3.0.0",
     "express-ws-routes": "^1.1.0",
     "json-prune": "^1.1.0",
+    "longjohn": "^0.2.12",
     "mongodb": "^3.0.10",
     "network": "^0.3.2",
     "node-csv-parse": "^1.2.0",

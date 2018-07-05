@@ -1,11 +1,11 @@
 import * as express from 'express';
 import * as fs from 'fs';
 import * as p from 'path';
-import { Action } from './../../core/cgi-package';
+import { Action } from './../../helpers/cgi-helpers/core';
 import { autoPad } from './../../helpers/shells/shell-writer';
 
 var defaultPath = "index";
-var actions: Action[] = [];
+export var actions: Action[] = [];
 
 /// meant to be called only once
 export function routerLoader(app, path, cgiPath = null, first = true, level = 0): Action[] {
@@ -60,13 +60,15 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
 
     if (first) {
         /// message ///
-        console.log("\x1b[35m", "Mounting Cgi Tree...", "\x1b[0m");
+        if (app) console.log("\x1b[35m", "Mounting Cgi Tree...", "\x1b[0m");
         /// normalize cgiPath
-        cgiPath = "/" + (cgiPath.match(/([a-z0-9].*)/gi) || [""])[0];
+        cgiPath = "/" + ( cgiPath ? ((cgiPath.match(/([a-z0-9].*)/gi) || [""])[0]) : "" );
         /// load sub directory
         var router = express.Router();
-        app.use(cgiPath, router);
-        app = router;
+        if (app !== null) {
+            app.use(cgiPath, router);
+            app = router;
+        }
     }
     ///////////////
 
@@ -74,8 +76,10 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
         var files = fs.readdirSync(path);
         if (!first) {
             var router = express.Router();
-            app.use(`/${name}`, router);
-            app = router;
+            if (app !== null) {
+                app.use(`/${name}`, router);
+                app = router;
+            }
             /// message ///
             var types = getTypesFromPath(`${path}/${defaultPath}`);
             printChild(name, types, true);
@@ -99,13 +103,13 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
         var types = [];
         if (route instanceof Action) {
             actions.push(route);
-            app.use(`/${routename}`, route.mount());
+            if (app !== null) app.use(`/${routename}`, route.mount());
             /// message ///
             types = getTypesFromAction(route);
             ///////////////
 
         } else {
-            app.use(`/${routename}`, route);
+            if (app !== null) app.use(`/${routename}`, route);
             types = gettypesFromActionClassic(route);
         }
 

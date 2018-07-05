@@ -24,6 +24,11 @@ import { Config } from './../core/config.gen';
 let app: express.Application = expressWsRoutes();
 `;
 
+var tDebugStack = `
+var lj = require('longjohn');
+lj.async_trace_limit = 20;
+`;
+
 var tDisableCache = `
 /// Disable Cache
 if (Config.core.disableCache) app.use(noCache);
@@ -119,6 +124,10 @@ function main(): string {
     tmpstr.push(
         tHeader.replace(/^[\r\n]+/, '')
     );
+    /////////////////////////////////////////////
+
+    /// debug track /////////////////////////////
+    tmpstr.push(tDebugStack);
     /////////////////////////////////////////////
 
     /// disable cache ///////////////////////////

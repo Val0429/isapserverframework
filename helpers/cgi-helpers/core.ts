@@ -100,8 +100,7 @@ export class Action<T = any, U = any> {
         /// 4) requiredParameters
         config.requiredParameters && middlewares.push(requiredParameters(config.requiredParameters));
         /// 4) inputType
-        /// todo
-        // config.inputType && middlewares.push(inputType(caller, config.inputType));
+        config.inputType && middlewares.push(inputType(caller, config.inputType));
         /// mount others
         config.middlewares && (middlewares = [...middlewares, ...config.middlewares]);
         /////////////////////////////////////////////

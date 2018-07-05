@@ -51,34 +51,8 @@ export interface TypesFromAction {
 }
 
 
-export namespace AstConverter {
-    export function toBoolean(input: string | number | boolean | any, name: string): boolean {
-        return typeof input === 'string' ? (input === 'true' ? true : false) :
-            typeof input === 'number' ? (input === 1 ? true : false) :
-            (input ? true : false);
-    }
-
-    export function toString(input: string, name: string): string {
-        if (typeof input !== 'string') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be string.`]);
-        return input;
-    }
-
-    export function toNumber(input: string | number, name: string): number {
-        if (typeof input !== 'string' && typeof input !== 'number') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be number.`]);
-        if (typeof input === 'string') return parseInt(input, 10);
-        return input;
-    }
-
-    export function toDateEntity(input: string | number, name: string): string {
-        if (typeof input !== 'string' && typeof input !== 'number') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid string or number of Date.`]);
-        return `<!@#${new Date(input).toISOString()}#@!>`;
-    }
-
-    export function tryParseDateEntity(input: string): Date {
-        if (typeof input !== 'string') return;
-        if (input.substr(0, 4) === '<!@#' && input.substr(input.length-4, 4) === '#@!>') {
-            return new Date(input.substr(4, input.length-8));
-        }
-    }
-    
+export interface ConverterEntity {
+    __type__: string;
+    class?: string;
+    data: any;
 }

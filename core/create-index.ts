@@ -4,7 +4,6 @@ import { RoleList } from './userRoles.gen';
 import { createIndex } from './../helpers/parse-server/parse-helper';
 
 waitServerReady(async () => {
-
     /// indexes ////////////////
     /// Session
     createIndex("_Session", "expiresTTL",

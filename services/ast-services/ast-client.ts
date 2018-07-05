@@ -1,8 +1,9 @@
 const { fork } = require('child_process');
-import { RequestInit, RequestNormal, EnumRequestType, TypesFromAction, Response, AstConverter } from './ast-core';
+import { RequestInit, RequestNormal, EnumRequestType, TypesFromAction, Response, ConverterEntity } from './ast-core';
 import { Errors } from './../../core/errors.gen';
 import { actions } from './../../helpers/routers/router-loader';
 import { waitServerReady } from './../../core/pending-tasks';
+import { ParseObject, retrievePrimaryClass } from './../../helpers/parse-server/parse-helper';
 const uuidv1 = require('uuid/v1');
 
 interface Client {
@@ -17,13 +18,14 @@ export class AstClient {
 
     finalConverter(data: any): any {
         if (typeof data !== 'object') {
-            if (typeof data === 'string') {
-                /// try convert Date back
-                var result = AstConverter.tryParseDateEntity(data);
-                if (result) return result;
-            }
             return data;
         }
+
+        /// try convert back
+        var result = AstConverter.fromDateEntity(data) ||
+                     AstConverter.fromParseObjectEntity(data);
+        if (result) return result;
+
         for (var key in data) {
             var value = data[key];
             data[key] = this.finalConverter(value);
@@ -77,3 +79,25 @@ export class AstClient {
 }
 
 export default new AstClient();
+
+
+namespace AstConverter {
+
+    export function fromDateEntity(input: ConverterEntity): Date {
+        if (input.__type__ !== "Date") return;
+        return new Date(input.data);
+    }
+
+    export function fromParseObjectEntity(input: ConverterEntity): ParseObject<any> {
+        if (input.__type__ !== "ParseObject") return;
+        var cls: any = retrievePrimaryClass(input.class);
+        if (!cls) throw Errors.throw(Errors.CustomInvalid, [`Inner type <${input.class}> is not a registered class.`]);
+        
+        /// create ParseObject
+        var obj = new cls( typeof input.data === 'string' ? undefined : input.data );
+        /// set id
+        if (typeof input.data === 'string') obj.id = input.data;
+
+        return obj;
+    }
+}

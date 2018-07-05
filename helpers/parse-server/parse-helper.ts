@@ -10,7 +10,7 @@ export function registerSubclass(collectionName?: string) {
         primaryClassMap[name] = targetClass;
     }
 }
-export function retrievePrimaryClass<T>(target: T): new () => T extends 'string' ? any : T {
+export function retrievePrimaryClass<T>(target: T): new () => (T extends string ? any : T) {
     var name: string = typeof target === 'string' ? target : target.constructor.name;
     return primaryClassMap[name];
 }

@@ -85,35 +85,27 @@ process.on('message', (data: Request) => {
 namespace AstParser {
     export function getType(type: TypesFromAction): Type<ts.Type> {
         let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
-        /// 1) get type alias from source directly
-        var tas = sourceFile.getTypeAlias(type.type);
-        if (tas) return tas.getType();
-        var inf = AstParser.getInterface(type);
-        if (inf) return inf.getType();
-        return;
-    }
-
-    export function getInterface(type: TypesFromAction): InterfaceDeclaration {
-        let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
         /// 1) get interface from source directly
         var inf = sourceFile.getInterface(type.type);
-        if (inf) return inf;
+        if (inf) return inf.getType();
+        var tas = sourceFile.getTypeAlias(type.type);
+        if (tas) return tas.getType();
 
         /// 2) get from named import
         /// 3) and also get from asterisk export
-        inf = sourceFile.getImportDeclarations().reduce<InterfaceDeclaration>( (final, imd, i, ary) => {
-            var result = imd.getNamedImports().reduce<InterfaceDeclaration>( (final, ims, i, ary2) => {
+        var rtn: Type<ts.Type> = sourceFile.getImportDeclarations().reduce<Type<ts.Type>>( (final, imd, i, ary) => {
+            var result = imd.getNamedImports().reduce<Type<ts.Type>>( (final, ims, i, ary2) => {
                 if (ims.getName() === type.type) {
                     /// found
                     var sf = ims.getNameNode().getDefinitions()[0].getSourceFile();
                     ary.length = ary2.length = 0;
-                    return AstParser.getInterface({path: sf, type: type.type});
+                    return AstParser.getType({path: sf, type: type.type});
                 } return final;
             }, null);
             if (result) return result;
             return final;
         }, null);
-        return inf;
+        return rtn;
     }
 
     export function getInterfaceMembers(inf: InterfaceDeclaration): PropertySignature[] {
@@ -211,6 +203,9 @@ namespace AstParser {
             var rtnt = AstConverter.toTuple(type, obj, showname);
             if (name) data[name] = rtnt;
 
+        } else if (type.isIntersection()) {
+            /// 11) Intersection
+            var rtni = AstConverter.toIntersection(type, obj, showname);
         }
 
         // } else if (type.getText() === "Parse.File") {
@@ -333,6 +328,11 @@ namespace AstConverter {
         if (types.length !== input.length) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should with exact length of ${types.length}.`]);
         for (var key = 0; key < types.length; ++key)
             AstParser.validateType(types[key], input, key+"", `${name}.${key}`);
+        return input;
+    }
+
+    export function toIntersection(type: Type<ts.Type>, input: any, name: string): any {
+        console.log(type.getIntersectionTypes());
         return input;
     }
 

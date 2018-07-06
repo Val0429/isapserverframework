@@ -5,7 +5,7 @@ import { Config } from './../../core/config.gen';
 export namespace FileHelper {
 
     /// save base64 file(s) into Parse.File(s), and return.
-    export async function toParseFile<T extends string | string[]>(input: T, extName: string = null, mime: string = null):
+    export async function toParseFile<T extends string | string[]>(input: T, name: string = null, mime: string = null):
         Promise<
             T extends string ? Parse.File :
                 Parse.File[]
@@ -19,7 +19,7 @@ export namespace FileHelper {
             return <any>result;
         }
 
-        var file = new Parse.File(`image.${extName || 'b64'}`, { base64: input }, mime);
+        var file = new Parse.File(`${name || 'file.b64'}`, { base64: input }, mime);
         await file.save();
         return <any>file;
     }

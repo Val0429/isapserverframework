@@ -56,3 +56,21 @@ export interface ConverterEntity {
     class?: string;
     data: any;
 }
+
+/// Type Converter
+export interface IvParseFile {
+    name: string;
+    type: string;
+    data: string;
+}
+export type vParseFile =
+    /**
+     * pure base64 string.
+     */
+    string |
+    /**
+     * name: filename with ext name.
+     * type: mime-type.
+     * data: pure base64 string.
+     */
+    IvParseFile;

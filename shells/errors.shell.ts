@@ -15,9 +15,26 @@ export class Errors {
 
     detail: ErrorObject;
     args: string[];
+    tag: any;
+    next: Errors;
 
-    constructor(error: ErrorObject) {
-        this.detail = error;
+    constructor(error: ErrorObject | Errors) {
+        var err: any = error;
+        if (err.statusCode !== undefined && err.message !== undefined) {
+            /// ErrorObject
+            this.detail = err;
+        } else {
+            /// from Errors JSON
+            this.detail = err.detail;
+            this.args = err.args;
+            if (err.next) this.append( new Errors(err.next) );
+        }
+    }
+
+    append(error: Errors) {
+        var me: Errors = this;
+        while (me.next) me = me.next;
+        me.next = error;
     }
 
     static throw(error: ErrorObject, args: string[] = null): Errors {
@@ -26,7 +43,7 @@ export class Errors {
         return rtn;
     }
 
-    resolve(res: Response = null): string {
+    resolve(res: Response = null, recursive: boolean = true): string {
         var message = this.detail.message;
         do {
             if (!this.args) break;
@@ -35,6 +52,14 @@ export class Errors {
                 message = message.replace(new RegExp(\`\\\\{\${i}\\\\}\`, "g"), arg);
             }
         } while(0);
+
+        if (recursive) {
+            var me: Errors = this;
+            while (me.next) {
+                me = me.next;
+                message += "\\r\\n" + me.resolve(null, false);
+            }
+        }
         
         if (res) {
             (async () => {

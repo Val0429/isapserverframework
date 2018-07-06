@@ -8,6 +8,7 @@ var reflector: Project = this.reflector = new Project({
     addFilesFromTsConfig: true
 });
 reflector.addExistingSourceFiles("node_modules/@types/**/*");
+var tSource = reflector.getSourceFile(`ast-core.ts`);
 
 class AstService {
 
@@ -39,7 +40,7 @@ class AstService {
         var data = request.data;
         var type = AstParser.getType(request.type);
         if (!type) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
-        AstParser.validateType(type, data);
+        data = AstParser.validateType(type, data);
 
         return data;
     }
@@ -125,7 +126,7 @@ namespace AstParser {
         return result;
     }
 
-    export function validateType(type: Type<ts.Type>, data: any, name: string = null, prefix: string = null, isArray: boolean = false) {
+    export function validateType(type: Type<ts.Type>, data: any, prefix: string = null, isArray: boolean = false): any {
 
         /// 3) validate type
         /**
@@ -141,81 +142,82 @@ namespace AstParser {
          * 8) Array --- Array
          * 9) Tuple
          * 10) Parse.File
-         * 11) Intersection
-         * 12) Union
-         * 13) Generic
-         * 14) Any
+         * 11) Literal Type
+         * 12) Intersection
+         * 13) Union
+         * 14) Generic
+         * 15) Any
          * X) Other Class X
          */
 
         var showname = prefix;
-        /// if name == null, data must be object type
-        if (!name && typeof data !== "object") throw "Internal Error, validateType must be object type.";
-        var obj = name ? data[name] : data;
+        var obj = data;
 
         if (type.isBoolean()) {
             /// 1) boolean
             //console.log(`${name} is boolean, obj ${typeof obj}`);
-            data[name] = AstConverter.toBoolean(obj, showname, isArray);
+            return AstConverter.toBoolean(obj, showname, isArray);
 
         } else if (type.isString()) {
             /// 2) string
-            data[name] = AstConverter.toString(obj, showname, isArray);
+            return AstConverter.toString(obj, showname, isArray);
             //console.log(`${name} is string, obj ${typeof obj}`);
 
         } else if (type.isNumber()) {
             /// 3) number
-            data[name] = AstConverter.toNumber(obj, showname, isArray);
+            return AstConverter.toNumber(obj, showname, isArray);
             // console.log(`${name} is number, obj ${typeof obj}`);
 
         } else if (type.getText() === 'Date') {
             /// 4) Date
-            data[name] = AstConverter.toDateEntity(obj, showname, isArray);
+            return AstConverter.toDateEntity(obj, showname, isArray);
             // console.log(`${name} is Date, obj ${typeof obj}`);
 
         } else if (type.isEnumLiteral()) {
             /// 5) Enum
-            data[name] = AstConverter.toEnum(type, obj, showname, isArray);
+            return AstConverter.toEnum(type, obj, showname, isArray);
             // console.log(`${name} is Enum, obj ${typeof obj}`);
         
         } else if (type.isClass()) {
             if (type.getText() === 'Parse.File') {
-                // /// 10) Parse.File
-                // data[name] = AstConverter.toParseFileEntity(type, obj, showname, isArray);
+                /// 10) Parse.File
+                return AstConverter.toParseFileEntity(type, obj, showname, isArray);
             } else {
                 /// 6) ParseObject --- string (objectId) | Object
-                data[name] = AstConverter.toParseObjectEntity(type, obj, showname, isArray);
+                return AstConverter.toParseObjectEntity(type, obj, showname, isArray);
             }
 
         } else if (type.isInterface() || type.isAnonymous()) {
             /// 7) Object (Interface) --- Object
             /// 7.1) Anonymous Type
-            var rtno = AstConverter.toObject(type, obj, showname, isArray);
-            if (name) data[name] = rtno;
+            return AstConverter.toObject(type, obj, showname, isArray);
 
         } else if (type.isArray()) {
             /// 8) Array --- Array
-            var rtna = AstConverter.toArray(type, obj, showname);
-            if (name) data[name] = rtna;
+            return AstConverter.toArray(type, obj, showname);
 
         } else if (type.isTuple()) {
             /// 9) Tuple
-            var rtnt = AstConverter.toTuple(type, obj, showname);
-            if (name) data[name] = rtnt;
+            return AstConverter.toTuple(type, obj, showname);
+
+        } else if (type.isNumberLiteral() || type.isBooleanLiteral() || type.isStringLiteral()) {
+            /// 11) Literal Type
+            return AstConverter.ToLiteral(type, obj, showname);
 
         } else if (type.isIntersection()) {
-            /// 11) Intersection
-            var rtni = AstConverter.toIntersection(type, obj, showname);
+            /// 12) Intersection
+            return AstConverter.toIntersection(type, obj, showname);
+        } else if (type.isUnion()) {
+            /// 13) Union
+            return AstConverter.toUnion(type, obj, showname);
         }
 
-        // } else if (type.getText() === "Parse.File") {
-        //     /// 10) Parse.File
-        //     console.log("Parse.File", name);
-        // }
+        /// todo: error handle
+        return obj;
 
     }
 
-    export function validateInterface(inf: InterfaceDeclaration, data: any, prefix: string = null) {
+    export function validateInterface(inf: InterfaceDeclaration, data: object, prefix: string = null): object {
         function getName(name: string): string {
             return !prefix ? name : `${prefix}.${name}`;
         }
@@ -225,7 +227,11 @@ namespace AstParser {
 
         try {
 
+        if (typeof data !== 'object' || Array.isArray(data)) throw Errors.throw(Errors.CustomInvalid, [`<${prefix}> should be valid object.`]);
+
         var mem = AstParser.getInterfaceMembers(inf);
+
+        var newdata = {};
 
         mem.forEach( (prop) => {
             var name = prop.getName();
@@ -235,21 +241,21 @@ namespace AstParser {
 
             /// 1) validate required
             var q = prop.getQuestionTokenNode();
-            if (!q && (obj === undefined || obj === null)) throw Errors.throw(Errors.ParametersRequired, [`<${getName(name)}>`]);
+            if (!q && (obj === undefined || obj === null)) throw Errors.throw(Errors.ParametersRequired, [`<${showname}>`]);
 
-            AstParser.validateType(type, data, name, showname);
+            newdata[name] = AstParser.validateType(type, obj, showname);
         });
 
 
         } catch (reason) {
             if (reason instanceof Errors) {
-                if (reason.args.length > 0) {
-                    reason.args[0] = reason.args[0] + `\n\n${getImplementation()}`;
-                }
+                reason.append( Errors.throw(Errors.Custom, [`${getImplementation()}\r\n`]) );
+                reason.tag = newdata;
             }
             throw reason;
         }
-                
+
+        return newdata;       
     }
 }
 
@@ -308,17 +314,15 @@ namespace AstConverter {
     }
 
     export function toObject(type: Type<ts.Type>, input: object, name: string, isArray: boolean = false): object {
-        if (typeof input !== 'object' || Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid object${isArray?'[]':''}.`]);
         var inf: InterfaceDeclaration = type.getSymbol().getDeclarations()[0] as InterfaceDeclaration;
-        //AstParser.validateType(inf.getType(), input, null, name);
-        AstParser.validateInterface(inf, input, name);
+        input = AstParser.validateInterface(inf, input, name);
         return input;
     }
 
     export function toArray(type: Type<ts.Type>, input: Array<any>, name: string): Array<any> {
         if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
         var tType = type.getTypeArguments()[0];
-        for (var key in input) AstParser.validateType(tType, input, key, name, true);
+        for (var key in input) input[key] = AstParser.validateType(tType, input[key], name, true);
         return input;
     }
 
@@ -327,18 +331,50 @@ namespace AstConverter {
         var types = type.getTypeArguments();
         if (types.length !== input.length) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should with exact length of ${types.length}.`]);
         for (var key = 0; key < types.length; ++key)
-            AstParser.validateType(types[key], input, key+"", `${name}.${key}`);
+            input[key] = AstParser.validateType(types[key], input[key], `${name}.${key}`);
         return input;
     }
 
-    export function toIntersection(type: Type<ts.Type>, input: any, name: string): any {
-        console.log(type.getIntersectionTypes());
+    export function ToLiteral(type: Type<ts.Type>, input: boolean | string | number, name: string, isArray: boolean = false): boolean | string | number {
+        var tc = (<any>type.compilerType);
+        var value = type.isBooleanLiteral() ? type.getText() === 'true' :
+            tc.freshType.value;
+        if (value !== input) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be ${typeof value} of ${value}.`]);
         return input;
     }
 
-    // export function toParseFileEntity(type: Type<ts.Type>, input: string | object, name, isArray: boolean = false) {
-    //     return input;
-    // }
+    export function toIntersection(type: Type<ts.Type>, input: object, name: string): object {
+        // if (typeof input !== 'object') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid object${isArray?'[]':''}.`]);
+        var types = type.getIntersectionTypes();
+        var rtn = {};
+        for (var key = 0; key < types.length; ++key)
+            rtn = { ...rtn, ...AstParser.validateType(types[key], input, name) };
+        return rtn;
+    }
+
+    export function toUnion(type: Type<ts.Type>, input: any, name: string): any {
+        var types = type.getUnionTypes();
+        var reasons;
+        for (var key = 0; key < types.length; ++key) {
+            try {
+                return AstParser.validateType(types[key], input, name);
+            } catch(reason) {
+                if (!(reason instanceof Errors)) throw reason;
+                if (!reasons) reasons = reason;
+                else reasons.append(reason);
+            }
+        }
+        reasons.append( Errors.throw(Errors.Custom, [`${type.getAliasSymbol().getDeclarations()[0].getText()}\r\n`]) );
+        throw reasons;
+    }
+
+    export function toParseFileEntity(type: Type<ts.Type>, input: string | object, name, isArray: boolean = false) {
+        var type = AstParser.getType({path: tSource, type: 'vParseFile'});
+        return {
+            __type__: "Parse.File",
+            data: AstParser.validateType(type, input, name, isArray)
+        }
+    }
     
     export function toParseObjectEntity(type: Type<ts.Type>, input: string | object, name: string, isArray: boolean = false): ConverterEntity {
         if (typeof input !== 'string' && typeof input !== 'object') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be${isArray?' Array of':''} objectId, or object itself.`]);
@@ -355,7 +391,7 @@ namespace AstConverter {
             var TType = decl.getBaseTypes()[0].getTypeArguments()[0];
             var Tdecl = TType.getSymbol().getValueDeclaration();
             var inf = TType.getSymbol().getDeclarations()[0] as InterfaceDeclaration;
-            AstParser.validateInterface(inf, input, name);
+            input = AstParser.validateInterface(inf, input, name);
 
         } while(0);
 

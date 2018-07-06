@@ -9,6 +9,10 @@ import './../core';
 
 /// requiredParameters /////////////////////////////////////
 declare module "helpers/cgi-helpers/core" {
+    export interface ActionParam<T> {
+        inputType: T;
+    }
+
     export interface ActionConfig {
         /**
          * Replacement of `requiredParameters`.
@@ -16,6 +20,12 @@ declare module "helpers/cgi-helpers/core" {
          * Default = null.
          */
         inputType?: string;
+    }
+}
+
+declare module 'express/lib/request' {
+    interface Request {
+        inputType: any;
     }
 }
 
@@ -27,8 +37,9 @@ export function inputType(caller: string, type: string): RequestHandler {
                 type
             }, req.parameters);
 
+            req.inputType = rtn;
             /// replace after validation
-            req.parameters = {...req.parameters, ...rtn};
+            // req.parameters = {...req.parameters, ...rtn};
 
         } catch(reason) {
             return next( reason );

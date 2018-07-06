@@ -188,8 +188,8 @@ namespace AstParser {
         
         } else if (type.isClass()) {
             if (type.getText() === 'Parse.File') {
-                /// 10) Parse.File
-                data[name] = AstConverter.toParseFileEntity(type, obj, showname, isArray);
+                // /// 10) Parse.File
+                // data[name] = AstConverter.toParseFileEntity(type, obj, showname, isArray);
             } else {
                 /// 6) ParseObject --- string (objectId) | Object
                 data[name] = AstConverter.toParseObjectEntity(type, obj, showname, isArray);
@@ -336,9 +336,9 @@ namespace AstConverter {
         return input;
     }
 
-    export function toParseFileEntity(type: Type<ts.Type>, input: string | object, name, isArray: boolean = false) {
-        return input;
-    }
+    // export function toParseFileEntity(type: Type<ts.Type>, input: string | object, name, isArray: boolean = false) {
+    //     return input;
+    // }
     
     export function toParseObjectEntity(type: Type<ts.Type>, input: string | object, name: string, isArray: boolean = false): ConverterEntity {
         if (typeof input !== 'string' && typeof input !== 'object') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be${isArray?' Array of':''} objectId, or object itself.`]);

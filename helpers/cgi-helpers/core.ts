@@ -124,6 +124,7 @@ export class Action<T = any, U = any> {
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {
                             var result = await realfunc({...request ,request, response});
+                            if (this.config.outputType) result = await ParseObject.toOuputJSON2(this.caller, this.config.outputType, result);
                             response.send(result);
                         } catch(reason) {
                             next(reason);
@@ -154,354 +155,164 @@ export class Action<T = any, U = any> {
     }
 }
 
-export type InputRestfulC<T = {}> = {
-    sessionId: string;
-} & T;
-export type OutputRestfulC<T = {}> = ParseObject<T>;
 
-export type InputRestfulR<T = {}> = IInputPaging & {
-    sessionId: string;
-    objectId?: string;
-} & T;
-export type OutputRestfulR<T> = IOutputPaging<ParseObject<T>[]> | ParseObject<T>;
+export namespace Restful {
 
-export type InputRestfulU<T = {}> = {
-    sessionId: string;
-    objectId: string;
-} & T;
-export type OutputRestfulU<T> = ParseObject<T>;
+    export interface Option {
+        paging?: boolean;
+        parseObject?: boolean;
+    }
 
-export type InputRestfulD<T> = {
-    sessionId: string;
-    objectId: string;
-} & T;
-export type OutputRestfulD<T = {}> = ParseObject<T>;
+    export type InputC<T> = T;
+    export type OutputC<T, K extends Option = {
+        parseObject: true
+    }, U = K extends { parseObject: false } ? T : ParseObject<T> >
+         = U;
 
-export interface RestfulTuner<T> {
-    (input: T): Promise<T> | T
-}
+    export type InputR<T, K extends Option = {
+        paging: true
+    }, U = K extends { paging: false } ? T : IInputPaging<T> >
+       = U;
+    export type OutputR<T, K extends Option = {
+        paging: true,
+        parseObject: true,
+    }, U = K extends { parseObject: false } ? T : ParseObject<T>,
+       V = K extends { paging: false } ? U : IOutputPaging<U> >
+       = V;
 
-export class Restful {
+    export type InputU<T> = { objectId: string } & T;
+    export type OutputU<T, K extends Option = {
+        parseObject: true
+    }, U = K extends { parseObject: false } ? T : ParseObject<T> >
+         = U;
+
+    export type InputD<T> = InputU<T>;
+    export type OutputD<T, K extends Option = {
+        parseObject: true
+    }> = OutputU<T, K>;
+
     /**
      * C: prototype
      */
-    // action.post<InputPost>({
-    //     requiredParameters: ["floor", "phone", "unitNo"],
-    // }, async (data) => {
-    //     var floor = new Floors({
-    //         floor: data.parameters.floor,
-    //         phone: data.parameters.phone,
-    //         unitNo: data.parameters.unitNo,
-    //     });
-    //     await floor.save();
-
-    //     return floor;
-
-    // });
-
-    // action.post<InputPost, OutputPost>({
-    //     requiredParameters: ["floor", "phone", "unitNo"],
-    // }, RestfulC(Floors, ["floor", "phone", "unitNo"]));
-
-    // function RestfulC<T extends Parse.Object>(type: new(...args: any[])=> T, keys: string[]) {
-    //     return async <U>(data: U): Promise<T> => {
-    //         var o = new type(omitObject((<any>data).parameters, keys));
+    // static C<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, requiredParameters: string[] = [], options: ActionConfig = {},
+    //     tuner?: RestfulTuner<T>
+    //     ) {
+    //     options = options || {};
+    //     options.requiredParameters = requiredParameters;
+            
+    //     action.post<InputRestfulC<T>, OutputRestfulC<T>>(options, async <U>(data: U): Promise<ParseObject<T>> => {
+    //         var params = (<any>data).parameters;
+    //         tuner && ( params = await tuner(params) );
+    //         var o = new type(omitObject(params, requiredParameters));
     //         await o.save();
     //         return o;
-    //     }
+    //     });
     // }
-
-    static C<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, requiredParameters: string[] = [], options: ActionConfig = {},
-        tuner?: RestfulTuner<T>
-        ) {
-        options = options || {};
-        options.requiredParameters = requiredParameters;
-            
-        action.post<InputRestfulC<T>, OutputRestfulC<T>>(options, async <U>(data: U): Promise<ParseObject<T>> => {
-            var params = (<any>data).parameters;
-            tuner && ( params = await tuner(params) );
-            var o = new type(omitObject(params, requiredParameters));
-            await o.save();
-            return o;
-        });
-    }
 
     /**
      * R: prototype
      */
-    // action.get<InputGet, OutputGet>(async (data) => {
-    //     var page = +(data.parameters.page || 1);
-    //     var pageSize = +(data.parameters.pageSize || 20);
-
-    //     var floors = await new Parse.Query(Floors)
-    //         .limit(pageSize)
-    //         .skip( (page-1) * pageSize )
-    //         .find();
-
-    //     var total = await new Parse.Query(Floors).count();
-    //     var totalPages = Math.ceil(total / pageSize);
-
-    //     return {
-    //         page, pageSize,
-    //         total, totalPages,
-    //         results: floors
-    //     }
-    // });
-    // static R<T extends Parse.Object>(type: new(...args: any[])=> T) {
-    //     return async <U>(data: U): Promise<IOutputPaging<T[]>> => {
-    //         var param = (<any>data).parameters;
-    //         var page = +(param.page || 1);
-    //         var pageSize = +(param.pageSize || 20);
-    //         var o = await new Parse.Query(type)
-    //             .limit(pageSize)
-    //             .skip( (page-1) * pageSize )
-    //             .find();
-    //         var total = await new Parse.Query(type).count();
-    //         var totalPages = Math.ceil(total / pageSize);
-    //         return {
-    //             page, pageSize,
-    //             total, totalPages,
-    //             results: o
-    //         }
-    //     }
+    // static R<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, options: ActionConfig = {},
+    //     tuner?: RestfulTuner<ParseObject<T>>
+    // ) {
+    //     action.get<InputRestfulR<T>, OutputRestfulR<T>>(options, async (data): Promise<OutputRestfulR<T>> => {
+    //         var params = (<any>data).parameters;
+    //         return await this.SingleOrPagination<ParseObject<T>>( new Parse.Query(type), params, null, tuner );
+    //     });
     // }
-
-    static R<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, options: ActionConfig = {},
-        tuner?: RestfulTuner<ParseObject<T>>
-    ) {
-        action.get<InputRestfulR<T>, OutputRestfulR<T>>(options, async (data): Promise<OutputRestfulR<T>> => {
-            var params = (<any>data).parameters;
-            return await this.SingleOrPagination<ParseObject<T>>( new Parse.Query(type), params, null, tuner );
-        });
-    }
 
     /**
      * U: prototype
      */
-    // action.put<InputPut, OutputPut>({
-    //     requiredParameters: ["objectId"],
-    // }, async (data) => {
-    //     var floor = await new Parse.Query(Floors)
-    //         .get(data.parameters.objectId);
+    // static U<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {},
+    //     tuner?: RestfulTuner<T>
+    // ) {
+    //     const key = "objectId";
+    //     options = options || {};
+    //     options.requiredParameters = (options.requiredParameters || []).concat(key);
 
-    //     await floor.save( omitObject(data.parameters, ["floor", "phone", "unitNo"]) );
-    //     return floor;
-    // });
-    // action.put<InputPut, OutputPut>({
-    //     requiredParameters: ["objectId"],
-    // }, RestfulU(Floors, ["floor", "phone", "unitNo"]));
-
-    // function RestfulU<T extends Parse.Object>(type: new(...args: any[])=> T, keys: string[]) {
-    //     return async <U>(data: U): Promise<T> => {
-    //         var param = (<any>data).parameters;
-    //         var o = await new Parse.Query(type)
-    //             .get(param.objectId);
-    //         await o.save( omitObject(param, keys) );
-    //         return o;
-    //     }
-    // }
-
-    static U<T>(action: Action, type: new(...args: any[]) => ParseObject<T>, acceptParameters: string[] = [], options: ActionConfig = {},
-        tuner?: RestfulTuner<T>
-    ) {
-        const key = "objectId";
-        options = options || {};
-        options.requiredParameters = (options.requiredParameters || []).concat(key);
-
-        action.put<InputRestfulU<T>, OutputRestfulU<T>>(options, async (data): Promise<OutputRestfulU<T>> => {
-            var params = (<any>data).parameters;
-            tuner && ( params = await tuner(params) );
+    //     action.put<InputRestfulU<T>, OutputRestfulU<T>>(options, async (data): Promise<OutputRestfulU<T>> => {
+    //         var params = (<any>data).parameters;
+    //         tuner && ( params = await tuner(params) );
             
-            var o = await new Parse.Query(type)
-                .get(params.objectId);
-            await o.save( omitObject(params, acceptParameters) );
-            return o;
-        });
-    }
+    //         var o = await new Parse.Query(type)
+    //             .get(params.objectId);
+    //         await o.save( omitObject(params, acceptParameters) );
+    //         return o;
+    //     });
+    // }
 
     /**
      * D: prototype
      */
-    // action.delete<InputDelete>({
-    //     requiredParameters: ["objectId"],
-    // }, async (data) => {
-    //     var floor = await new Parse.Query(Floors)
-    //         .get(data.parameters.objectId);
-    //     await floor.destroy();
+    // static D<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, options: ActionConfig = {},
+    //     tuner?: RestfulTuner<T>
+    // ) {
+    //     const key = "objectId";
+    //     options = options || {};
+    //     options.requiredParameters = (options.requiredParameters || []).concat(key);
 
-    //     return;
-    // });
-    // action.delete<InputDelete, OutputDelete>({
-    //     requiredParameters: ["objectId"],
-    // }, RestfulD(Floors));
+    //     action.delete<InputRestfulD<T>, OutputRestfulD<T>>(options, async (data): Promise<OutputRestfulD<T>> => {
+    //         var params = (<any>data).parameters;
+    //         tuner && ( params = await tuner(params) );
 
-    // function RestfulD<T extends Parse.Object>(type: new(...args: any[])=> T) {
-    //     return async <U>(data: U): Promise<T> => {
-    //         var param = (<any>data).parameters;
     //         var o = await new Parse.Query(type)
-    //             .get(param.objectId);
+    //             .get(params.objectId);
     //         await o.destroy();
     //         return o;
-    //     }
+    //     });
     // }
 
-    static D<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, options: ActionConfig = {},
-        tuner?: RestfulTuner<T>
-    ) {
-        const key = "objectId";
-        options = options || {};
-        options.requiredParameters = (options.requiredParameters || []).concat(key);
+    // static CRUD<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, requiredParameters: string[], acceptParameters: string[] = null) {
+    //     acceptParameters = acceptParameters || requiredParameters;
 
-        action.delete<InputRestfulD<T>, OutputRestfulD<T>>(options, async (data): Promise<OutputRestfulD<T>> => {
-            var params = (<any>data).parameters;
-            tuner && ( params = await tuner(params) );
+    //     this.C<T>(action, type, acceptParameters, {requiredParameters});
+    //     this.R<T>(action, type);
+    //     this.U<T>(action, type, acceptParameters);
+    //     this.D<T>(action, type);
+    // }
 
-            var o = await new Parse.Query(type)
-                .get(params.objectId);
-            await o.destroy();
-            return o;
-        });
-    }
+    // static async Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging,
+    //     rules: ParseObjectJSONRule = null, tuner?: RestfulTuner<any>): Promise<IOutputPaging<T[]>> {
 
-    static CRUD<T>(action: Action, type: new(...args: any[])=> ParseObject<T>, requiredParameters: string[], acceptParameters: string[] = null) {
-        acceptParameters = acceptParameters || requiredParameters;
+    //     var page = +(paging.page || 1);
+    //     var pageSize = +(paging.pageSize || 20);
+    //     if ("true" === paging.all) pageSize = Number.MAX_SAFE_INTEGER;
+    //     var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
+    //     var total = await query.count();
+    //     var totalPages = Math.ceil(total / pageSize);
 
-        this.C<T>(action, type, acceptParameters, {requiredParameters});
-        this.R<T>(action, type);
-        this.U<T>(action, type, acceptParameters);
-        this.D<T>(action, type);
-    }
+    //     /// apply tuner
+    //     if (tuner) {
+    //         for (var u of o) await tuner(u);
+    //     }
 
-    static async Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging,
-        rules: ParseObjectJSONRule = null, tuner?: RestfulTuner<any>): Promise<IOutputPaging<T[]>> {
+    //     if (paging.all === "true") return { total, results: ParseObject.toOutputJSON.call(o, rules) };
+    //     return { page, pageSize, total, totalPages, results: ParseObject.toOutputJSON.call(o, rules) };
+    // }
 
+    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging<any>): Promise<IOutputPaging<any>> {
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
-        if ("true" === paging.all) pageSize = Number.MAX_SAFE_INTEGER;
+        var all = true == paging.all;
+        if (true == paging.all) pageSize = Number.MAX_SAFE_INTEGER;
         var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
 
-        /// apply tuner
-        if (tuner) {
-            for (var u of o) await tuner(u);
-        }
-
-        if (paging.all === "true") return { total, results: ParseObject.toOutputJSON.call(o, rules) };
-        return { page, pageSize, total, totalPages, results: ParseObject.toOutputJSON.call(o, rules) };
+        if (all) return { total, results: o };
+        return { page, pageSize, total, totalPages, results: o };
     }
 
-    static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },
-        rules: ParseObjectJSONRule = null, tuner?: RestfulTuner<any>): Promise<IOutputPaging<T[]> | T> {
-        /// single
-        if (paging.objectId) {
-            var o = await query.get(paging.objectId);
-            tuner && await tuner(o);
-            return ParseObject.toOutputJSON.call(o, rules);
-        }
-        return this.Pagination(query, paging, rules, tuner);
-    }
+    // static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },
+    //     rules: ParseObjectJSONRule = null, tuner?: RestfulTuner<any>): Promise<IOutputPaging<T[]> | T> {
+    //     /// single
+    //     if (paging.objectId) {
+    //         var o = await query.get(paging.objectId);
+    //         tuner && await tuner(o);
+    //         return ParseObject.toOutputJSON.call(o, rules);
+    //     }
+    //     return this.Pagination(query, paging, rules, tuner);
+    // }
 
 }
-
-    
-
-// import config from './../../workspace/config/default/core';
-
-// /// loginRequired //////////////////////////////////////////
-// declare module "helpers/cgi-helpers/core" {
-//     export interface ActionParam<T> {
-//         session: Parse.Session;
-//         user: Parse.User;
-//         role: Parse.Role;
-//     }
-// }
-
-// declare module 'express/lib/request' {
-//     interface Request {
-//         session: Parse.Session;
-//         user: Parse.User;
-//         role: Parse.Role;
-//     }
-// }
-// export async function loginRequired(req: Request, res: Response, next: NextFunction) {
-//     var sessionKey: string = config.keyOfSessionId;
-
-//     /// should contain sessionId
-//     var sessionId: string = req.parameters[sessionKey];
-//     if (!sessionId) {
-//         return Errors.throw(Errors.ParametersRequired, [sessionKey]).resolve(res);
-//     }
-
-//     var session: Parse.Session;
-//     var user: Parse.User;
-//     var role: Parse.Role;
-//     try {
-//         /// get session instance
-//         session = await new Parse.Query("_Session")
-//                 .descending("createdAt")
-//                 .include("user")
-//                 .first({sessionToken: sessionId}) as Parse.Session;
-            
-//         /// session not match
-//         if (!session || session.getSessionToken() != sessionId) {
-//             return Errors.throw(Errors.LoginRequired).resolve(res);
-//         }
-
-//         /// get user instance
-//         user = session.get("user");
-
-//         /// get user role
-//         role = await new Parse.Query(Parse.Role)
-//                 .equalTo("users", user)
-//                 .first() as Parse.Role;
-
-//     } catch(reason) {
-//         return Errors.throw(Errors.SessionNotExists).resolve(res);
-//     }
-
-//     /// final
-//     req.session = session;
-//     req.user = user;
-//     req.role = role;
-//     next();
-// }
-// ////////////////////////////////////////////////////////////
-
-
-// import { NextFunction } from 'express/lib/router/index';
-// /// permissionCheck ////////////////////////////////////////
-// export function permissionCheck(permissions: RoleList[]): RequestHandler {
-//     return <any>((req: Request, res: Response, next: NextFunction) => {
-//         if (permissions.indexOf(<RoleList>req.role.get("name")) < 0) {
-//             return Errors.throw(Errors.PermissionDenined).resolve(res);
-//         }
-//         next();
-//     });
-// }
-// ////////////////////////////////////////////////////////////
-
-
-// import { bodyParser } from './../middlewares/body-parser';
-// /// BodyParser --> + parameters ////////////////////////////
-// declare module 'helpers/cgi-helpers/core' {
-//     export interface ActionParam<T> {
-//         parameters: T;
-//     }
-// }
-// declare module 'express/lib/request' {
-//     interface Request {
-//         parameters: any;
-//     }
-// }
-
-// export function VBodyParserJson(options = null): RequestHandler {
-//     return <any>((req: Request, res: Response, next: NextFunction): any => {
-//         return bodyParser.json(options)(req, res, () => {
-//             req.parameters = { ...req.query, ...req.body };
-//             next();
-//         });
-//     })
-// }
-
-// ////////////////////////////////////////////////////////////

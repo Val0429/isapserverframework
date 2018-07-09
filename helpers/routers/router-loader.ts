@@ -25,6 +25,7 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
         var router: any = route;
         var stack = router.stack;
         var methods = stack[0].route.methods;
+        var types = [];
         var protos = ["get", "post", "put", "delete"];
         if (methods["_all"]) types.push("ALL");
         for (var proto of protos) {
@@ -35,15 +36,21 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
     }
 
     var loadRouteFromPath = (path: string) => {
-        try {
-            var route: Action = require(`${path}`).default;
-            return route;
-        } catch(e) {
-            return null;
-        }
+        var route: Action = require(`${path}`).default;
+        if (!route) throw `${path} has no default export.`;
+        return route;
     }
 
-    var getTypesFromPath = (path: string) => getTypesFromAction( loadRouteFromPath(path) );
+    var getTypesFromPath = (path: string) => {
+        var route: Action = loadRouteFromPath(path);
+        var types = [];
+        if (route instanceof Action) {
+            types = getTypesFromAction(route);
+        } else {
+            types = gettypesFromActionClassic(route);
+        }
+        return types;
+    }
 
     var printChild = (name: string, types: Array<string>, root: boolean = true) => {
         if (root) {
@@ -83,12 +90,6 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
             /// message ///
             var types = getTypesFromPath(`${path}/${defaultPath}`);
             printChild(name, types, true);
-            // var msg = ["\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m"];
-            // var types = getTypesFromPath(`${path}/${defaultPath}`);
-            // if (types) {
-            //     msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`, "\x1b[0m"];
-            // }
-            // console.log(...msg);
             ///////////////
         }
 
@@ -97,7 +98,7 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
         }
 
     } else {
-        var route: Action = require(`${path}`).default;
+        var route: Action = loadRouteFromPath(path);
         var routename = name === defaultPath ? (name = "", "($)") : name;
 
         var types = [];

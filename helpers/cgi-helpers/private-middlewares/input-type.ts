@@ -20,6 +20,7 @@ declare module "helpers/cgi-helpers/core" {
          * Default = null.
          */
         inputType?: string;
+        outputType?: string;
     }
 }
 
@@ -38,8 +39,6 @@ export function inputType(caller: string, type: string): RequestHandler {
             }, req.parameters);
 
             req.inputType = rtn;
-            /// replace after validation
-            // req.parameters = {...req.parameters, ...rtn};
 
         } catch(reason) {
             return next( reason );

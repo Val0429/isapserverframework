@@ -27,6 +27,9 @@ let app: express.Application = expressWsRoutes();
 var tDebugStack = `
 var lj = require('longjohn');
 lj.async_trace_limit = 20;
+process.on('uncaughtException', err => {
+    process.stderr.write(err);
+});
 `;
 
 var tDisableCache = `

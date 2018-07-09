@@ -1,5 +1,6 @@
 import * as Parse from 'parse/node';
 import { FileHelper } from './file-helper';
+import ast from './../../services/ast-services/ast-client';
 
 /// decorators //////////////
 var primaryClassMap = {};
@@ -92,6 +93,10 @@ export class ParseObject<T> extends Parse.Object {
 
     toJSON(): any {
         return ParseObject.toOutputJSON.call(this, ...arguments);
+    }
+
+    static async toOuputJSON2(caller: string, inputType: string, data: object) {
+        return await ast.requestJSON({path: caller, type: inputType}, data);
     }
 
     static toOutputJSON(this: Parse.Object | Parse.Object[], rules?: ParseObjectJSONRule, seen = null) {

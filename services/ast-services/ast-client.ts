@@ -1,5 +1,5 @@
 const { fork } = require('child_process');
-import { RequestInit, RequestNormal, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile } from './ast-core';
+import { RequestInit, RequestNormal, RequestBase, RequestJSON, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile } from './ast-core';
 import { Errors } from './../../core/errors.gen';
 import { actions } from './../../helpers/routers/router-loader';
 import { waitServerReady } from './../../core/pending-tasks';
@@ -71,15 +71,9 @@ export class AstClient {
         });
     }
 
-    requestValidation(type: TypesFromAction, data: any): Promise<any> {
-        let sessionId = uuidv1();
-        var send: RequestNormal = {
-            action: EnumRequestType.normal,
-            sessionId,
-            type,
-            data
-        };
-        this.process.send(send);
+    request(request: RequestBase): Promise<any> {
+        var sessionId = request.sessionId = uuidv1();
+        this.process.send(request);
         var resolve, reject;
         var promise = new Promise( (res, rej) => {
             resolve = res; reject = rej;
@@ -89,10 +83,96 @@ export class AstClient {
         }
         return promise;
     }
+
+    requestValidation(type: TypesFromAction, data: any): Promise<any> {
+        var send: RequestNormal = {
+            action: EnumRequestType.normal,
+            type,
+            data
+        };
+        return this.request(send);
+    }
+
+    requestJSON(type: TypesFromAction, data: any): Promise<any> {
+        var send: RequestJSON = {
+            action: EnumRequestType.json,
+            type,
+            data: AstJSONConverter.neutualizeData(data)
+        };
+        return this.request(send);
+    }
 }
 
 export default new AstClient();
 
+namespace AstJSONConverter {
+    export function neutualizeData(data: object): object {
+        /**
+         * Allow input types:
+         * 1) boolean
+         * 2) string
+         * 3) number
+         * 4) Date --- string | number. todo: now only convert to string
+         * 5) Enum --- string | number
+         * 6) ParseObject --- Object. todo: add createtime & modifytime
+         * 7) Object --- Object
+         * 8) Array --- Array
+         * 10) Parse.File --- uri
+         * 16) Parse.User
+         */
+
+        var filterRules = {
+            "Parse.User": {
+                ACL: null,
+                sessionToken: null,
+            },
+            "Parse.Role": {
+                ACL: null,
+            }
+        }
+         
+        var NeutualizeType = (data: any, filter: any): any => {
+            var refDetect = {};
+            var neutualize = (data: any, filter: any): any => {
+                var type = typeof data;
+                if (type === 'boolean') return data;
+                else if (type === 'string') return data;
+                else if (type === 'number') return data;
+                else if (type === 'undefined') return data;
+                else if (data instanceof Date) return data.toISOString();
+                else if (data instanceof Parse.File) return data.url();
+                else if (data instanceof Parse.Relation) return undefined;
+                else if (data instanceof Parse.Object) {
+                    if (!data.id || refDetect[data.id]) return undefined;
+                    if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
+                    if (data.className === '_Role') filter = filter || filterRules["Parse.Role"];
+                    refDetect[data.id] = true;
+                    return ({
+                        objectId: data.id,
+                        ...neutualize(data.attributes, filter)
+                    });
+                }
+                else if (type === 'object') {
+                    // return data;
+                    var result = {};
+
+                    for (var key in data) {
+                        var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
+                        if (cfilter === null) result[key] = undefined;
+                        else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
+                        else result[key] = neutualize(data[key], cfilter);
+                        /// todo: function transfer
+                    } return result;
+                } else {
+                    throw `Inner Error: ${type} is not accepted output type.`;
+                }
+            }
+            return neutualize(data, filter);
+        };
+
+        return NeutualizeType(data, null);
+    }
+}
 
 namespace AstConverter {
 

@@ -4,19 +4,22 @@ import { Errors } from './../../core/errors.gen';
 
 export enum EnumRequestType {
     init = 0,
-    normal = 1
+    normal = 1,
+    json = 2,
 }
 
-export type Request = RequestInit | RequestNormal;
-export type Response = ResponseNormal;
+export type Request = RequestInit | RequestNormal | RequestJSON;
+export type Response = ResponseNormal | ResponseJSON;
 
 export type RequestType<T> =
     T extends EnumRequestType.init ? RequestInit :
     T extends EnumRequestType.normal ? RequestNormal :
+    T extends EnumRequestType.json ? RequestJSON :
     never;
 
 export type ResponseType<T> =
     T extends EnumRequestType.normal ? ResponseNormal :
+    T extends EnumRequestType.json ? ResponseJSON :
     never;
 
 export function getRequestType<T extends EnumRequestType>(type: T, data: Request): RequestType<T> {
@@ -32,15 +35,29 @@ export interface RequestInit {
     actions: Action[];
 }
 
-export interface RequestNormal {
+export interface RequestBase {
+    sessionId?: string;
+}
+
+export interface RequestNormal extends RequestBase {
     action: EnumRequestType.normal;
-    sessionId: string;
     type: TypesFromAction;
     data: any;
 }
 
-export interface ResponseNormal {
+export interface RequestJSON extends RequestBase {
+    action: EnumRequestType.json;
+    type: TypesFromAction;
+    data: any;
+}
+
+export interface ResponseNormal extends RequestBase {
     action: EnumRequestType.normal;
+    data: any;
+}
+
+export interface ResponseJSON {
+    action: EnumRequestType.json;
     sessionId: string;
     data: any;
 }

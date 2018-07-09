@@ -109,7 +109,7 @@ namespace AstParser {
         return rtn;
     }
 
-    export function getInterfaceMembers(inf: InterfaceDeclaration): PropertySignature[] {
+    export function getInterfaceMembers(inf: InterfaceDeclaration, showinfo: boolean = false): PropertySignature[] {
         var result: PropertySignature[] = [];
         /// 1) push direct members
         inf.getMembers().forEach( (data) => {
@@ -122,6 +122,12 @@ namespace AstParser {
                 result = [...result, ...AstParser.getInterfaceMembers(data)];
             }
         });
+
+        if (showinfo) {
+            result.forEach( (info) => {
+                console.log(`${info.getName()}${info.getQuestionTokenNode() ? '?' : ''}: ${info.getType().getText()};`);
+            });
+        }
 
         return result;
     }
@@ -210,20 +216,51 @@ namespace AstParser {
         } else if (type.isUnion()) {
             /// 13) Union
             return AstConverter.toUnion(type, obj, showname);
+
+        } else if (type.isObject() && type.getTypeArguments().length > 0) {
+            /// 14) Generic
+            // console.log(
+            //     type.isAnonymous(),
+            //     type.isArray(),
+            //     type.isClass(),
+            //     type.isClassOrInterface(),
+            //     type.isIntersection(),
+            //     type.isObject(),
+            //     type.isTypeParameter(),
+            // );
+            // console.log(type.getTypeArguments()[0].isString());
+            //console.log(type.getTargetType().getText());
+            // var ifs = AstParser.getInterfaceMembers( type.getTargetType().getSymbol().getDeclarations()[0] as InterfaceDeclaration, true) ;
+            // console.log(ifs[0]);
+            // console.log( (<any>type.getTargetType().getSymbol().getDeclarations[0]) );
+            // console.log(ifs[0].getType().compilerType);
+            //return AstConverter.
+            // var ifs = AstParser.getInterfaceMembers(type.getSymbol().getDeclarations()[0] as InterfaceDeclaration, true);
+            // console.log(ifs[0].getType().getApparentType().getText());
+            //console.log('???', showname, AstParser.getInterfaceMembers(type.getSymbol().getDeclarations()[0] as InterfaceDeclaration));
+
+            /// 1) get type resolve to
+            //console.log(type.getText(), type.getSymbol().getName());
+            //console.log(type.getTypeArguments()[0], type.getTypeArguments()[0].getText());
+
+            return AstConverter.toObject(type, obj, showname, isArray);
         }
 
+        throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);
         /// todo: error handle
-        return obj;
+        //return obj;
 
     }
 
-    export function validateInterface(inf: InterfaceDeclaration, data: object, prefix: string = null): object {
+    export function validateInterface(inf: InterfaceDeclaration, data: object, prefix: string = null, targs: Type<ts.Type>[] = []): object {
         function getName(name: string): string {
             return !prefix ? name : `${prefix}.${name}`;
         }
         function getImplementation(): string {
             return inf.getText();
         }
+
+        var params = inf.getTypeParameters ? inf.getTypeParameters().map( (data) => data.getText() ) : [];
 
         try {
 
@@ -238,6 +275,12 @@ namespace AstParser {
             var showname = getName(name);
             var type = prop.getType();
             var obj = data[name];
+
+            /// 0) handle generic
+            if (targs) {
+                var pos = params.indexOf( type.getText() );
+                if (pos >= 0) type = targs[pos];
+            }
 
             /// 1) validate required
             var q = prop.getQuestionTokenNode();
@@ -256,6 +299,12 @@ namespace AstParser {
         }
 
         return newdata;       
+    }
+
+    export function getTypeInfo(type: Type<ts.Type>): string {
+        var symbol = type.getSymbol() || type.getAliasSymbol();
+        if (!symbol) return null;
+        return symbol.getDeclarations()[0].getText();
     }
 }
 
@@ -315,7 +364,8 @@ namespace AstConverter {
 
     export function toObject(type: Type<ts.Type>, input: object, name: string, isArray: boolean = false): object {
         var inf: InterfaceDeclaration = type.getSymbol().getDeclarations()[0] as InterfaceDeclaration;
-        input = AstParser.validateInterface(inf, input, name);
+        var targs = type.getTypeArguments();
+        input = AstParser.validateInterface(inf, input, name, targs);
         return input;
     }
 
@@ -347,8 +397,16 @@ namespace AstConverter {
         // if (typeof input !== 'object') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid object${isArray?'[]':''}.`]);
         var types = type.getIntersectionTypes();
         var rtn = {};
-        for (var key = 0; key < types.length; ++key)
-            rtn = { ...rtn, ...AstParser.validateType(types[key], input, name) };
+        try {
+            for (var key = 0; key < types.length; ++key)
+                rtn = { ...rtn, ...AstParser.validateType(types[key], input, name) };
+        } catch(reason) {
+            if (reason instanceof Errors) {
+                reason.append(Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]));
+                for (var type of types) reason.append(Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]));
+            }
+            throw reason;
+        }
         return rtn;
     }
 
@@ -364,7 +422,7 @@ namespace AstConverter {
                 else reasons.append(reason);
             }
         }
-        reasons.append( Errors.throw(Errors.Custom, [`${type.getAliasSymbol().getDeclarations()[0].getText()}\r\n`]) );
+        reasons.append( Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]) );
         throw reasons;
     }
 

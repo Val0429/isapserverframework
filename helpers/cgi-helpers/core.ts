@@ -124,7 +124,6 @@ export class Action<T = any, U = any> {
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {
                             var result = await realfunc({...request ,request, response});
-                            if (this.config.outputType) result = await ParseObject.toOuputJSON2(this.caller, this.config.outputType, result);
                             response.send(result);
                         } catch(reason) {
                             next(reason);
@@ -169,10 +168,14 @@ export namespace Restful {
     }, U = K extends { parseObject: false } ? T : ParseObject<T> >
          = U;
 
+    // export type InputR<T, K extends Option = {
+    //     paging: true
+    // }, U = K extends { paging: false } ? T : IInputPaging<Partial<T>> >
+    //    = U & { objectId?: string };
     export type InputR<T, K extends Option = {
         paging: true
-    }, U = K extends { paging: false } ? T : IInputPaging<T> >
-       = U;
+    }, U = K extends { paging: false } ? T : IInputPaging<{}> >
+       = U & { objectId?: string };
     export type OutputR<T, K extends Option = {
         paging: true,
         parseObject: true,
@@ -180,7 +183,7 @@ export namespace Restful {
        V = K extends { paging: false } ? U : IOutputPaging<U> >
        = V;
 
-    export type InputU<T> = { objectId: string } & T;
+    export type InputU<T> = { objectId: string } & Partial<T>;
     export type OutputU<T, K extends Option = {
         parseObject: true
     }, U = K extends { parseObject: false } ? T : ParseObject<T> >
@@ -291,7 +294,7 @@ export namespace Restful {
     //     return { page, pageSize, total, totalPages, results: ParseObject.toOutputJSON.call(o, rules) };
     // }
 
-    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging<any>): Promise<IOutputPaging<any>> {
+    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging<any>, filter: any = null): Promise<IOutputPaging<any>> {
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
         var all = true == paging.all;
@@ -300,8 +303,10 @@ export namespace Restful {
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
 
-        if (all) return { total, results: o };
-        return { page, pageSize, total, totalPages, results: o };
+        var results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );
+
+        if (all) return { total, results };
+        return { page, pageSize, total, totalPages, results };
     }
 
     // static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },

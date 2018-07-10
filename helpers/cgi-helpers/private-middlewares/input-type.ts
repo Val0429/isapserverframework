@@ -20,7 +20,6 @@ declare module "helpers/cgi-helpers/core" {
          * Default = null.
          */
         inputType?: string;
-        outputType?: string;
     }
 }
 

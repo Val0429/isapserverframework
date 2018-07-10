@@ -1,4 +1,4 @@
-import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType, RequestNormal, RequestJSON, ResponseNormal, ResponseJSON, ConverterEntity } from './ast-core';
+import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType, RequestNormal, ResponseNormal, ConverterEntity } from './ast-core';
 import { Action } from './../../helpers/cgi-helpers/core';
 import { Errors } from './../../core/errors.gen';
 import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
@@ -45,17 +45,6 @@ class AstService {
         return data;
     }
 
-    /**
-     * convert to JSON with validation
-     */
-    toJSON(request: RequestJSON) {
-        var data = request.data;
-        var type = AstParser.getType(request.type);
-        if (!type) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
-        //data = AstJSONParser.validateType(type, data);
-        return data;
-    }
-
 }
 
 var ast = new AstService();
@@ -86,99 +75,12 @@ process.on('message', (data: Request) => {
                 data: rtn
             } as ResponseNormal);
             break;
-        case EnumRequestType.json:
-            var rtjson = getRequestType(data.action, data);
-            var rtn = ast.toJSON(rtjson);
-            process.send({
-                action: rtjson.action,
-                sessionId: rtjson.sessionId,
-                data: rtn
-            } as ResponseJSON);
-            break;
         default:
             console.log(`Unknown ASTService type: ${data}`);
     }
 
     // console.log(`Message from parent: ${data}`);
 });
-
-
-namespace AstJSONParser {
-    export function validateType(type: Type<ts.Type>, data: any, prefix: string = null, isArray: boolean = false): any {
-
-        /// 3) validate type
-        /**
-         * Allow input types:
-         * 1) boolean --- boolean | string | number
-         * 2) string --- string
-         * 3) number --- string | number
-         * 4) Date --- string | number
-         * 5) Enum --- string | number
-         * 6) ParseObject --- string (objectId) | Object
-         * 7) Object --- Object
-         * 7.1) Anonymous Type
-         * 8) Array --- Array
-         * 9) Tuple
-         * 10) Parse.File
-         * 11) Literal Type
-         * 12) Intersection
-         * 13) Union
-         * 14) Generic
-         * 15) Any
-         * X) Other Class X
-         */
-
-        var showname = prefix;
-        var obj = data;
-
-        if (type.isEnumLiteral()) {
-            /// 5) Enum
-            //return AstConverter.toEnum(type, obj, showname, isArray);
-            return 123;
-            // console.log(`${name} is Enum, obj ${typeof obj}`);
-        
-        } else if (type.isClass()) {
-            if (type.getText() === 'Parse.File') {
-                /// 10) Parse.File
-                return AstConverter.toParseFileEntity(type, obj, showname, isArray);
-            } else {
-                /// 6) ParseObject --- string (objectId) | Object
-                return AstConverter.toParseObjectEntity(type, obj, showname, isArray);
-            }
-
-        } else if (type.isInterface() || type.isAnonymous()) {
-            /// 7) Object (Interface) --- Object
-            /// 7.1) Anonymous Type
-            return AstConverter.toObject(type, obj, showname, isArray);
-
-        } else if (type.isArray()) {
-            /// 8) Array --- Array
-            return AstConverter.toArray(type, obj, showname);
-
-        } else if (type.isTuple()) {
-            /// 9) Tuple
-            return AstConverter.toTuple(type, obj, showname);
-
-        } else if (type.isNumberLiteral() || type.isBooleanLiteral() || type.isStringLiteral()) {
-            /// 11) Literal Type
-            return AstConverter.ToLiteral(type, obj, showname);
-
-        } else if (type.isIntersection()) {
-            /// 12) Intersection
-            return AstConverter.toIntersection(type, obj, showname);
-        } else if (type.isUnion()) {
-            /// 13) Union
-            return AstConverter.toUnion(type, obj, showname);
-
-        } else if (type.isObject() && type.getTypeArguments().length > 0) {
-            /// 14) Generic
-            return AstConverter.toObject(type, obj, showname, isArray);
-        }
-
-        throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);
-    }    
-}
-
 
 namespace AstParser {
     export function getType(type: TypesFromAction): Type<ts.Type> {
@@ -229,8 +131,7 @@ namespace AstParser {
         return result;
     }
 
-    export function validateType(type: Type<ts.Type>, data: any, prefix: string = null, isArray: boolean = false): any {
-
+    export function validateType(type: Type<ts.Type>, data: any, prefix: string = null, isArray: boolean = false, params: { [index: string]: Type<ts.Type> } = {}): any {
         /// 3) validate type
         /**
          * Allow input types:
@@ -255,6 +156,8 @@ namespace AstParser {
 
         var showname = prefix;
         var obj = data;
+
+        if (typeof obj === 'undefined') return undefined;
 
         if (type.isBoolean()) {
             /// 1) boolean
@@ -309,14 +212,21 @@ namespace AstParser {
 
         } else if (type.isIntersection()) {
             /// 12) Intersection
-            return AstConverter.toIntersection(type, obj, showname);
+            return AstConverter.toIntersection(type, obj, showname, params);
+
         } else if (type.isUnion()) {
             /// 13) Union
-            return AstConverter.toUnion(type, obj, showname);
+            return AstConverter.toUnion(type, obj, showname, params);
 
         } else if (type.isObject() && type.getTypeArguments().length > 0) {
             /// 14) Generic
             return AstConverter.toObject(type, obj, showname, isArray);
+
+        } else if (type.isTypeParameter() && !type.isString()) {
+            var ntype = params[type.getText()];
+            if (!ntype) throw Errors.throw(Errors.Custom, [`Internal Error: failed to handle type ${type.getText()}`]);
+            return AstParser.validateType(ntype, obj, showname, isArray, params);
+            
         }
 
         throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);
@@ -330,7 +240,12 @@ namespace AstParser {
             return inf.getText();
         }
 
-        var params = inf.getTypeParameters ? inf.getTypeParameters().map( (data) => data.getText() ) : [];
+        //var params = inf.getTypeParameters ? inf.getTypeParameters().map( (data) => data.getText() ) : [];
+        var params = !inf.getTypeParameters ? {} :
+            inf.getTypeParameters().reduce((final, value, idx) => {
+                final[value.getName()] = targs && targs[idx] ? targs[idx] : undefined;
+                return final;
+            }, {});
 
         try {
 
@@ -348,15 +263,16 @@ namespace AstParser {
 
             /// 0) handle generic
             if (targs) {
-                var pos = params.indexOf( type.getText() );
-                if (pos >= 0) type = targs[pos];
+                var pos = params[type.getText()];
+                if (pos) type = pos;
+                // var pos = params.indexOf( type.getText() );
+                // if (pos >= 0) type = targs[pos];
             }
 
             /// 1) validate required
             var q = prop.getQuestionTokenNode();
             if (!q && (obj === undefined || obj === null)) throw Errors.throw(Errors.ParametersRequired, [`<${showname}>`]);
-
-            newdata[name] = AstParser.validateType(type, obj, showname);
+            newdata[name] = AstParser.validateType(type, obj, showname, false, params);
         });
 
 
@@ -434,6 +350,7 @@ namespace AstConverter {
 
     export function toObject(type: Type<ts.Type>, input: object, name: string, isArray: boolean = false): object {
         var inf: InterfaceDeclaration = type.getSymbol().getDeclarations()[0] as InterfaceDeclaration;
+        if (!inf) return {};    /// Anonymous object may not have interface
         var targs = type.getTypeArguments();
         input = AstParser.validateInterface(inf, input, name, targs);
         return input;
@@ -463,13 +380,13 @@ namespace AstConverter {
         return input;
     }
 
-    export function toIntersection(type: Type<ts.Type>, input: object, name: string): object {
+    export function toIntersection(type: Type<ts.Type>, input: object, name: string, params: { [index: string]: Type<ts.Type> }): object {
         // if (typeof input !== 'object') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid object${isArray?'[]':''}.`]);
         var types = type.getIntersectionTypes();
         var rtn = {};
         try {
             for (var key = 0; key < types.length; ++key)
-                rtn = { ...rtn, ...AstParser.validateType(types[key], input, name) };
+                rtn = { ...rtn, ...AstParser.validateType(types[key], input, name, false, params) };
         } catch(reason) {
             if (reason instanceof Errors) {
                 reason.append(Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]));
@@ -480,12 +397,12 @@ namespace AstConverter {
         return rtn;
     }
 
-    export function toUnion(type: Type<ts.Type>, input: any, name: string): any {
+    export function toUnion(type: Type<ts.Type>, input: any, name: string, params: { [index: string]: Type<ts.Type> }): any {
         var types = type.getUnionTypes();
         var reasons;
         for (var key = 0; key < types.length; ++key) {
             try {
-                return AstParser.validateType(types[key], input, name);
+                return AstParser.validateType(types[key], input, name, false, params);
             } catch(reason) {
                 if (!(reason instanceof Errors)) throw reason;
                 if (!reasons) reasons = reason;

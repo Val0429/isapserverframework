@@ -1,6 +1,8 @@
 import * as Parse from 'parse/node';
 import { FileHelper } from './file-helper';
 import ast from './../../services/ast-services/ast-client';
+import { EnumConverter } from './../utility/get-enum-key';
+import { RoleList } from './../../core/userRoles.gen';
 
 /// decorators //////////////
 var primaryClassMap = {};
@@ -95,52 +97,74 @@ export class ParseObject<T> extends Parse.Object {
         return ParseObject.toOutputJSON.call(this, ...arguments);
     }
 
-    static async toOuputJSON2(caller: string, inputType: string, data: object) {
-        return await ast.requestJSON({path: caller, type: inputType}, data);
+    static toOutputJSON(data: object, filter: any = null): any {
+        /**
+         * Allow input types:
+         * 1) boolean
+         * 2) string
+         * 3) number
+         * 4) Date --- string | number. todo: now only convert to string
+         * 5) Enum --- string | number
+         * 6) ParseObject --- Object. todo: add createtime & modifytime
+         * 7) Object --- Object
+         * 8) Array --- Array
+         * 10) Parse.File --- uri
+         * 16) Parse.User
+         */
+
+        var filterRules = {
+            "Parse.User": {
+                ACL: null,
+                sessionToken: null,
+            },
+            "Parse.Role": {
+                ACL: null,
+                name: EnumConverter(RoleList)
+            }
+        }
+
+        var NeutualizeType = (data: any, filter: any): any => {
+            var refDetect = {};
+            var neutualize = (data: any, filter: any): any => {
+                var type = typeof data;
+                if (type === 'boolean') return data;
+                else if (type === 'string') return data;
+                else if (type === 'number') return data;
+                else if (type === 'undefined') return data;
+                else if (data instanceof Date) return data.toISOString();
+                else if (data instanceof Parse.File) return data.url();
+                else if (data instanceof Parse.Relation) return undefined;
+                else if (data instanceof Parse.Object) {
+                    if (!data.id || refDetect[data.id]) return undefined;
+                    if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
+                    if (data.className === '_Role') filter = filter || filterRules["Parse.Role"];
+                    refDetect[data.id] = true;
+                    return ({
+                        objectId: data.id,
+                        ...neutualize(data.attributes, filter)
+                    });
+                }
+                else if (type === 'object') {
+                    // return data;
+                    var result = {};
+
+                    for (var key in data) {
+                        var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
+                        if (cfilter === null) result[key] = undefined;
+                        else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
+                        else result[key] = neutualize(data[key], cfilter);
+                        /// todo: function transfer
+                    } return result;
+                } else {
+                    throw `Inner Error: ${type} is not accepted output type.`;
+                }
+            }
+            return neutualize(data, filter);
+        };
+
+        return NeutualizeType(data, filter);
     }
 
-    static toOutputJSON(this: Parse.Object | Parse.Object[], rules?: ParseObjectJSONRule, seen = null) {
-        if (Array.isArray(this)) {
-            return this.map( (value) => ParseObject.toOutputJSON.call(value, rules, seen) );
-        }
-
-        var seenEntry = this.id ? `${this.className}:${this.id}` : this;
-        var seen = seen || [seenEntry];
-        var rules = rules || {};
-        var json = {};
-        var attrs = this.attributes;
-        for (var attr in attrs) {
-            if (attr === 'ACL') {
-                /// do nothing
-            }
-            else if ((attr === 'createdAt' || attr === 'updatedAt') && attrs[attr].toJSON) {
-                json[attr] = attrs[attr].toJSON();
-            } else {
-                var inst = attrs[attr];
-                var rule = rules[attr];
-                if (rule !== undefined) {
-                    if (typeof rule === 'function') json[attr] = rule(inst);
-                    else if (rule === null) { /* do nothing */ }
-                    else json[attr] = ParseObject.toOutputJSON.call(inst, rule, seen);
-                }
-                else if (inst instanceof Parse.Object) json[attr] = ParseObject.toOutputJSON.call(inst, rules, seen);
-                else if (inst instanceof Parse.File) json[attr] = FileHelper.getURL(inst);
-                else json[attr] = (<any>0, (<any>Parse)._encode)(inst, false, false, seen);
-            }
-        }
-
-        if (this instanceof Parse.Object) {
-            var pending = (<any>this)._getPendingOps();
-            for (var attr in pending[0]) {
-                json[attr] = pending[0][attr].toJSON();
-            }
-        }
-
-        if (this.id) {
-            json["objectId"] = this.id;
-        }
-        return json;
-    }    
 }
 
 /**

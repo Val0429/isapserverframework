@@ -1,3 +1,5 @@
+import { RoleList } from './../../core/userRoles.gen';
+
 export interface IRole {
     name: string;
 }
@@ -11,5 +13,5 @@ export interface IUser<T = {}> {
     password: string;
     email?: string;
     data?: T & IUserData;
-    roles: IRole;
+    roles: RoleList[];
 }

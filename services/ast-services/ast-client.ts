@@ -1,5 +1,5 @@
 const { fork } = require('child_process');
-import { RequestInit, RequestNormal, RequestBase, RequestJSON, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile } from './ast-core';
+import { RequestInit, RequestNormal, RequestBase, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile } from './ast-core';
 import { Errors } from './../../core/errors.gen';
 import { actions } from './../../helpers/routers/router-loader';
 import { waitServerReady } from './../../core/pending-tasks';
@@ -93,14 +93,6 @@ export class AstClient {
         return this.request(send);
     }
 
-    requestJSON(type: TypesFromAction, data: any): Promise<any> {
-        var send: RequestJSON = {
-            action: EnumRequestType.json,
-            type,
-            data: AstJSONConverter.neutualizeData(data)
-        };
-        return this.request(send);
-    }
 }
 
 export default new AstClient();

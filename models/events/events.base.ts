@@ -39,7 +39,7 @@ export interface IEvents<T = IEvent> {
 }
 
 @registerSubclass() export class Events<T extends IEvents = IEvents> extends ParseObject<T> {
-    static async save(event: ParseObject<IEvent>): Promise<void> {
+    static async save(event: ParseObject<IEvent>, data: object = {}): Promise<void> {
         if (!event.isNew) throw "currently doesn't support save of not new object.";
         /// save into specific Event
         await event.save();
@@ -51,6 +51,7 @@ export interface IEvents<T = IEvent> {
         var evt = new Events({
             action: event.getValue("action"),
             entity: <any>token,
+            data,
             owner: event.getValue("owner"),
             relatedPerson: event.getValue("relatedPerson")
         });
@@ -84,5 +85,3 @@ export interface IEvents<T = IEvent> {
         return super.getValue(key);
     }
 }
-
-import './../schedulers/schedulers.base';

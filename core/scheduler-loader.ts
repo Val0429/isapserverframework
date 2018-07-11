@@ -32,7 +32,7 @@ export class Scheduler {
         if (actions.length === 0) return;
 
         var ob = time ? ScheduleHelper.scheduleObservable(time.attributes, true) : Observable.of(true);
-        let subject = EventSubjects[event];
+        let subject = EventSubjects[event as string];
         if (!subject) return;
 
         var sj = subject.withLatestFrom(ob)

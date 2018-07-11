@@ -49,7 +49,7 @@ action.put<InputU, OutputU>({ inputType: "InputU" }, async (data) => {
     /// 1) Get Object
     var { objectId } = data.inputType;
     var obj = await new Parse.Query({0}).get(objectId);
-    if (!obj) throw Errors.throw(Errors.CustomNotExists, [\`{0} <\${objectId} not exists.\`]);
+    if (!obj) throw Errors.throw(Errors.CustomNotExists, [\`{0} <\${objectId}> not exists.\`]);
     /// 2) Modify
     await obj.save({ ...data.inputType, objectId: undefined });
     /// 3) Output
@@ -78,13 +78,41 @@ export default action;
 `;
 
 import * as fs from 'fs';
+import { Restful } from './../helpers/cgi-helpers/core';
 
-export default function main(path: string, className: string) {
+export default function main(path: string, className: string, options: Restful.CRUDOptions) {
     var origin = fs.readFileSync(path, "UTF-8");
-    var regex = /^.*Restful.CRUD.*$/mg;
-    var data = origin.replace(regex, (a, b) => {
-        return template.replace( /\{0\}/mg, className );
+    var regex = /^.*Restful.CRUD.*$/m;
+    // var data = origin.replace(regex, (a, b) => {
+    //     return template.replace( /\{0\}/mg, className );
+    // });
+    var spos, epos;
+    origin.replace(regex, (a, b) => {
+        spos = b;
+        for (;b<origin.length;++b) { /* find first b */ if (origin[b] === '(') break; }
+        var braclets = 0, end = false;
+        for (;b<origin.length;++b) {
+            /// find first b
+            var char = origin[b];
+            if (end === true) {
+                if (char === '\n') {
+                    epos = b+1;
+                    break;
+                }
+                continue;
+            }
+            if (char === '(') ++braclets;
+            else if (char === ')') --braclets;
+            if (braclets === 0) end = true;
+        }
+        return a;
     });
+    var data = [
+        origin.substring(0, spos),
+        template.replace( /\{0\}/mg, className ),
+        origin.substring(epos || origin.length, origin.length)
+    ].join("");
+
     console.log(`CRUD resolved for path <${path}>.`);
     fs.writeFileSync(path, data, "UTF-8");
 }

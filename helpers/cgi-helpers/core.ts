@@ -219,9 +219,18 @@ export namespace Restful {
         return { paging: {page, pageSize, total, totalPages}, results };
     }
 
-    export function CRUD(className: string) {
+    export interface CRUDOptions {
+        includeAll?: boolean;
+        deleteSubObjects?: boolean;
+    }
+    export function CRUD(className: string, options: CRUDOptions = {}) {
+        const defaultCRUDOptions: CRUDOptions = {
+            includeAll: true,
+            deleteSubObjects: true
+        }
+        options = { ...defaultCRUDOptions, ...options };
         if (!retrievePrimaryClass(className)) throw `Internal Error: <${className}> should be a valid object for CRUD.`;
-        CRUDMaker(caller(), className);
+        CRUDMaker(caller(), className, options);
     }
 
 }

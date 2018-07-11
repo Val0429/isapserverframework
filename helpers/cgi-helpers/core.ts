@@ -162,20 +162,24 @@ export namespace Restful {
         parseObject?: boolean;
     }
 
+    export interface ValidObject {
+        objectId: string;
+    }
+
+    export interface Query<T> {
+        query: Partial<T>;
+    }
+
     export type InputC<T> = T;
     export type OutputC<T, K extends Option = {
         parseObject: true
     }, U = K extends { parseObject: false } ? T : ParseObject<T> >
          = U;
 
-    // export type InputR<T, K extends Option = {
-    //     paging: true
-    // }, U = K extends { paging: false } ? T : IInputPaging<Partial<T>> >
-    //    = U & { objectId?: string };
     export type InputR<T, K extends Option = {
         paging: true
-    }, U = K extends { paging: false } ? T : IInputPaging<{}> >
-       = U & { objectId?: string };
+    }, U = K extends { paging: false } ? Partial<T> : IInputPaging<Partial<T>> >
+       = U & Partial<ValidObject>;
     export type OutputR<T, K extends Option = {
         paging: true,
         parseObject: true,
@@ -183,7 +187,7 @@ export namespace Restful {
        V = K extends { paging: false } ? U : IOutputPaging<U> >
        = V;
 
-    export type InputU<T> = { objectId: string } & Partial<T>;
+    export type InputU<T> = ValidObject & Partial<T>;
     export type OutputU<T, K extends Option = {
         parseObject: true
     }, U = K extends { parseObject: false } ? T : ParseObject<T> >
@@ -294,19 +298,28 @@ export namespace Restful {
     //     return { page, pageSize, total, totalPages, results: ParseObject.toOutputJSON.call(o, rules) };
     // }
 
-    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging<any>, filter: any = null): Promise<IOutputPaging<any>> {
+    export function Filter<T extends Parse.Object = any>(query: Parse.Query<T>, params: object): Parse.Query<T> {
+        /// remove paging
+        var ps = { ...params, paging: undefined };
+        /// including others
+        for (var p in ps) query = query.equalTo(p, ps[p]);
+        return query;
+    }
+
+    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, params: IInputPaging<any>, filter: any = null): Promise<IOutputPaging<any>> {
+        var paging = params.paging || {};
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
-        var all = true == paging.all;
-        if (true == paging.all) pageSize = Number.MAX_SAFE_INTEGER;
+        var all = "true" == paging.all;
+        if (all) pageSize = Number.MAX_SAFE_INTEGER;
         var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
 
         var results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );
 
-        if (all) return { total, results };
-        return { page, pageSize, total, totalPages, results };
+        if (all) return { paging: {total}, results };
+        return { paging: {page, pageSize, total, totalPages}, results };
     }
 
     // static async SingleOrPagination<T extends Parse.Object = any>(query: Parse.Query<T>, paging: IInputPaging & { objectId?: string },

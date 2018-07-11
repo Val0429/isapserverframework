@@ -6,15 +6,20 @@
 export interface IInputPagingBase {
     page?: number;
     pageSize?: number;
+    all?: "true" | "false";
 }
 
-export type IInputPaging<T> = (IInputPagingBase | {
-    all: true | false;
-}) & T;
+export type IInputPaging<T> = {
+    paging?: IInputPagingBase;
+} & T;
 
-export interface IOutputPaging<T> extends IInputPagingBase {
+export interface IOutputPagingBase {
     total: number;
     totalPages?: number;
-    results: T[];
 }
 
+export type IOutputPaging<T> = {
+    paging?: IInputPagingBase & IOutputPagingBase
+} & {
+    results: T[];
+}

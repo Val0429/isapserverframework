@@ -19,6 +19,13 @@ interface IConfig {
 export { IConfig };
 `;
 
+var tInterfaceSetup = `
+interface IConfigSetup {
+{0}
+}
+export { IConfigSetup };
+`;
+
 // core: coreConfig,
 // mongodb: mongodbConfig,
 var tExport = `
@@ -91,6 +98,20 @@ function main(): string {
         tInterface.replace("{0}", tmp.join("\r\n"))
     )
     /////////////////////////////////////////////
+
+    /// make interface setup ////////////////////
+    var tmp = [];
+    var template = `{0}?: Partial<{0}ConfigType>;`;
+    for (var key of keys) {
+        tmp.push(
+            autoPad(template.replace(/\{0\}/g, capitalize(key)), 4)
+        );
+    }
+    tmpstr.push(
+        tInterfaceSetup.replace("{0}", tmp.join("\r\n"))
+    )
+    /////////////////////////////////////////////
+
 
     /// make export /////////////////////////////
     var tmp = [];

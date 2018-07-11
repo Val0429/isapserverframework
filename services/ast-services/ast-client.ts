@@ -25,7 +25,7 @@ export class AstClient {
         /// try convert back
         try {
             var result = AstConverter.fromDateEntity(data) ||
-                        AstConverter.fromParseObjectEntity(data) ||
+                        (await AstConverter.fromParseObjectEntity(data)) ||
                         (await AstConverter.fromParseFileEntity(data))
                         ;
             if (result) return result;
@@ -95,7 +95,8 @@ export class AstClient {
 
 }
 
-export default new AstClient();
+var ast = new AstClient();
+export default ast;
 
 namespace AstJSONConverter {
     export function neutualizeData(data: object): object {
@@ -173,16 +174,20 @@ namespace AstConverter {
         return new Date(input.data);
     }
 
-    export function fromParseObjectEntity(input: ConverterEntity): ParseObject<any> {
+    export async function fromParseObjectEntity(input: ConverterEntity): Promise<ParseObject<any>> {
         if (input.__type__ !== "ParseObject") return;
         var cls: any = retrievePrimaryClass(input.class);
         if (!cls) throw Errors.throw(Errors.CustomInvalid, [`Inner type <${input.class}> is not a registered class.`]);
-        
-        /// create ParseObject
-        var obj = new cls( typeof input.data === 'string' ? undefined : input.data );
-        /// set id
-        if (typeof input.data === 'string') obj.id = input.data;
 
+        /// pure string object
+        if (typeof input.data === 'string') {
+            var obj = new cls();
+            obj.id = input.data;
+            return obj;
+        }
+
+        /// data has to be converted
+        var obj = new cls( await ast.finalConverter(input.data) );
         return obj;
     }
 

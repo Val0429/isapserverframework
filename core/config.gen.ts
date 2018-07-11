@@ -21,6 +21,19 @@ interface IConfig {
 export { IConfig };
 
 
+interface IConfigSetup {
+    core?: Partial<coreConfigType>;
+    mongodb?: Partial<mongodbConfigType>;
+    parseDashboard?: Partial<parseDashboardConfigType>;
+    parseServer?: Partial<parseServerConfigType>;
+    cms?: Partial<cmsConfigType>;
+    evis?: Partial<evisConfigType>;
+    frs?: Partial<frsConfigType>;
+    fts?: Partial<ftsConfigType>;
+}
+export { IConfigSetup };
+
+
 var Config: IConfig = {
     core: <any>coreConfig,
     mongodb: <any>mongodbConfig,

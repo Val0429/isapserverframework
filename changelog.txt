@@ -3,6 +3,9 @@ v2.0 upgrade
 Critical (Should modify code after upgrade):
 1. "workspace" now should contain `package.json` & `node_modules`.
 2. `ws` protocol `socket` is now wrapped by new class, add feature `closeGracefully()`.
+3. CRUD, of R, move paging page / pageSize into object `paging`.
+4. Restful.C/R/U/D removed.
+5. /config API remaked. *Type checking applied on config*
 
 Normal (No need modify code):
 1. Autoload web page from `/workspace/custom/web`.

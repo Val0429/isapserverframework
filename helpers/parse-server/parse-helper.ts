@@ -135,7 +135,7 @@ export class ParseObject<T> extends Parse.Object {
                 else if (data instanceof Parse.File) return data.url();
                 else if (data instanceof Parse.Relation) return undefined;
                 else if (data instanceof Parse.Object) {
-                    if (!data.id || refDetect[data.id]) return undefined;
+                    if (data.id && refDetect[data.id]) return undefined;
                     if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
                     if (data.className === '_Role') filter = filter || filterRules["Parse.Role"];
                     refDetect[data.id] = true;
@@ -146,7 +146,8 @@ export class ParseObject<T> extends Parse.Object {
                 }
                 else if (type === 'object') {
                     // return data;
-                    var result = {};
+                    var isArray = Array.isArray(data);
+                    var result = isArray ? [] : {};
 
                     for (var key in data) {
                         var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);

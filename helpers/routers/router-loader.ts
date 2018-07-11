@@ -36,7 +36,8 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
     }
 
     var loadRouteFromPath = (path: string) => {
-        var route: Action = require(`${path}`).default;
+        var route: Action;
+        try { route = require(`${path}`).default; } catch(reason) { return null; }
         if (!route) throw `${path} has no default export.`;
         return route;
     }
@@ -44,6 +45,7 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
     var getTypesFromPath = (path: string) => {
         var route: Action = loadRouteFromPath(path);
         var types = [];
+        if (!route) return types;
         if (route instanceof Action) {
             types = getTypesFromAction(route);
         } else {
@@ -55,10 +57,10 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
     var printChild = (name: string, types: Array<string>, root: boolean = true) => {
         if (root) {
             var msg = ["\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m"];
-            if (types) {
-                msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`, "\x1b[0m"];
+            if (types && types.length > 0) {
+                msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`];
             }
-            console.log(...msg);
+            console.log(...msg, "\x1b[0m");
 
         } else {
             if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");

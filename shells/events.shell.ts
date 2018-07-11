@@ -50,6 +50,10 @@ export interface IEvent{0} extends IEvent {
 ////////////////////////////////////////////////////
 `;
 
+var tEnumType = `
+export type EventEnumType = {0};
+`;
+
 var tSubjects = `
 import { waitServerReady } from './pending-tasks';
 import { Config } from './config.gen';
@@ -147,6 +151,20 @@ function main(events: Config): string {
         );
     }
     tmpstr.push(tmp.join("\r\n"));
+    /////////////////////////////////////////////
+
+    /// make enum ///////////////////////////////
+    var tmp = [];
+    var template = `"Event{0}"`;
+    for (var event of events) {
+        var name = event[1];
+        tmp.push(
+            template.replace(/\{0\}/g, name)
+        );
+    }
+    tmpstr.push(
+        tEnumType.replace("{0}", tmp.join(" | "))
+    )
     /////////////////////////////////////////////
 
     /// make subjects ///////////////////////////

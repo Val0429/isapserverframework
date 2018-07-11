@@ -176,6 +176,9 @@ export interface IEventDoneCheckIn extends IEvent {
 ////////////////////////////////////////////////////
 
 
+export type EventEnumType = "EventLogin" | "EventLogout" | "EventConfigChanged" | "EventTryRegister" | "EventPickFloor" | "EventScanIDCard" | "EventRegistrationComplete" | "EventTryCheckIn" | "EventFaceVerifyResult" | "EventDoneCheckIn";
+
+
 import { waitServerReady } from './pending-tasks';
 import { Config } from './config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';

@@ -249,6 +249,9 @@ namespace AstParser {
             if (!ntype) throw Errors.throw(Errors.Custom, [`Internal Error: failed to handle type ${type.getText()}`]);
             return AstParser.validateType(ntype, obj, showname, isArray, params);
             
+        } else if (type.getText() === "any") {
+            /// 99) Any
+            return obj;
         }
         
         throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);

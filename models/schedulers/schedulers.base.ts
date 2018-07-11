@@ -1,5 +1,6 @@
 import { ParseObject, registerSubclass, retrievePrimaryClass } from './../../helpers/parse-server/parse-helper';
 import { IEvent } from './../events/events.base';
+import { EventEnumType } from './../../core/events.gen';
 export * from './actions/index';
 export * from './templates/index';
 
@@ -22,24 +23,24 @@ export interface IScheduleTimes {
 }
 @registerSubclass() export class ScheduleTimes extends ParseObject<IScheduleTimes> {}
 
-export interface IScheduleActions<T> {
+export interface IScheduleActions {
     action: string;
     /**
      * recipes?
      */
-    data: T;
+    data: any[];
     template: string;
 }
-@registerSubclass() export class ScheduleActions<T = any[]> extends ParseObject<IScheduleActions<T>> {}
+@registerSubclass() export class ScheduleActions extends ParseObject<IScheduleActions> {}
 
 export interface ISchedulersHandle<T> {
     event: ParseObject<IEvent>;
     time: ScheduleTimes;
-    actions: IScheduleActions<T>;
+    actions: IScheduleActions;
 }
 
 export interface ISchedulers {
-    event: string;
+    event: EventEnumType;
     time: ScheduleTimes;
     actions: ScheduleActions[];
 }

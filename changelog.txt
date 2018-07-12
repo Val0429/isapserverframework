@@ -1,5 +1,8 @@
 v2.0 upgrade
 
+First Note:
+You have to run in a brand new database. If you cannot do that, please don't upgrade.
+
 Critical (Should modify code after upgrade):
 1. "workspace" now should contain `package.json` & `node_modules`.
 2. `ws` protocol `socket` is now wrapped by new class, add feature `closeGracefully()`.
@@ -15,7 +18,7 @@ Normal (No need modify code):
 5. Now cgi-bin Action won't check `permission` when `loginRequired` is false.
 6. You can now hook Schedulers without write into Mongo. Try `Scheduler.register()`.
 7. Now will show error messages when `ws` `socket` error.
-8. `Schedulers` now support fully CRUD.
+8. `Schedulers` now support fully CRD.
 9. Add `inputType` support for `Action` options.
 10. You can now filter `get` request with any fields by default.
 11. You can now `get` all `Events` by `/events`.

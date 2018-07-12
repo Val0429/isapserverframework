@@ -4,10 +4,11 @@ import { DynamicLoader } from './../helpers/dynamic-loader/dynamic-loader';
 import { EventLogin, Events, IEvent } from './events.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Config } from './config.gen';
-import { EventSubjects } from './events.gen';
+import { EventSubjects, EventList } from './events.gen';
 import { ScheduleHelper } from './../helpers/schedules/schedule-helper';
 import { retrievePrimaryClass, ParseObject } from './../helpers/parse-server/parse-helper';
 import { Schedulers, ScheduleTimeType, ScheduleTimes, ScheduleActions, ScheduleActionBase } from './../models/schedulers/schedulers.base';
+import { EnumConverter } from './../helpers/utility/get-enum-key';
 import { Observable, Subscription } from 'rxjs';
 
 const uuidv1 = require('uuid/v1');
@@ -23,6 +24,7 @@ export class Scheduler {
 
         /// parse event
         let event = value.getValue("event");
+        let eventname = EnumConverter(EventList)(event);
 
         /// parse time
         let time = value.getValue("time");
@@ -32,7 +34,7 @@ export class Scheduler {
         if (actions.length === 0) return;
 
         var ob = time ? ScheduleHelper.scheduleObservable(time.attributes, true) : Observable.of(true);
-        let subject = EventSubjects[event as string];
+        let subject = EventSubjects[eventname];
         if (!subject) return;
 
         var sj = subject.withLatestFrom(ob)
@@ -42,7 +44,7 @@ export class Scheduler {
                 this.resolve(value, event);
             });
         var previous = this.hashKey[value.id];
-        console.log(`Schedule ${previous ? "re" : ""}loaded with <${event}>, do <${actions.map(data => data.attributes.action).join(", ")}>.`);
+        console.log(`Schedule ${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.attributes.action).join(", ")}>.`);
 
         previous && previous.unsubscribe();
         this.hashKey[value.id] = sj;

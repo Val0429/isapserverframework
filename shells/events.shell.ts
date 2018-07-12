@@ -43,15 +43,11 @@ export type EventsType<T> =
 var tInterface = `
 /// Event{1}: {0} //////////////////////////////////
 export interface IEvent{0} extends IEvent {
-    action: "{1}";
+    action: {1};
     {2}
 }
-@registerSubclass() export class Event{0} extends ParseObject<IEvent{0}> { constructor(data?: Omit<IEvent{0}, 'action'>) { super({ action: "{1}", ...data }) } }
+@registerSubclass() export class Event{0} extends ParseObject<IEvent{0}> { constructor(data?: Omit<IEvent{0}, 'action'>) { super({ action: {1}, ...data }) } }
 ////////////////////////////////////////////////////
-`;
-
-var tEnumType = `
-export type EventEnumType = {0};
 `;
 
 var tSubjects = `
@@ -115,7 +111,7 @@ function main(events: Config): string {
     /// make enum ///////////////////////////////
     var tmp = [];
     for (var event of events) {
-        tmp.push(`${event[1]} = "${event[0]}"`);
+        tmp.push(`Event${event[1]} = "${event[0]}"`);
     }
     tmpstr.push(
         tEnum.replace("{0}", tmp.join(",\r\n    "))
@@ -146,25 +142,12 @@ function main(events: Config): string {
         attrs = autoPad(attrs, 4);
         tmp.push(
             tInterface.replace(/\{0\}/g, event[1])
-                      .replace(/\{1\}/g, event[0].toString())
+                      //.replace(/\{1\}/g, event[0].toString())
+                      .replace(/\{1\}/g, `EventList.Event${event[1]}`)
                       .replace(/\{2\}/g, attrs)
         );
     }
     tmpstr.push(tmp.join("\r\n"));
-    /////////////////////////////////////////////
-
-    /// make enum ///////////////////////////////
-    var tmp = [];
-    var template = `"Event{0}"`;
-    for (var event of events) {
-        var name = event[1];
-        tmp.push(
-            template.replace(/\{0\}/g, name)
-        );
-    }
-    tmpstr.push(
-        tEnumType.replace("{0}", tmp.join(" | "))
-    )
     /////////////////////////////////////////////
 
     /// make subjects ///////////////////////////

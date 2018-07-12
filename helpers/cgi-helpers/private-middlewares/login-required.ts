@@ -32,8 +32,10 @@ declare module 'express/lib/request' {
         role: Parse.Role[];
     }
 }
+
+const keyOfSessionId: string = "sessionId";
 export async function loginRequired(req: Request, res: Response, next: NextFunction) {
-    var sessionKey: string = config.keyOfSessionId;
+    var sessionKey: string = keyOfSessionId;
 
     /// should contain sessionId
     var sessionId: string = req.parameters[sessionKey];

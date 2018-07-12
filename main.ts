@@ -2,7 +2,7 @@
 /// <reference path="./helpers/cgi-helpers/core.d.ts" />
 "use strict";
 
-console.log("todo remove: log loading time.");
+ /// todo remove: log loading time
 console.time("compiler");  /// 27
 import './core/compiler';
 console.timeEnd("compiler");

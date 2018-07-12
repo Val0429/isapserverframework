@@ -29,7 +29,7 @@ export default new Action<Input, Output>({
     var ev = new EventLogin({
         owner: obj.user
     });
-    await Events.save(ev);
+    Events.save(ev);
 
     return ParseObject.toOutputJSON({
         sessionId: obj.sessionId,

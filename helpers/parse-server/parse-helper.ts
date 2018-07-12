@@ -123,44 +123,41 @@ export class ParseObject<T> extends Parse.Object {
             }
         }
 
-        var NeutualizeType = (data: any, filter: any): any => {
-            var refDetect = {};
-            var neutualize = (data: any, filter: any): any => {
-                var type = typeof data;
+        var NeutualizeType = (data: any, filter: any, refDetect = {}): any => {
+            var type = typeof data;
 
-                if (type === 'boolean') return data;
-                else if (type === 'string') return data;
-                else if (type === 'number') return data;
-                else if (type === 'undefined') return data;
-                else if (data instanceof Date) return data.toISOString();
-                else if (data instanceof Parse.File) return data.url();
-                else if (data instanceof Parse.Relation) return undefined;
-                else if (data instanceof Parse.Object) {
-                    if (data.id && refDetect[data.id]) return undefined;
-                    if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
-                    if (data.className === '_Role') filter = filter || filterRules["Parse.Role"];
-                    refDetect[data.id] = true;
-                    return ({
-                        objectId: data.id,
-                        ...neutualize(data.attributes, filter)
-                    });
-                }
-                else if (type === 'object') {
-                    var isArray = Array.isArray(data);
-                    var result = isArray ? [] : {};
-
-                    for (var key in data) {
-                        var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
-                        if (cfilter === false) result[key] = undefined;
-                        else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
-                        else result[key] = neutualize(data[key], cfilter);
-                        /// todo: function transfer
-                    } return result;
-                } else {
-                    throw `Inner Error: ${type} is not accepted output type.`;
-                }
+            if (type === 'boolean') return data;
+            else if (type === 'string') return data;
+            else if (type === 'number') return data;
+            else if (type === 'undefined') return data;
+            else if (data instanceof Date) return data.toISOString();
+            else if (data instanceof Parse.File) return data.url();
+            else if (data instanceof Parse.Relation) return undefined;
+            else if (data instanceof Parse.Object) {
+                if (data.id && refDetect[data.id]) return undefined;
+                if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
+                if (data.className === '_Role') filter = filter || filterRules["Parse.Role"];
+                var newref = { ...refDetect };
+                newref[data.id] = true;
+                return ({
+                    objectId: data.id,
+                    ...NeutualizeType(data.attributes, filter, newref)
+                });
             }
-            return neutualize(data, filter);
+            else if (type === 'object') {
+                var isArray = Array.isArray(data);
+                var result = isArray ? [] : {};
+
+                for (var key in data) {
+                    var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
+                    if (cfilter === false) result[key] = undefined;
+                    else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
+                    else result[key] = NeutualizeType(data[key], cfilter, refDetect);
+                    /// todo: function transfer
+                } return result;
+            } else {
+                throw `Inner Error: ${type} is not accepted output type.`;
+            }
         };
 
         return NeutualizeType(data, filter);

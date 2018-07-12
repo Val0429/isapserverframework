@@ -157,7 +157,7 @@ namespace AstParser {
 
         var showname = prefix;
         var obj = data;
-        var debug = true;
+        var debug = false;
 
         if (typeof obj === 'undefined') return undefined;
 
@@ -350,7 +350,16 @@ namespace AstConverter {
     export function toEnum(type: Type<ts.Type>, input: string | number, name: string, isArray: boolean = false): string | number {
         var keyValue = {}, keyArray = [];
         /// get key / value pair
-        type.getUnionTypes().forEach( (data) => {
+        var types = type.getUnionTypes();
+        
+        /// enum literal
+        if (types.length === 0) {
+            var tname = type.getSymbol().getName();
+            if (tname === input) return input;
+            throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be value <${tname}>.`])
+        }
+
+        types.forEach( (data) => {
             var name = data.getSymbol().getName();
             keyValue[ name ] = (<any>data.compilerType).value;
             keyArray.push(name);

@@ -9,16 +9,16 @@ export * from './../workspace/custom/models/index';
 
 
 export enum EventList {
-    Login = "1",
-    Logout = "2",
-    ConfigChanged = "101",
-    TryRegister = "3601",
-    PickFloor = "3602",
-    ScanIDCard = "3603",
-    RegistrationComplete = "3688",
-    TryCheckIn = "3701",
-    FaceVerifyResult = "3702",
-    DoneCheckIn = "3788"
+    EventLogin = "1",
+    EventLogout = "2",
+    EventConfigChanged = "101",
+    EventTryRegister = "3601",
+    EventPickFloor = "3602",
+    EventScanIDCard = "3603",
+    EventRegistrationComplete = "3688",
+    EventTryCheckIn = "3701",
+    EventFaceVerifyResult = "3702",
+    EventDoneCheckIn = "3788"
 }
 
 
@@ -49,9 +49,9 @@ export type EventsType<T> =
     never;
 
 
-/// Event1: Login //////////////////////////////////
+/// EventEventList.EventLogin: Login //////////////////////////////////
 export interface IEventLogin extends IEvent {
-    action: "1";
+    action: EventList.EventLogin;
         
     /**
     * owner: self User
@@ -61,46 +61,46 @@ export interface IEventLogin extends IEvent {
     target?: Parse.User;
     
 }
-@registerSubclass() export class EventLogin extends ParseObject<IEventLogin> { constructor(data?: Omit<IEventLogin, 'action'>) { super({ action: "1", ...data }) } }
+@registerSubclass() export class EventLogin extends ParseObject<IEventLogin> { constructor(data?: Omit<IEventLogin, 'action'>) { super({ action: EventList.EventLogin, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event2: Logout //////////////////////////////////
+/// EventEventList.EventLogout: Logout //////////////////////////////////
 export interface IEventLogout extends IEvent {
-    action: "2";
+    action: EventList.EventLogout;
         
     /// owner: self User
     /// target: Administrator / Host / Kiosk = none. Visitor = Target Kiosk
     
 }
-@registerSubclass() export class EventLogout extends ParseObject<IEventLogout> { constructor(data?: Omit<IEventLogout, 'action'>) { super({ action: "2", ...data }) } }
+@registerSubclass() export class EventLogout extends ParseObject<IEventLogout> { constructor(data?: Omit<IEventLogout, 'action'>) { super({ action: EventList.EventLogout, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event101: ConfigChanged //////////////////////////////////
+/// EventEventList.EventConfigChanged: ConfigChanged //////////////////////////////////
 export interface IEventConfigChanged extends IEvent {
-    action: "101";
+    action: EventList.EventConfigChanged;
         
     key: string;
     value: any;
     
 }
-@registerSubclass() export class EventConfigChanged extends ParseObject<IEventConfigChanged> { constructor(data?: Omit<IEventConfigChanged, 'action'>) { super({ action: "101", ...data }) } }
+@registerSubclass() export class EventConfigChanged extends ParseObject<IEventConfigChanged> { constructor(data?: Omit<IEventConfigChanged, 'action'>) { super({ action: EventList.EventConfigChanged, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event3601: TryRegister //////////////////////////////////
+/// EventEventList.EventTryRegister: TryRegister //////////////////////////////////
 export interface IEventTryRegister extends IEvent {
-    action: "3601";
+    action: EventList.EventTryRegister;
         
 }
-@registerSubclass() export class EventTryRegister extends ParseObject<IEventTryRegister> { constructor(data?: Omit<IEventTryRegister, 'action'>) { super({ action: "3601", ...data }) } }
+@registerSubclass() export class EventTryRegister extends ParseObject<IEventTryRegister> { constructor(data?: Omit<IEventTryRegister, 'action'>) { super({ action: EventList.EventTryRegister, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event3602: PickFloor //////////////////////////////////
+/// EventEventList.EventPickFloor: PickFloor //////////////////////////////////
 export interface IEventPickFloor extends IEvent {
-    action: "3602";
+    action: EventList.EventPickFloor;
         
     /**
     * Floors object pick by Person.
@@ -108,13 +108,13 @@ export interface IEventPickFloor extends IEvent {
     floor: Floors;
     
 }
-@registerSubclass() export class EventPickFloor extends ParseObject<IEventPickFloor> { constructor(data?: Omit<IEventPickFloor, 'action'>) { super({ action: "3602", ...data }) } }
+@registerSubclass() export class EventPickFloor extends ParseObject<IEventPickFloor> { constructor(data?: Omit<IEventPickFloor, 'action'>) { super({ action: EventList.EventPickFloor, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event3603: ScanIDCard //////////////////////////////////
+/// EventEventList.EventScanIDCard: ScanIDCard //////////////////////////////////
 export interface IEventScanIDCard extends IEvent {
-    action: "3603";
+    action: EventList.EventScanIDCard;
         
     /**
     * Extracted info from ID Card.
@@ -125,31 +125,31 @@ export interface IEventScanIDCard extends IEvent {
     image: Parse.File[];
     
 }
-@registerSubclass() export class EventScanIDCard extends ParseObject<IEventScanIDCard> { constructor(data?: Omit<IEventScanIDCard, 'action'>) { super({ action: "3603", ...data }) } }
+@registerSubclass() export class EventScanIDCard extends ParseObject<IEventScanIDCard> { constructor(data?: Omit<IEventScanIDCard, 'action'>) { super({ action: EventList.EventScanIDCard, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event3688: RegistrationComplete //////////////////////////////////
+/// EventEventList.EventRegistrationComplete: RegistrationComplete //////////////////////////////////
 export interface IEventRegistrationComplete extends IEvent {
-    action: "3688";
+    action: EventList.EventRegistrationComplete;
         
 }
-@registerSubclass() export class EventRegistrationComplete extends ParseObject<IEventRegistrationComplete> { constructor(data?: Omit<IEventRegistrationComplete, 'action'>) { super({ action: "3688", ...data }) } }
+@registerSubclass() export class EventRegistrationComplete extends ParseObject<IEventRegistrationComplete> { constructor(data?: Omit<IEventRegistrationComplete, 'action'>) { super({ action: EventList.EventRegistrationComplete, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event3701: TryCheckIn //////////////////////////////////
+/// EventEventList.EventTryCheckIn: TryCheckIn //////////////////////////////////
 export interface IEventTryCheckIn extends IEvent {
-    action: "3701";
+    action: EventList.EventTryCheckIn;
         
 }
-@registerSubclass() export class EventTryCheckIn extends ParseObject<IEventTryCheckIn> { constructor(data?: Omit<IEventTryCheckIn, 'action'>) { super({ action: "3701", ...data }) } }
+@registerSubclass() export class EventTryCheckIn extends ParseObject<IEventTryCheckIn> { constructor(data?: Omit<IEventTryCheckIn, 'action'>) { super({ action: EventList.EventTryCheckIn, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event3702: FaceVerifyResult //////////////////////////////////
+/// EventEventList.EventFaceVerifyResult: FaceVerifyResult //////////////////////////////////
 export interface IEventFaceVerifyResult extends IEvent {
-    action: "3702";
+    action: EventList.EventFaceVerifyResult;
         
     /**
     * Verified face image and final result.
@@ -158,13 +158,13 @@ export interface IEventFaceVerifyResult extends IEvent {
     result: boolean;
     
 }
-@registerSubclass() export class EventFaceVerifyResult extends ParseObject<IEventFaceVerifyResult> { constructor(data?: Omit<IEventFaceVerifyResult, 'action'>) { super({ action: "3702", ...data }) } }
+@registerSubclass() export class EventFaceVerifyResult extends ParseObject<IEventFaceVerifyResult> { constructor(data?: Omit<IEventFaceVerifyResult, 'action'>) { super({ action: EventList.EventFaceVerifyResult, ...data }) } }
 ////////////////////////////////////////////////////
 
 
-/// Event3788: DoneCheckIn //////////////////////////////////
+/// EventEventList.EventDoneCheckIn: DoneCheckIn //////////////////////////////////
 export interface IEventDoneCheckIn extends IEvent {
-    action: "3788";
+    action: EventList.EventDoneCheckIn;
         
     /**
     * Check-in final result.
@@ -172,11 +172,8 @@ export interface IEventDoneCheckIn extends IEvent {
     result: boolean;
     
 }
-@registerSubclass() export class EventDoneCheckIn extends ParseObject<IEventDoneCheckIn> { constructor(data?: Omit<IEventDoneCheckIn, 'action'>) { super({ action: "3788", ...data }) } }
+@registerSubclass() export class EventDoneCheckIn extends ParseObject<IEventDoneCheckIn> { constructor(data?: Omit<IEventDoneCheckIn, 'action'>) { super({ action: EventList.EventDoneCheckIn, ...data }) } }
 ////////////////////////////////////////////////////
-
-
-export type EventEnumType = "EventLogin" | "EventLogout" | "EventConfigChanged" | "EventTryRegister" | "EventPickFloor" | "EventScanIDCard" | "EventRegistrationComplete" | "EventTryCheckIn" | "EventFaceVerifyResult" | "EventDoneCheckIn";
 
 
 import { waitServerReady } from './pending-tasks';

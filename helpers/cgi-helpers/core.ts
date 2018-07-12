@@ -203,7 +203,7 @@ export namespace Restful {
         return query;
     }
 
-    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, params: IInputPaging<any>, filter: any = null): Promise<IOutputPaging<any>> {
+    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, params: IInputPaging<any>, filter: any = null, tuner: ((input: T[])=> Promise<T[]>) = null ): Promise<IOutputPaging<any>> {
         var paging = params.paging || {};
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
@@ -213,6 +213,7 @@ export namespace Restful {
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
 
+        if (tuner) o = await tuner(o);
         var results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );
 
         if (all) return { paging: {total}, results };

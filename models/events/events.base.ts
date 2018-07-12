@@ -2,17 +2,11 @@ import * as Parse from 'parse/node';
 import { Person } from './../userRoles/personRoles.base';
 import { ParseObject, registerSubclass, retrievePrimaryClass } from './../../helpers/parse-server/parse-helper';
 import { EventList, EventsType } from './../../core/events.gen';
+import { EnumConverter } from './../../helpers/utility/get-enum-key';
 
 /// Base
-// export interface IEvent<T = IEvent, U = IEvent> {
-//     actions: number | number[];
-//     owner: Parse.User;
-//     target?: Parse.User;
-//     entities: IEvent | IEvent[];
-// }
-
 export interface IEvent {
-    action: string;
+    action: EventList;
     /**
      * Owner of this event, current user.
      */
@@ -32,7 +26,7 @@ export interface IEvent {
 }
 
 export interface IEvents<T = IEvent> {
-    action: string;
+    action: EventList;
     owner: Parse.User;
     relatedPerson: Person;
     entity: ParseObject<T>;
@@ -70,6 +64,51 @@ export interface IEvents<T = IEvent> {
             return null;
         }
         return <any>event;
+    }
+
+    /// Normal Style
+    // var query = Events.Query.get();
+    // var results = await query.find();
+    // await Events.Query.tuner(results);
+    // return ParseObject.toOutputJSON(results, Events.Query.filter);
+
+    /// Paging Style
+    // var query = Events.Query.get();
+    // return Restful.Pagination(query, { paging: { } }, Events.Query.filter(), Events.Query.tuner());
+    
+    static Query = {
+        get(): Parse.Query<Events> {
+            return new Parse.Query(Events)
+                .include("owner");
+        },
+        tuner() {
+            return async (data: Events[]): Promise<Events[]> => {
+                var promises = data.map( (event) => {
+                    var ins = event.getValue("entity");
+                    event.setValue("entity", ins);
+                    return ins.fetch();
+                });
+                await Promise.all(promises);
+                return data;
+            }
+        },
+        filter() {
+            return {
+                action: EnumConverter(EventList),
+                entity: {
+                    action: false,
+                    owner: false,
+                    createdAt: false,
+                    updatedAt: false
+                },
+                owner: {
+                    roles: false,
+                    ACL: false,
+                    createdAt: false,
+                    updatedAt: false
+                }
+            }
+        }
     }
 
     getValue<U extends keyof T>(key: U): T[U] {

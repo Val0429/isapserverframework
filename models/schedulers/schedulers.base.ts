@@ -1,6 +1,6 @@
 import { ParseObject, registerSubclass, retrievePrimaryClass } from './../../helpers/parse-server/parse-helper';
 import { IEvent } from './../events/events.base';
-import { EventEnumType } from './../../core/events.gen';
+import { EventList } from './../../core/events.gen';
 export * from './actions/index';
 export * from './templates/index';
 
@@ -40,7 +40,7 @@ export interface ISchedulersHandle<T> {
 }
 
 export interface ISchedulers {
-    event: EventEnumType;
+    event: EventList;
     time: ScheduleTimes;
     actions: ScheduleActions[];
 }

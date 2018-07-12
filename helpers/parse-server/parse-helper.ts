@@ -114,11 +114,11 @@ export class ParseObject<T> extends Parse.Object {
 
         var filterRules = {
             "Parse.User": {
-                ACL: null,
-                sessionToken: null,
+                ACL: false,
+                sessionToken: false,
             },
             "Parse.Role": {
-                ACL: null,
+                ACL: false,
                 name: EnumConverter(RoleList)
             }
         }
@@ -127,6 +127,7 @@ export class ParseObject<T> extends Parse.Object {
             var refDetect = {};
             var neutualize = (data: any, filter: any): any => {
                 var type = typeof data;
+
                 if (type === 'boolean') return data;
                 else if (type === 'string') return data;
                 else if (type === 'number') return data;
@@ -145,13 +146,12 @@ export class ParseObject<T> extends Parse.Object {
                     });
                 }
                 else if (type === 'object') {
-                    // return data;
                     var isArray = Array.isArray(data);
                     var result = isArray ? [] : {};
 
                     for (var key in data) {
                         var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
-                        if (cfilter === null) result[key] = undefined;
+                        if (cfilter === false) result[key] = undefined;
                         else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
                         else result[key] = neutualize(data[key], cfilter);
                         /// todo: function transfer

@@ -140,8 +140,7 @@ export class ParseObject<T> extends Parse.Object {
                 var newref = { ...refDetect };
                 newref[data.id] = true;
                 return ({
-                    objectId: data.id,
-                    ...NeutualizeType(data.attributes, filter, newref)
+                    ...NeutualizeType({objectId: data.id, ...data.attributes}, filter, newref)
                 });
             }
             else if (type === 'object') {

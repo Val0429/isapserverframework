@@ -23,3 +23,4 @@ Normal (No need modify code):
 10. You can now filter `get` request with any fields by default.
 11. You can now `get` all `Events` by `/events`.
 12. Copy reviewed `core-templates` into your project.
+13. Now will write log to `logs/nssm_log.txt` when run as a service.

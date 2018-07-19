@@ -37,7 +37,9 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
 
     var loadRouteFromPath = (path: string) => {
         var route: Action;
-        try { route = require(`${path}`).default; } catch(reason) { return null; }
+        try { route = require(`${path}`).default; } catch(reason)
+            { throw reason; }
+            //{ return null; }
         if (!route) throw `${path} has no default export.`;
         return route;
     }

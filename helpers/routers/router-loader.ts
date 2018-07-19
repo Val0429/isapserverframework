@@ -1,8 +1,8 @@
 import * as express from 'express';
 import * as fs from 'fs';
 import * as p from 'path';
-import { Action } from './../../helpers/cgi-helpers/core';
-import { autoPad } from './../../helpers/shells/shell-writer';
+import { Action } from 'helpers/cgi-helpers/core';
+import { autoPad } from 'helpers/shells/shell-writer';
 
 var defaultPath = "index";
 export var actions: Action[] = [];

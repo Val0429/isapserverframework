@@ -1,4 +1,4 @@
-import { makeSubject } from './../helpers/utility/task-helper';
+import { makeSubject } from 'helpers/utility/task-helper';
 
 var {
     makeSubjectReady: makeServerReady,

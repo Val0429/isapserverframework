@@ -7,8 +7,7 @@ const defaultPath = `${__dirname}/../../config_default`;
 const wsDefaultPath = `${__dirname}/../../workspace/config/default`;
 const wsOtherPath = `${__dirname}/../../workspace/config/custom`;
 
-import { registerSubclass, ParseObject } from './../../helpers/parse-server/parse-helper';
-//import { exec as configWriterExec } from './../../shells/config.shell';
+import { registerSubclass, ParseObject } from 'helpers/parse-server/parse-helper';
 
 /// Configurations /////////////////////////////////
 export interface IConfiguration<T = any> {
@@ -19,7 +18,7 @@ export interface IConfiguration<T = any> {
 ////////////////////////////////////////////////////
 
 var template = `
-import { Config } from './../../../config_default/{0}';
+import { Config } from 'config_default/{0}';
 
 var config: Partial<Config> = {
     

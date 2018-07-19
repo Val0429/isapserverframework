@@ -1,5 +1,5 @@
 import { IUser, IRole } from './userRoles.base';
-import { ParseObject, registerSubclass, registerPrimaryKey } from './../../helpers/parse-server/parse-helper';
+import { ParseObject, registerSubclass, registerPrimaryKey } from 'helpers/parse-server/parse-helper';
 
 export interface IPerson<T> extends IUser<T> {}
 @registerSubclass()

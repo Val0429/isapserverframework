@@ -1,4 +1,4 @@
-import { RoleList } from './../../core/userRoles.gen';
+import { RoleList } from 'core/userRoles.gen';
 
 export interface IRole {
     name: string;

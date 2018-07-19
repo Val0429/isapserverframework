@@ -17,8 +17,8 @@ export * from './events.gen';
 export * from './errors.gen';
 export * from './config.gen';
 
-export * from './../helpers/middlewares/index';
+export * from 'helpers/middlewares/index';
 
-export * from './../helpers/cgi-helpers/core';
+export * from 'helpers/cgi-helpers/core';
 
-export * from './../helpers/utility/index';
+export * from 'helpers/utility/index';

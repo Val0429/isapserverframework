@@ -1,6 +1,6 @@
-import { ParseObject, registerSubclass, retrievePrimaryClass } from './../../helpers/parse-server/parse-helper';
-import { IEvent } from './../events/events.base';
-import { EventList } from './../../core/events.gen';
+import { ParseObject, registerSubclass, retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
+import { IEvent } from 'models/events/events.base';
+import { EventList } from 'core/events.gen';
 export * from './actions/index';
 export * from './templates/index';
 
@@ -48,8 +48,8 @@ export interface ISchedulers {
 
 
 
-// import { IEvent } from './../events/events.base';
-// import { ParseObject } from './../../helpers/parse-server/parse-helper';
+// import { IEvent } from 'models/events/events.base';
+// import { ParseObject } from 'helpers/parse-server/parse-helper';
 
 // export class Schedulers {
 //     event: ScheduleEvent;

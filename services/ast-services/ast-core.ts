@@ -1,6 +1,6 @@
-import { Action } from './../../helpers/cgi-helpers/core';
+import { Action } from 'helpers/cgi-helpers/core';
 import { SourceFile } from 'ts-simple-ast';
-import { Errors } from './../../core/errors.gen';
+import { Errors } from 'core/errors.gen';
 
 export enum EnumRequestType {
     init = 0,

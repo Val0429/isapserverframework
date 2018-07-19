@@ -9,23 +9,23 @@ import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-rou
 
 /// Parse & define
 import * as Parse from 'parse/node';
-import { RoleList, IRole } from './../../core/userRoles.gen';
+import { RoleList, IRole } from 'core/userRoles.gen';
 //import * as Socket from 'ws';
-import { Socket } from './../../helpers/sockets/socket-helper';
-import { Errors, IInputPaging, IOutputPaging } from './../../core/errors.gen';
-import { Config } from './../../core/config.gen';
+import { Socket } from 'helpers/sockets/socket-helper';
+import { Errors, IInputPaging, IOutputPaging } from 'core/errors.gen';
+import { Config } from 'core/config.gen';
 
 /// Middlewares
-import * as Middlewares from './../../helpers/middlewares/index';
+import * as Middlewares from 'helpers/middlewares/index';
 
 /// Helpers
 export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
 export * from './../parse-server/parse-helper';
 export * from './../sockets/socket-helper';
-import { omitObject } from './../../helpers/utility/omit-object';
-import { ParseObject, ParseObjectJSONRule, retrievePrimaryClass } from './../../helpers/parse-server/parse-helper';
-import CRUDMaker from './../../shells/crud.shell';
+import { omitObject } from './../utility/omit-object';
+import { ParseObject, ParseObjectJSONRule, retrievePrimaryClass } from './../parse-server/parse-helper';
+import CRUDMaker from 'shells/crud.shell';
 var caller = require('caller');
 
 /// private middlewares

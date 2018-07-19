@@ -1,4 +1,4 @@
-import { shellWriter2, autoPad } from './../helpers/shells/shell-writer';
+import { shellWriter2, autoPad } from 'helpers/shells/shell-writer';
 
 
 function main(): string {

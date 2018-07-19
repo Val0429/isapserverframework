@@ -1,19 +1,19 @@
-import { shellWriter, shellWriter2, autoPad } from './../helpers/shells/shell-writer';
-import { Config } from './../models/events/events.define';
+import { shellWriter, shellWriter2, autoPad } from 'helpers/shells/shell-writer';
+import { Config } from 'models/events/events.define';
 
 // import {
 //     IEventLogin, IEventLogout
 // } from './events';
 var tHeader = `
 import * as Parse from 'parse/node';
-import { registerSubclass, ParseObject, Omit } from '../helpers/parse-server/parse-helper';
-import { Events, IEvents, IEvent } from './../models/events/events.base';
-export * from './../models/events/events.base';
+import { registerSubclass, ParseObject, Omit } from 'helpers/parse-server/parse-helper';
+import { Events, IEvents, IEvent } from 'models/events/events.base';
+export * from 'models/events/events.base';
 `;
 
 var tHeaderSpecial = `
-import { {0} } from './../workspace/custom/models/index';
-export * from './../workspace/custom/models/index';
+import { {0} } from 'workspace/custom/models/index';
+export * from 'workspace/custom/models/index';
 `;
 
 // export enum EventList {
@@ -55,7 +55,7 @@ import { waitServerReady } from './pending-tasks';
 import { Config } from './config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Subject } from 'rxjs';
-import { retrievePrimaryClass } from '../helpers/parse-server/parse-helper';
+import { retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
 import { promisify } from 'bluebird';
 
 export var EventSubjects: {

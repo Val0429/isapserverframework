@@ -1,6 +1,5 @@
 import * as Parse from 'parse/node';
-import { Config } from './../../core/config.gen';
-// import { Errors } from './../../core/errors.gen';
+import { Config } from 'core/config.gen';
 
 export namespace FileHelper {
 

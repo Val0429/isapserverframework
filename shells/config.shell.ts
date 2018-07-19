@@ -1,9 +1,9 @@
-import { autoPad } from './../helpers/shells/shell-writer';
+import { autoPad } from 'helpers/shells/shell-writer';
 import * as fs from 'fs';
 import * as p from 'path';
 
-// import coreConfig, { Config as coreConfigType } from './../config_default/core';
-// import mongodbConfig, { Config as mongodbConfigType } from './../config_default/mongodb';
+// import coreConfig, { Config as coreConfigType } from 'config_default/core';
+// import mongodbConfig, { Config as mongodbConfigType } from 'config_default/mongodb';
 var tHeaderSpecial = `
 {0}
 `;
@@ -58,7 +58,7 @@ function main(): string {
     var keys = [];  
     /// make header special /////////////////////
     var tmp = [];
-    var template = `import {0}Config, { Config as {0}ConfigType } from './../workspace/config/default/{1}';`;
+    var template = `import {0}Config, { Config as {0}ConfigType } from 'workspace/config/default/{1}';`;
     var dir = defPath;
     var files = fs.readdirSync(dir);
     for (var file of files) {
@@ -69,7 +69,7 @@ function main(): string {
                     .replace(/\{1\}/g, name)
         );
     }
-    var template = `import {0}Config, { Config as {0}ConfigType } from './../workspace/config/custom/{1}';`;
+    var template = `import {0}Config, { Config as {0}ConfigType } from 'workspace/config/custom/{1}';`;
     var dir = wsCustomPath;
     var files = fs.readdirSync(dir);
     for (var file of files) {
@@ -133,7 +133,7 @@ function main(): string {
 
 var result = {};
 var template = `
-import { Config } from './../../../config_default/{0}';
+import { Config } from 'config_default/{0}';
 export { Config };
 
 var config: Partial<Config> = {};

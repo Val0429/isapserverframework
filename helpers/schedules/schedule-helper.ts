@@ -1,5 +1,5 @@
 import { Observable, BehaviorSubject } from 'rxjs';
-import { IScheduleTimes, ScheduleTimeType } from './../../models/schedulers/schedulers.base';
+import { IScheduleTimes, ScheduleTimeType } from 'models/schedulers/schedulers.base';
 
 export namespace ScheduleHelper {
     /**

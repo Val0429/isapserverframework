@@ -1,16 +1,16 @@
 import * as Parse from 'parse/node';
 import { waitServerReady } from './pending-tasks';
-import { DynamicLoader } from './../helpers/dynamic-loader/dynamic-loader';
+import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
 import { EventLogin, Events, IEvent } from './events.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Config } from './config.gen';
 import { EventSubjects, EventList } from './events.gen';
-import { ScheduleHelper } from './../helpers/schedules/schedule-helper';
-import { retrievePrimaryClass, ParseObject } from './../helpers/parse-server/parse-helper';
-import { Schedulers, ScheduleTimeType, ScheduleTimes, ScheduleActions, ScheduleActionBase } from './../models/schedulers/schedulers.base';
+import { ScheduleHelper } from 'helpers/schedules/schedule-helper';
+import { retrievePrimaryClass, ParseObject } from 'helpers/parse-server/parse-helper';
+import { Schedulers, ScheduleTimeType, ScheduleTimes, ScheduleActions, ScheduleActionBase } from 'models/schedulers/schedulers.base';
 export { EventList } from './events.gen';
-export * from './../models/schedulers/schedulers.base';
-import { EnumConverter } from './../helpers/utility/get-enum-key';
+export * from 'models/schedulers/schedulers.base';
+import { EnumConverter } from 'helpers/utility/get-enum-key';
 import { Observable, Subscription } from 'rxjs';
 
 const uuidv1 = require('uuid/v1');

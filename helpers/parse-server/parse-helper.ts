@@ -2,7 +2,7 @@ import * as Parse from 'parse/node';
 import { FileHelper } from './file-helper';
 import ast from './../../services/ast-services/ast-client';
 import { EnumConverter } from './../utility/get-enum-key';
-import { RoleList } from './../../core/userRoles.gen';
+import { RoleList } from 'core/userRoles.gen';
 
 /// decorators //////////////
 var primaryClassMap = {};
@@ -183,7 +183,7 @@ export interface ParseObjectJSONRule {
 /**
  * Create index helper.
  */
-import { Config } from './../../core/config.gen';
+import { Config } from 'core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 
 export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions = {}) {

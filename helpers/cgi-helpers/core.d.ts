@@ -1,5 +1,5 @@
 //import * as Socket from 'ws';
-import { Socket } from './../../helpers/sockets/socket-helper';
+import { Socket } from 'helpers/sockets/socket-helper';
 import { Response } from '~express/lib/response';
 
 declare module 'helpers/cgi-helpers/core' {

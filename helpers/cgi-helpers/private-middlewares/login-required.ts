@@ -1,11 +1,10 @@
-import { RoleList, IRole } from './../../../core/userRoles.gen';
-import { Errors } from './../../../core/errors.gen';
+import { RoleList, IRole } from 'core/userRoles.gen';
+import { Errors } from 'core/errors.gen';
 
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
 
-import config from './../../../workspace/config/default/core';
 import './../core';
 
 /// loginRequired //////////////////////////////////////////

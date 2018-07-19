@@ -1,8 +1,8 @@
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
-import { RoleList } from './../../../core/userRoles.gen';
-import { Errors } from './../../../core/errors.gen';
+import { RoleList } from 'core/userRoles.gen';
+import { Errors } from 'core/errors.gen';
 import ast from './../../../services/ast-services/ast-client';
 
 import './../core';

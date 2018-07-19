@@ -1,7 +1,9 @@
+import './../../core/alias';
+
 import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType, RequestNormal, ResponseNormal, ConverterEntity } from './ast-core';
-import { Action } from './../../helpers/cgi-helpers/core';
-import { Errors } from './../../core/errors.gen';
-import { deepMerge } from './../../helpers/utility/deep-merge';
+import { Action } from 'helpers/cgi-helpers/core';
+import { Errors } from 'core/errors.gen';
+import { deepMerge } from 'helpers/utility/deep-merge';
 import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
 
 var reflector: Project = this.reflector = new Project({

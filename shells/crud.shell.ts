@@ -78,7 +78,7 @@ export default action;
 `;
 
 import * as fs from 'fs';
-import { Restful } from './../helpers/cgi-helpers/core';
+import { Restful } from 'helpers/cgi-helpers/core';
 
 export default function main(path: string, className: string, options: Restful.CRUDOptions) {
     var origin = fs.readFileSync(path, "UTF-8");

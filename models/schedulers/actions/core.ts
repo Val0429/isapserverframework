@@ -1,5 +1,5 @@
 import { ISchedulersHandle } from './../schedulers.base';
-import { ParseObject } from './../../../helpers/parse-server/parse-helper';
+import { ParseObject } from 'helpers/parse-server/parse-helper';
 
 export interface IScheduleActionBase {
     do(data: ISchedulersHandle<any>): void | Promise<void>;

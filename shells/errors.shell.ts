@@ -1,12 +1,12 @@
-import { shellWriter2, autoPad } from './../helpers/shells/shell-writer';
+import { shellWriter2, autoPad } from 'helpers/shells/shell-writer';
 
 var tHeader = `
-import { ErrorObject } from './../models/cgis/errors.base';
-export * from './../models/cgis/errors.base';
-export * from './../models/cgis/cgis.base';
+import { ErrorObject } from 'models/cgis/errors.base';
+export * from 'models/cgis/errors.base';
+export * from 'models/cgis/cgis.base';
 import { Response } from 'express/lib/response';
-import { ExpressWsSocket } from './../helpers/middlewares/express-ws-routes';
-import { Socket } from './../helpers/sockets/socket-helper';
+import { ExpressWsSocket } from 'helpers/middlewares/express-ws-routes';
+import { Socket } from 'helpers/sockets/socket-helper';
 `;
 
 var tInterface = `
@@ -86,7 +86,7 @@ var tInterfaceUnit = `
     static {0}: ErrorObject = { statusCode: {1}, message: "{2}" };
 `;
 
-import { Config } from './../models/cgis/errors.define';
+import { Config } from 'models/cgis/errors.define';
 function main(events: Config[]): string {
     var tmpstr = [];
     

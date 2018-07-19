@@ -24,3 +24,9 @@ Normal (No need modify code):
 11. You can now `get` all `Events` by `/events`.
 12. Copy reviewed `core-templates` into your project.
 13. Now will write log to `logs/nssm_log.txt` when run as a service.
+
+v2.1 upgrade
+
+Normal (No need modify code):
+1. router-loader now shows `cgi-bin` error in detail.
+2. You can now use path alias of root. ex: `./../../core/cgi-packages` can be `core/cgi-packages`.

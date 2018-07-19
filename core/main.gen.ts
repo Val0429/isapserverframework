@@ -1,19 +1,19 @@
 "use strict";
 
-import './../shells/events.shell';
+import 'shells/events.shell';
 
 import * as express from 'express';
-import { expressWsRoutes } from './../helpers/middlewares/express-ws-routes';
+import { expressWsRoutes } from 'helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
-import { noCache } from './../helpers/middlewares/no-cache';
-import { accessControlAllowOrigin } from './../helpers/middlewares/access-control-allow-origin';
-import { routerLoader } from './../helpers/routers/router-loader';
-import { makeServerReady, waitServerReady } from './../core/pending-tasks';
+import { noCache } from 'helpers/middlewares/no-cache';
+import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
+import { routerLoader } from 'helpers/routers/router-loader';
+import { makeServerReady, waitServerReady } from 'core/pending-tasks';
 import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 
-import { Config } from './../core/config.gen';
+import { Config } from 'core/config.gen';
 
 let app: express.Application = expressWsRoutes();
 
@@ -68,7 +68,7 @@ app.use(Config.parseDashboard.serverPath, Dashboard);
 app.use('/', express.static(`${__dirname}/../workspace/custom/web`));
 
 
-import { Errors } from './../core/errors.gen';
+import { Errors } from 'core/errors.gen';
 app.use( (reason, req, res, next) => {
     if (reason instanceof Errors) reason.resolve(res);
     else {

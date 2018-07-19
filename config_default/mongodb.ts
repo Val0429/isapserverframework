@@ -1,4 +1,5 @@
 var config: Config = {
+    enable: true,
     ip: "localhost",
     port: 27017,
     collection: "VMS",   
@@ -6,6 +7,7 @@ var config: Config = {
 export default config;
 
 export interface Config {
+    enable: boolean;
     ip: string;
     port: number;
     /**

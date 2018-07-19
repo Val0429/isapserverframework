@@ -46,21 +46,23 @@ var actions = routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.c
 `;
 
 var tRunParseServer = `
-/// run parse server ////
-var ParseServer = new parse.ParseServer({
-    databaseURI: \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`,
-    appId: Config.parseServer.appId,
-    masterKey: Config.parseServer.masterKey,
-    fileKey: Config.parseServer.fileKey,
-    serverURL: \`http://localhost:\${Config.core.port}\${Config.parseServer.serverPath}\`,
-});
-app.use(Config.parseServer.serverPath, ParseServer);
+if (Config.mongodb.enable) {
+    /// run parse server ////
+    var ParseServer = new parse.ParseServer({
+        databaseURI: \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`,
+        appId: Config.parseServer.appId,
+        masterKey: Config.parseServer.masterKey,
+        fileKey: Config.parseServer.fileKey,
+        serverURL: \`http://localhost:\${Config.core.port}\${Config.parseServer.serverPath}\`,
+    });
+    app.use(Config.parseServer.serverPath, ParseServer);
+}
 /////////////////////////
 `;
 
 var tRunParseDashboard = `
 /// run parse dashboard ////
-if (Config.parseDashboard.enable) {
+if (Config.mongodb.enable && Config.parseDashboard.enable) {
 var Dashboard = new ParseDashboard({
     "apps": [
     {

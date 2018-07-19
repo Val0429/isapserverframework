@@ -3,6 +3,7 @@ import { Config } from './config.gen';
 import { RoleList } from './userRoles.gen';
 import { createIndex } from 'helpers/parse-server/parse-helper';
 
+Config.mongodb.enable &&
 waitServerReady(async () => {
     /// indexes ////////////////
     /// Session

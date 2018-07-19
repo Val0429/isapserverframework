@@ -79,6 +79,7 @@ export class Scheduler {
 var scheduler = new Scheduler();
 export default scheduler;
 
+Config.mongodb.enable &&
 waitServerReady(async () => {
     /// get all Schedulers, register
     var objs = await new Parse.Query(Schedulers)

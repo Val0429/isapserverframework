@@ -1,6 +1,5 @@
 import * as Parse from 'parse/node';
 import { FileHelper } from './file-helper';
-import ast from './../../services/ast-services/ast-client';
 import { EnumConverter } from './../utility/get-enum-key';
 import { RoleList } from 'core/userRoles.gen';
 

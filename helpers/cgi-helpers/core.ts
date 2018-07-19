@@ -22,6 +22,7 @@ import * as Middlewares from './../../helpers/middlewares/index';
 export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
 export * from './../parse-server/parse-helper';
+export * from './../sockets/socket-helper';
 import { omitObject } from './../../helpers/utility/omit-object';
 import { ParseObject, ParseObjectJSONRule, retrievePrimaryClass } from './../../helpers/parse-server/parse-helper';
 import CRUDMaker from './../../shells/crud.shell';

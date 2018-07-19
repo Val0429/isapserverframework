@@ -184,7 +184,7 @@ shellWriter(
     genFilePath,
     () => {
         var merged: Config = <any>[...events, ...cevents];
-        fs.writeFileSync(genFilePath, main(merged), "UTF-8");
+        fs.writeFileSync(genFilePath, main(merged));
         console.log("<Generated> Event file updated!");        
     }
 );

@@ -20,7 +20,7 @@ export function shellWriter(detects: string[], target: string, ready: () => void
 export async function shellWriter2(path: string, data: string, ready: () => void) {
      var origin = fs.existsSync(path) ? fs.readFileSync(path, "UTF-8") : "";
      if (origin !== data) {
-         fs.writeFileSync(path, data, "UTF-8");
+         fs.writeFileSync(path, data);
          ready();
      }
 }

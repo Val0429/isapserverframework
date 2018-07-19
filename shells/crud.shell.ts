@@ -114,5 +114,5 @@ export default function main(path: string, className: string, options: Restful.C
     ].join("");
 
     console.log(`CRUD resolved for path <${path}>.`);
-    fs.writeFileSync(path, data, "UTF-8");
+    fs.writeFileSync(path, data);
 }

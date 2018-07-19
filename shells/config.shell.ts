@@ -146,7 +146,7 @@ for (var file of files) {
     if (!fs.existsSync(target)) {
         var name = p.parse(file).name;
         var content = template.replace("{0}", name);
-        fs.writeFileSync(target, content, "UTF-8");
+        fs.writeFileSync(target, content);
         console.log(`Workspace ${file} not exists, default created.`);
     }
 }
@@ -154,7 +154,7 @@ for (var file of files) {
 var origin = fs.existsSync(genFilePath) ? fs.readFileSync(genFilePath, "UTF-8") : "";
 var data = main();
 if (origin !== data) {
-    fs.writeFileSync(genFilePath, data, "UTF-8");
+    fs.writeFileSync(genFilePath, data);
     console.log("<Generated> Config file updated!");            
 }
 

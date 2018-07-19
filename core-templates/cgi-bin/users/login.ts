@@ -4,7 +4,7 @@ import {
     Action, Errors,
     bodyParserJson, EventLogin, Events,
     UserHelper, getEnumKey, ParseObject, EnumConverter
-} from './../../../core/cgi-package';
+} from 'core/cgi-package';
 
 
 export interface Input {

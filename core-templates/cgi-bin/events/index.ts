@@ -3,7 +3,7 @@ import {
     Parse, IRole, IUser, RoleList,
     Action, Errors, Events, IEvents,
     Restful, FileHelper, ParseObject
-} from './../../../core/cgi-package';
+} from 'core/cgi-package';
 
 
 var action = new Action({

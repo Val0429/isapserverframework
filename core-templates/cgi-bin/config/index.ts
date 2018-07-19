@@ -3,7 +3,7 @@ import {
     Parse, IRole, IUser, RoleList, IConfig, Config, IConfigSetup,
     Action, Errors, Floors,
     Restful, FileHelper, ParseObject
-} from './../../../core/cgi-package';
+} from 'core/cgi-package';
 
 
 var action = new Action({
@@ -53,7 +53,7 @@ action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
 export default action;
 
 
-import { wsDefPath, wsCustomPath } from './../../../shells/config.shell';
+import { wsDefPath, wsCustomPath } from 'shells/config.shell';
 import * as p from 'path';
 import * as fs from 'fs';
 import { promisify } from 'bluebird';

@@ -3,9 +3,9 @@ import {
     Parse, IRole, IUser, RoleList,
     Action, Errors,
     Restful, EventSubjects, ParseObject,
-} from './../../../core/cgi-package';
+} from 'core/cgi-package';
 
-import { IScheduleTimes, IScheduleActions, ISchedulers, Schedulers, ScheduleTimes, ScheduleActions } from './../../../models/schedulers/schedulers.base';
+import { IScheduleTimes, IScheduleActions, ISchedulers, Schedulers, ScheduleTimes, ScheduleActions } from 'models/schedulers/schedulers.base';
 
 
 var action = new Action({

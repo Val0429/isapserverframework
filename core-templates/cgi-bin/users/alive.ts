@@ -2,7 +2,7 @@ import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
     Action, Errors,
-} from './../../../core/cgi-package';
+} from 'core/cgi-package';
 
 
 export interface Input {

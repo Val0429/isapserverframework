@@ -77,15 +77,56 @@ action.delete<InputD, OutputD>({ inputType: "InputD" }, async (data) => {
 export default action;
 `;
 
+var templateInterface = `
+var action = new Action({
+    loginRequired: true,
+    permission: [RoleList.Administrator]
+});
+
+/// CRUD start /////////////////////////////////
+/********************************
+ * C: create object
+ ********************************/
+action.post<{0}>({ inputType: "{0}" }, async (data) => {
+
+});
+
+/********************************
+ * R: get object
+ ********************************/
+action.get<{0}, {0}>({ inputType: "{0}" }, async (data) => {
+    return ParseObject.toOutputJSON(data);
+});
+
+/********************************
+ * U: update object
+ ********************************/
+action.put<{0}>({ inputType: "{0}" }, async (data) => {
+
+});
+
+/********************************
+ * D: delete object
+ ********************************/
+action.delete<{0}>({ inputType: "{0}" }, async (data) => {
+
+});
+/// CRUD end ///////////////////////////////////
+
+export default action;
+`;
+
 import * as fs from 'fs';
 import { Restful } from 'helpers/cgi-helpers/core';
 
-export default function main(path: string, className: string, options: Restful.CRUDOptions) {
-    var origin = fs.readFileSync(path, "UTF-8");
+export default function main(path: string, className: string, options: Restful.CRUDOptions, isClass: boolean = true) {
+    if (isClass) createClass(path, className, options);
+    else createInterface(path, className, options);
+    process.exit(0);
+}
+
+function getPos(origin: string): { spos: number, epos: number } {
     var regex = /^.*Restful.CRUD.*$/m;
-    // var data = origin.replace(regex, (a, b) => {
-    //     return template.replace( /\{0\}/mg, className );
-    // });
     var spos, epos;
     origin.replace(regex, (a, b) => {
         spos = b;
@@ -107,9 +148,29 @@ export default function main(path: string, className: string, options: Restful.C
         }
         return a;
     });
+    return { spos, epos };
+}
+
+function createClass(path: string, className: string, options: Restful.CRUDOptions) {
+    var origin = fs.readFileSync(path, "UTF-8");
+    var { spos, epos } = getPos(origin);
     var data = [
         origin.substring(0, spos),
         template.replace( /\{0\}/mg, className ),
+        origin.substring(epos || origin.length, origin.length)
+    ].join("");
+
+    console.log(`CRUD resolved for path <${path}>.`);
+    fs.writeFileSync(path, data);
+}
+
+
+function createInterface(path: string, className: string, options: Restful.CRUDOptions) {
+    var origin = fs.readFileSync(path, "UTF-8");
+    var { spos, epos } = getPos(origin);
+    var data = [
+        origin.substring(0, spos),
+        templateInterface.replace( /\{0\}/mg, className ),
         origin.substring(epos || origin.length, origin.length)
     ].join("");
 

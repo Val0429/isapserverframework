@@ -231,8 +231,16 @@ export namespace Restful {
             deleteSubObjects: true
         }
         options = { ...defaultCRUDOptions, ...options };
-        if (!retrievePrimaryClass(className)) throw `Internal Error: <${className}> should be a valid object for CRUD.`;
-        CRUDMaker(caller(), className, options);
+
+        var isClass = retrievePrimaryClass(className) ? true : false;
+
+        if ( (!isClass && className[0] === 'I') || isClass ) {
+            /// handle interface & class
+            CRUDMaker(caller(), className, options, isClass);
+
+        } else {
+            throw `Internal Error: <${className}> should be a valid object for CRUD.`;
+        }
     }
 
 }

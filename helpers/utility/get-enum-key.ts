@@ -6,10 +6,11 @@ export function getEnumKey(oEnum: any, value: any) {
 }
 
 export function EnumConverter(oEnum: any) {
-    return (value: any) => {
-        for (var key in oEnum) {
-            if (value === oEnum[key]) return key;
-        }
-        return value;
-    }
+    return (value: any) => getEnumKey(oEnum, value);
+    // return (value: any) => {
+    //     for (var key in oEnum) {
+    //         if (value === oEnum[key]) return key;
+    //     }
+    //     return value;
+    // }
 }

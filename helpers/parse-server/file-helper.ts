@@ -1,5 +1,6 @@
 import * as Parse from 'parse/node';
 import { Config } from 'core/config.gen';
+import * as mimeType from 'mime-types';
 
 export namespace FileHelper {
 
@@ -17,6 +18,12 @@ export namespace FileHelper {
             }
             return <any>result;
         }
+
+        /// Parse input for ext name
+        var regex = /^data:([^;]+);base64,/i;
+        var type = null;
+        input = <any>(<string>input).replace(regex, (a, b) => { type = b; return ""; });
+        if (type !== null) name = `file.${mimeType.extension(type)}`;
 
         var file = new Parse.File(`${name || 'file.b64'}`, { base64: input }, mime);
         await file.save();

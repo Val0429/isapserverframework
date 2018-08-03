@@ -1,6 +1,6 @@
 var errors: Config[] = [
     ["LoginRequired", 401, "This action requires login."],
-    ["ParametersRequired", 401, "Parameters required: {0}"],
+    ["ParametersRequired", 400, "Parameters required: {0}"],
     
     ["ParametersInvalid", 400, "Parameters invalid: {0}"],
     ["LoginFailed", 401, "Login failed."],

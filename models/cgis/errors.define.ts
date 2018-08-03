@@ -2,15 +2,38 @@ var errors: Config[] = [
     ["LoginRequired", 401, "This action requires login."],
     ["ParametersRequired", 401, "Parameters required: {0}"],
     
-    ["ParametersInvalid", 404, "Parameters invalid: {0}"],
-    ["RequestFailed", 404, "Request failed."],
-    ["PermissionDenined", 404, "Permission denined."],
-    ["SessionNotExists", 404, "Session not exists."],
+    ["ParametersInvalid", 400, "Parameters invalid: {0}"],
+    ["LoginFailed", 401, "Login failed."],
+    ["PermissionDenied", 401, "Permission denied."],
+    ["SessionNotExists", 401, "Session not exists."],
 
+    /**
+     * Leave for previous use.
+     */
     ["CustomAlreadyExists", 400, "{0}"],
-    ["CustomNotExists", 404, "{0}"],
-    ["CustomInvalid", 404, "{0}"],
+    ["CustomNotExists", 400, "{0}"],
+    ["CustomInvalid", 400, "{0}"],
+
     ["Custom", 500, "{0}"],
+
+    /**
+     * wrong Parameters
+     * lack Parameters
+     * duplicate entry
+     */
+    ["CustomBadRequest", 400, "{0}"],
+    /**
+     * no token
+     * expired token
+     * unauthorized role
+     * token not found
+     * multi login
+     */
+    ["CustomUnauthorized", 401, "{0}"],
+    /**
+     * wrong address
+     */
+    ["CustomNotFound", 404, "{0}"],
 ];
 
 export default errors;

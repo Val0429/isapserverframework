@@ -29,7 +29,7 @@ export namespace UserHelper {
             sessionId = user.getSessionToken();
 
         } catch(reason) {
-            throw Errors.throw(Errors.RequestFailed);
+            throw Errors.throw(Errors.LoginFailed);
         }
         
         return { sessionId, user };

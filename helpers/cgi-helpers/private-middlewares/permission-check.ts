@@ -24,7 +24,7 @@ export function permissionCheck(permissions: RoleList[]): RequestHandler {
 
         var roles = req.role.filter( (element) => permissions.indexOf(element.get("name")) >= 0 );
 
-        if (roles.length == 0) return next( Errors.throw(Errors.PermissionDenined) );
+        if (roles.length == 0) return next( Errors.throw(Errors.PermissionDenied) );
 
         next();
     });

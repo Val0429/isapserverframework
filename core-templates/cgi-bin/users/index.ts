@@ -74,15 +74,16 @@ action.put<InputU, OutputU>({ inputType: "InputU" }, async (data) => {
 
     /// 1) Get User
     var user = await new Parse.Query(Parse.User)
+        .include("roles")
         .get(objectId);
     if (!user) throw Errors.throw(Errors.CustomNotExists, [`User <${objectId}> not exists.`]);
 
+    /// 2.0) Prepare params to feed in
+    var input = { ...data.inputType };
+    delete input.username;
+    delete input.roles;
     /// 2) Modify
-    await user.save({
-        ...data.inputType,
-        /// ignore update of username, roles
-        username: undefined, roles: undefined
-    }, {useMasterKey: true});
+    await user.save(input, {useMasterKey: true});
 
     /// 3) Hide password
     user.set("password", undefined);

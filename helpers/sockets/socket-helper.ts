@@ -1,5 +1,6 @@
 import * as WSSocket from 'ws';
 import { BehaviorSubject } from 'rxjs';
+import * as Rx from 'rxjs/Rx';
 import { Response } from 'express/lib/response';
 import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
 
@@ -39,19 +40,18 @@ export class Socket {
     send(data: any, arg2: any, arg3?: any) {
         var cb = arg3 || arg2;
         cb = this.wrapper(cb);
-        arguments[arg3 ? 2 : 1] = cb;
         this.sendCount.next(this.sendCount.getValue()+1);
-        this.io.send.apply(this.io, arguments);
+        this.io.send.call(this.io, data, cb);
     }
     private wrapper(callback: (err: Error) => void): (err: Error) => void {
         return (err: Error): void => {
-            callback(err);
+            callback && callback(err);
             this.sendCount.next(this.sendCount.getValue()-1);
         }
     }
 
     public closeGracefully() {
-        var subscription = this.sendCount.subscribe( (value) => {
+        let subscription = this.sendCount.observeOn(Rx.Scheduler.asap).subscribe( (value) => {
             if (value === 0) {
                 this.io.close();
                 subscription.unsubscribe();

@@ -4,6 +4,12 @@ import * as mimeType from 'mime-types';
 
 export namespace FileHelper {
 
+    export async function toBufferFromBase64(input: string) {
+        var regex = /^data:([^;]+);base64,/i;
+        var tmpstr = input.replace(regex, "");
+        return new Buffer(tmpstr, 'base64').toString();
+    }
+
     /// save base64 file(s) into Parse.File(s), and return.
     export async function toParseFile<T extends string | string[]>(input: T, name: string = null, mime: string = null):
         Promise<

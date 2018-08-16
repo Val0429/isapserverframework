@@ -24,6 +24,7 @@ export class Semaphore {
         resolve();
     }
     public onCompleted(): Promise<void> {
+        if (this.count === this.max) return Promise.resolve();
         let result;
         let promise = new Promise<void>((resolve) => result = resolve);
         this.completed.push(result);

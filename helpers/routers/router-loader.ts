@@ -37,7 +37,8 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
 
     var loadRouteFromPath = (path: string) => {
         var route: Action;
-        if (!fs.existsSync(path)) return null;
+        let ext = p.extname(path).toLowerCase();
+        if (ext !== '.ts' || !fs.existsSync(path)) return null;
         try {
             route = require(`${path}`).default;
         } catch(reason) {
@@ -106,6 +107,7 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
 
     } else {
         var route: Action = loadRouteFromPath(path);
+        if (route === null) return;
         var routename = name === defaultPath ? (name = "", "($)") : name;
 
         var types = [];

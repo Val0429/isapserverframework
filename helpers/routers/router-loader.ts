@@ -4,7 +4,7 @@ import * as p from 'path';
 import { Action } from 'helpers/cgi-helpers/core';
 import { autoPad } from 'helpers/shells/shell-writer';
 
-var defaultPath = "index.ts";
+var defaultPath = "index";
 export var actions: Action[] = [];
 
 /// meant to be called only once
@@ -38,6 +38,7 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
     var loadRouteFromPath = (path: string) => {
         var route: Action;
         let ext = p.extname(path).toLowerCase();
+        if (!ext) { ext = ".ts"; path += ".ts"; }
         if (ext !== '.ts' || !fs.existsSync(path)) return null;
         try {
             route = require(`${path}`).default;

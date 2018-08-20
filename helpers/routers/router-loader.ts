@@ -4,7 +4,7 @@ import * as p from 'path';
 import { Action } from 'helpers/cgi-helpers/core';
 import { autoPad } from 'helpers/shells/shell-writer';
 
-var defaultPath = "index";
+var defaultPath = "index.ts";
 export var actions: Action[] = [];
 
 /// meant to be called only once

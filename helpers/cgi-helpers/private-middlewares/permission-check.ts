@@ -19,8 +19,9 @@ declare module "helpers/cgi-helpers/core" {
 
 export function permissionCheck(permissions: RoleList[]): RequestHandler {
     return <any>((req: Request, res: Response, next: NextFunction) => {
+        /// if permission is empty, pass.
         /// if login not required, pass.
-        if (!req.role) return next();
+        if (permissions.length === 0 || !req.role) return next();
 
         var roles = req.role.filter( (element) => permissions.indexOf(element.get("name")) >= 0 );
 

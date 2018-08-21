@@ -5,6 +5,10 @@ export function getEnumKey(oEnum: any, value: any) {
     return value;
 }
 
+export function getEnumKeyArray(oEnum: any, value: any[]) {
+    return value.map( val => getEnumKey(oEnum, val) );
+}
+
 export function EnumConverter(oEnum: any) {
     return (value: any) => getEnumKey(oEnum, value);
     // return (value: any) => {

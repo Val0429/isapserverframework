@@ -8,6 +8,7 @@ import * as Parse from 'parse/node';
 import { registerSubclass, Omit, ParseTypedGetterSetter } from 'helpers/parse-server/parse-helper';
 import { IRole, IUser } from 'models/userRoles/userRoles.base';
 export * from 'models/userRoles/userRoles.base';
+import { {0} } from 'workspace/custom/models/index';
 `;
 
 // export enum EventList {
@@ -16,6 +17,16 @@ export * from 'models/userRoles/userRoles.base';
 // }
 var tEnum = `
 export enum RoleList {
+    {0}
+}
+`;
+
+// export const RoleInterfaceLiteralList = {
+//     99: "IUserSystemAdministrator",
+//     0: "IUserAdministrator"
+// }
+var tLiteralList = `
+export const RoleInterfaceLiteralList = {
     {0}
 }
 `;
@@ -30,22 +41,30 @@ export type UserType<T> =
     never;
 `;
 
+// export type IUser{1} = ParseTypedGetterSetter<IUser<IUser{1}Data>> & Parse.User;
 var tInterface = `
 /// User{1}: {0} ///////////////////////////////////
 export interface IUser{1}Data {
     {2}
 }
-export type IUser{1} = ParseTypedGetterSetter<IUser<IUser{1}Data>> & Parse.User;
+export type IUser{1} = IUser<IUser{1}Data>;
 ////////////////////////////////////////////////////
 `;
 // // Events.Login = EventLogin;
 
-function main(events: Array<[number, string, string] | [number, string]>): string {
+function main(events: Array<[number, string, string, string[]] | [number, string, string] | [number, string]>): string {
     var tmpstr = [];
     
     /// make header /////////////////////////////
+    var tmp = [];
+    for (var event of events) {
+        if (event[3]) {
+            tmp = [...tmp, ...event[3] as any];
+        }
+    }
+    tmp = tmp.filter( (a, b, c) => c.indexOf(a) === b );
     tmpstr.push(
-        tHeader.replace(/^[\r\n]+/, '')
+        tHeader.replace("{0}", tmp.join(", "))
     );
     /////////////////////////////////////////////
 
@@ -56,6 +75,16 @@ function main(events: Array<[number, string, string] | [number, string]>): strin
     }
     tmpstr.push(
         tEnum.replace("{0}", tmp.join(",\r\n    "))
+    );
+    /////////////////////////////////////////////
+
+    /// make literal list ///////////////////////
+    var tmp = [];
+    for (var event of events) {
+        tmp.push(`"${event[0]}": "IUser${event[1]}"`);
+    }
+    tmpstr.push(
+        tLiteralList.replace("{0}", tmp.join(",\r\n    "))
     );
     /////////////////////////////////////////////
 

@@ -4,12 +4,14 @@ import * as p from 'path';
 import { Action } from 'helpers/cgi-helpers/core';
 import { autoPad } from 'helpers/shells/shell-writer';
 
-var defaultPath = "index";
+const defaultPath = "index";
+const hiddenPath = "__api__";
 export var actions: Action[] = [];
 
 /// meant to be called only once
 export function routerLoader(app, path, cgiPath = null, first = true, level = 0): Action[] {
-    var name = p.parse(path).name;
+    let name = p.parse(path).name;
+    if (name === hiddenPath) return;
 
     var getTypesFromAction = (route: Action) => {
         if (route === null) return null;

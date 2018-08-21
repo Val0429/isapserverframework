@@ -54,6 +54,7 @@ var ast = new AstService();
 
 process.on('message', (data: Request) => {
     /// receive data
+    console.log('todo remove receiving data', data);
     switch (data.action) {
         case EnumRequestType.init:
             var rtinit = getRequestType(data.action, data);
@@ -89,10 +90,12 @@ namespace AstParser {
     export function getType(type: TypesFromAction): Type<ts.Type> {
         let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
         /// 1) get interface from source directly
+                console.time("123")
         var inf = sourceFile.getInterface(type.type);
         if (inf) return inf.getType();
         var tas = sourceFile.getTypeAlias(type.type);
         if (tas) return tas.getType();
+        console.timeEnd("123")
 
         /// 2) get from named import
         /// 3) and also get from asterisk export
@@ -100,6 +103,9 @@ namespace AstParser {
             var result = imd.getNamedImports().reduce<Type<ts.Type>>( (final, ims, i, ary2) => {
                 if (ims.getName() === type.type) {
                     /// found
+        console.time("456")
+        ims.getNameNode().getDefinitions();
+        console.timeEnd("456")
                     var sf = ims.getNameNode().getDefinitions()[0].getSourceFile();
                     ary.length = ary2.length = 0;
                     return AstParser.getType({path: sf, type: type.type});

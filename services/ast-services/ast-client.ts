@@ -6,6 +6,7 @@ import { waitServerReady } from 'core/pending-tasks';
 import { ParseObject, retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
 import { FileHelper } from 'helpers/parse-server/file-helper';
 const uuidv1 = require('uuid/v1');
+const caller = require('caller');
 
 interface Client {
     promise: Promise<any>;
@@ -83,8 +84,14 @@ export class AstClient {
         }
         return promise;
     }
-
-    requestValidation(type: TypesFromAction, data: any): Promise<any> {
+    requestValidation(nameOfType: string, data: any): Promise<any>;
+    requestValidation(type: TypesFromAction, data: any): Promise<any>;
+    requestValidation(type: string | TypesFromAction, data: any): Promise<any> {
+        /// turn string into TypesFromAction
+        if (typeof(type) === 'string') {
+            type = { path: caller(), type: type as string };
+        }
+        /// perform
         var send: RequestNormal = {
             action: EnumRequestType.normal,
             type,
@@ -92,6 +99,18 @@ export class AstClient {
         };
         return this.request(send);
     }
+
+    // requestValidation(nameOfType: string, data: any): Promise<any> {
+
+    // }
+    // requestValidation(type: TypesFromAction, data: any): Promise<any> {
+    //     var send: RequestNormal = {
+    //         action: EnumRequestType.normal,
+    //         type,
+    //         data
+    //     };
+    //     return this.request(send);
+    // }
 
 }
 
@@ -181,8 +200,15 @@ namespace AstConverter {
 
         /// pure string object
         if (typeof input.data === 'string') {
+            if (input.data === "") throw Errors.throw(Errors.CustomInvalid, [`<${input.class}> should not be empty.`]);
             var obj = new cls();
             obj.id = input.data;
+            try {
+                await obj.fetch();
+            } catch(e) {
+                if (e.code === 101) throw Errors.throw(Errors.CustomInvalid, [`<${input.data}> not exists in <${input.class}>.`]);
+                throw e;
+            }
             return obj;
         }
 

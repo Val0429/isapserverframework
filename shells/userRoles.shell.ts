@@ -50,7 +50,9 @@ export interface IUser{1}Data {
 export type IUser{1} = IUser<IUser{1}Data>;
 ////////////////////////////////////////////////////
 `;
-// // Events.Login = EventLogin;
+
+var tPartial = `export type PartialIUser{0} = Partial<IUser{0}>;`;
+
 
 function main(events: Array<[number, string, string, string[]] | [number, string, string] | [number, string]>): string {
     var tmpstr = [];
@@ -110,6 +112,16 @@ function main(events: Array<[number, string, string, string[]] | [number, string
             tInterface.replace(/\{0\}/g, event[0].toString())
                       .replace(/\{1\}/g, event[1])
                       .replace(/\{2\}/g, attrs)
+        );
+    }
+    tmpstr.push(tmp.join("\r\n"));
+    /////////////////////////////////////////////
+
+    // make partial /////////////////////////////
+    var tmp = [];
+    for (var event of events) {
+        tmp.push(
+            tPartial.replace(/\{0\}/g, event[1])
         );
     }
     tmpstr.push(tmp.join("\r\n"));

@@ -4,7 +4,7 @@ import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType,
 import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
-import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
+import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
 
 var reflector: Project = this.reflector = new Project({
     tsConfigFilePath: "./tsconfig.json",
@@ -54,7 +54,6 @@ var ast = new AstService();
 
 process.on('message', (data: Request) => {
     /// receive data
-    console.log('todo remove receiving data', data);
     switch (data.action) {
         case EnumRequestType.init:
             var rtinit = getRequestType(data.action, data);
@@ -87,15 +86,24 @@ process.on('message', (data: Request) => {
 });
 
 namespace AstParser {
+    let fileNameToSourceMap = {};
+    function getSourceFileFromImport(source: SourceFile, ims: ImportSpecifier): SourceFile {
+        let name = ims.getName();
+        let path = source.getFilePath();
+        let key = `${path}/${name}`;
+        let cache = fileNameToSourceMap[key];
+        if (cache !== undefined) return cache;
+        cache = ims.getNameNode().getDefinitions()[0].getSourceFile();
+        fileNameToSourceMap[key] = cache;
+        return cache;
+    }
     export function getType(type: TypesFromAction): Type<ts.Type> {
         let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
         /// 1) get interface from source directly
-                console.time("123")
         var inf = sourceFile.getInterface(type.type);
         if (inf) return inf.getType();
         var tas = sourceFile.getTypeAlias(type.type);
         if (tas) return tas.getType();
-        console.timeEnd("123")
 
         /// 2) get from named import
         /// 3) and also get from asterisk export
@@ -103,10 +111,8 @@ namespace AstParser {
             var result = imd.getNamedImports().reduce<Type<ts.Type>>( (final, ims, i, ary2) => {
                 if (ims.getName() === type.type) {
                     /// found
-        console.time("456")
-        ims.getNameNode().getDefinitions();
-        console.timeEnd("456")
-                    var sf = ims.getNameNode().getDefinitions()[0].getSourceFile();
+                    //var sf = ims.getNameNode().getDefinitions()[0].getSourceFile();
+                    let sf = getSourceFileFromImport(sourceFile, ims);
                     ary.length = ary2.length = 0;
                     return AstParser.getType({path: sf, type: type.type});
                 } return final;

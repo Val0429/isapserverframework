@@ -12,6 +12,6 @@ export interface IUser<T = {}> {
     username: string;
     password: string;
     email?: string;
-    data?: T & IUserData;
+    data: T & IUserData;
     roles: RoleList[];
 }

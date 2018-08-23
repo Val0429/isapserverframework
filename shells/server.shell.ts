@@ -1,5 +1,4 @@
 import { shellWriter2 } from 'helpers/shells/shell-writer';
-
 import { Config } from 'core/config.gen';
 
 var tHeader = `
@@ -17,6 +16,7 @@ import { makeServerReady, waitServerReady } from 'core/pending-tasks';
 import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
+import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
 
 import { Config } from 'core/config.gen';
 
@@ -98,9 +98,7 @@ app.listen(Config.core.port, async () => {
 
     /// todo: this is a workaround. create database at the beginning.
     let { ip, port, collection } = Config.mongodb;
-    const url = \`mongodb://\${ip}:\${port}/\${collection}\`;
-    let client = await MongoClient.connect(url);
-    let db = client.db(collection);
+    let db = await sharedMongoDB();
     await db.createCollection("_SCHEMA");
     ////////////////////////////////////////////////////////////////
 

@@ -15,3 +15,13 @@ export function makeSubject() {
         waitSubjectReady,
     }
 }
+
+export function makeReadyPromise() {
+    let subject = new BehaviorSubject(false);
+    let makeSubjectReady = () => subject.next(true);
+    let waitSubjectReady = subject.filter( value => value ).first().toPromise();
+    return {
+        makeSubjectReady,
+        waitSubjectReady
+    }
+}

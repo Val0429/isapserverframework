@@ -184,12 +184,19 @@ export interface ParseObjectJSONRule {
 import { Config } from 'core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 
-export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions = {}) {
-    let { ip, port, collection } = Config.mongodb;
-    const url = `mongodb://${ip}:${port}`;
+let { ip, port, collection } = Config.mongodb;
+const url = `mongodb://${ip}:${port}`;
+let sharedClient: MongoClient = null;
+let sharedDb: Db = null;
+export async function sharedMongoDB(): Promise<Db> {
+    if (sharedDb !== null) return sharedDb;
+    sharedClient = await MongoClient.connect(url);
+    sharedDb = sharedClient.db(collection);
+    return sharedDb;
+}
 
-    let client = await MongoClient.connect(url);
-    let db = client.db(collection);
+export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions = {}) {
+    let db = await sharedMongoDB();
 
     var instance = db.collection(collectionName);
     try {

@@ -51,7 +51,7 @@ export interface IEvent{0} extends IEvent {
 `;
 
 var tSubjects = `
-import { waitServerReady } from './pending-tasks';
+import { serverReady } from './pending-tasks';
 import { Config } from './config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Subject } from 'rxjs';
@@ -64,7 +64,9 @@ export var EventSubjects: {
 {1}
 };
 
-waitServerReady(async () => {
+(async () => {
+    await serverReady;
+
     let { ip, port, collection } = Config.mongodb;
     const url = \`mongodb://\${ip}:\${port}\`;
     let client = await MongoClient.connect(url);
@@ -82,7 +84,7 @@ waitServerReady(async () => {
             EventSubjects[event].next(rtn);
         });
     }
-});
+})();
 `;
 
 

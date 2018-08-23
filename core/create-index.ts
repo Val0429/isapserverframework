@@ -1,19 +1,22 @@
-import { waitServerReady } from './pending-tasks';
+import { serverReady } from './pending-tasks';
 import { Config } from './config.gen';
 import { RoleList } from './userRoles.gen';
 import { createIndex } from 'helpers/parse-server/parse-helper';
 
 Config.mongodb.enable &&
-waitServerReady(async () => {
-    /// indexes ////////////////
-    /// Session
-    createIndex("_Session", "expiresTTL",
-        { expiresAt: -1 },
-        { expireAfterSeconds: 0 }
-    );
-    createIndex("_Session", "createdAt",
-        { createdAt: -1 }
-    );
-    ////////////////////////////
-});
+(async () => {
 
+await serverReady;
+
+/// indexes ////////////////
+/// Session
+createIndex("_Session", "expiresTTL",
+    { expiresAt: -1 },
+    { expireAfterSeconds: 0 }
+);
+createIndex("_Session", "createdAt",
+    { createdAt: -1 }
+);
+////////////////////////////
+
+})();

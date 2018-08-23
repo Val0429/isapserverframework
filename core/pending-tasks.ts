@@ -1,9 +1,9 @@
-import { makeSubject } from 'helpers/utility/task-helper';
+import { makeReadyPromise } from 'helpers/utility/task-helper';
 
 var {
     makeSubjectReady: makeServerReady,
-    waitSubjectReady: waitServerReady,
-} = makeSubject();
+    waitSubjectReady: serverReady,
+} = makeReadyPromise();
 
-export { makeServerReady, waitServerReady }
+export { makeServerReady, serverReady }
 

@@ -12,7 +12,7 @@ import * as fs from 'fs';
 import { noCache } from 'helpers/middlewares/no-cache';
 import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from 'helpers/routers/router-loader';
-import { makeServerReady, waitServerReady } from 'core/pending-tasks';
+import { makeServerReady } from 'core/pending-tasks';
 import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';

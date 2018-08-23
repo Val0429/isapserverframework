@@ -2,7 +2,7 @@ const { fork } = require('child_process');
 import { RequestInit, RequestNormal, RequestBase, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile } from './ast-core';
 import { Errors } from 'core/errors.gen';
 import { actions } from 'helpers/routers/router-loader';
-import { waitServerReady } from 'core/pending-tasks';
+import { serverReady } from 'core/pending-tasks';
 import { ParseObject, retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
 import { FileHelper } from 'helpers/parse-server/file-helper';
 const uuidv1 = require('uuid/v1');
@@ -62,14 +62,15 @@ export class AstClient {
             }
         });
 
-        waitServerReady( () => {
+        (async () => {
+            await serverReady;
             /// send init
             var data: RequestInit = {
                 action: EnumRequestType.init,
                 actions
             };
             this.process.send(data);
-        });
+        })();
     }
 
     request(request: RequestBase): Promise<any> {

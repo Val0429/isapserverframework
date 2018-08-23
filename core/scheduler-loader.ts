@@ -1,5 +1,5 @@
 import * as Parse from 'parse/node';
-import { waitServerReady } from './pending-tasks';
+import { serverReady } from './pending-tasks';
 import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
 import { EventLogin, Events, IEvent } from './events.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
@@ -80,7 +80,9 @@ var scheduler = new Scheduler();
 export default scheduler;
 
 Config.mongodb.enable &&
-waitServerReady(async () => {
+(async () => {
+    await serverReady;
+
     /// get all Schedulers, register
     var objs = await new Parse.Query(Schedulers)
         .include("time")
@@ -100,5 +102,5 @@ waitServerReady(async () => {
     //     rtn.id = change.documentKey._id;
     //     EventSubjects[event].next(rtn);
     // });
-    
-});
+
+})();

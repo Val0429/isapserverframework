@@ -16,10 +16,12 @@ export function makeSubject() {
     }
 }
 
-export function makeReadyPromise() {
-    let subject = new BehaviorSubject(false);
-    let makeSubjectReady = () => subject.next(true);
-    let waitSubjectReady = subject.filter( value => value ).first().toPromise();
+
+export function makeReadyPromise<T = boolean>(defaultValue: T = undefined) {
+    if (defaultValue === undefined) defaultValue = false as any;
+    let subject = new BehaviorSubject<T>(defaultValue);
+    let makeSubjectReady = (obj: T = undefined) => { obj = obj || true as any; subject.next(obj); }
+    let waitSubjectReady = subject.filter( (value: any) => value !== undefined && value !== null && value !== false ).first().toPromise();
     return {
         makeSubjectReady,
         waitSubjectReady

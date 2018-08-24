@@ -190,14 +190,21 @@ export interface ParseObjectJSONRule {
 import { Config } from 'core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 
-let { ip, port, collection } = Config.mongodb;
-const url = `mongodb://${ip}:${port}`;
+export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> {
+    let { ip, port, collection } = Config.mongodb;
+    const url = `mongodb://${ip}:${port}`;
+    let client = await MongoClient.connect(url);
+    let db = client.db(collection);
+    return { client, db };
+}
+
 let sharedClient: MongoClient = null;
 let sharedDb: Db = null;
 export async function sharedMongoDB(): Promise<Db> {
     if (sharedDb !== null) return sharedDb;
-    sharedClient = await MongoClient.connect(url);
-    sharedDb = sharedClient.db(collection);
+    let { client, db } = await createMongoDB();
+    sharedClient = client;
+    sharedDb = db;
     return sharedDb;
 }
 

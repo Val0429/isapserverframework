@@ -134,8 +134,6 @@ export class ParseObject<T> extends Parse.Object {
             else if (data instanceof Parse.Relation) return undefined;
             else if (data instanceof Parse.Object) {
                 if (data.id && refDetect[data.id]) return undefined;
-                /// ignore deleted, or non-fetched parse object
-                if (data.createdAt === undefined) return undefined;
                 if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
                 if (data.className === '_Role') filter = filter || filterRules["Parse.Role"];
                 var newref = { ...refDetect };

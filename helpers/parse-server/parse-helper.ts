@@ -134,6 +134,8 @@ export class ParseObject<T> extends Parse.Object {
             else if (data instanceof Parse.Relation) return undefined;
             else if (data instanceof Parse.Object) {
                 if (data.id && refDetect[data.id]) return undefined;
+                /// ignore deleted, or non-fetched parse object
+                if (data.createdAt === undefined) return undefined;
                 if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
                 if (data.className === '_Role') filter = filter || filterRules["Parse.Role"];
                 var newref = { ...refDetect };
@@ -150,7 +152,11 @@ export class ParseObject<T> extends Parse.Object {
                     var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
                     if (cfilter === false) result[key] = undefined;
                     else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
-                    else result[key] = NeutualizeType(data[key], cfilter, refDetect);
+                    else {
+                        let rtn = NeutualizeType(data[key], cfilter, refDetect);
+                        !isArray && (result[key] = rtn);
+                        isArray && (rtn !== undefined) && (<any>result).push(rtn);
+                    }
                     /// todo: function transfer
                 } return result;
             } else {

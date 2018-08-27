@@ -49,22 +49,26 @@ export class PinCode {
     //     return result;
     // }
 
-    public async next(count: number = 1): Promise<Pin[]> {
-        let rtn = [];
-        if (count <= 0) return rtn;
+    public async next(): Promise<Pin>;
+    public async next(count: number): Promise<Pin[]>;
+    public async next(count: any = undefined): Promise<Pin | Pin[]> {
+        let cnt = count === undefined ? 1 : count;
+        let rtn: string[] = [];
+        if (cnt <= 0) return rtn;
         let pins = await this.pins;
         let { index, total, pin } = pins;
         pin = pin.buffer as any as Buffer;
 
-        for (let i=0; i<count; ++i) {
+        for (let i=0; i<cnt; ++i) {
             let result: string = pin.readUInt32BE((index++ % total) *unitSize) + "";
             rtn.push(result);
         }
         /// update db
         let col = this.mongoDb.collection(collectionName);
-        col.updateOne({}, { "$inc": { index: count } });
+        col.updateOne({}, { "$inc": { index: cnt } });
         pins.index = index;
-        return rtn;
+
+        return count === undefined ? rtn[0] : rtn;
     }
 
     constructor() {

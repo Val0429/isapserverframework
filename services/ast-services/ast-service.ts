@@ -4,7 +4,7 @@ import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType,
 import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
-import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
+import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
 
 var reflector: Project = this.reflector = new Project({
     tsConfigFilePath: "./tsconfig.json",
@@ -322,6 +322,13 @@ namespace AstParser {
         } catch (reason) {
             if (reason instanceof Errors) {
                 reason.append( Errors.throw(Errors.Custom, [`${getImplementation()}\r\n`]) );
+
+                let base = inf;
+                let declarations: (InterfaceDeclaration | TypeAliasDeclaration | ClassDeclaration)[];
+                while ( (declarations = base.getBaseDeclarations()).length > 0 ) {
+                    base = declarations[0] as any as InterfaceDeclaration;
+                    reason.append( Errors.throw(Errors.Custom, [`${base.getText()}\r\n`]) );
+                }
                 reason.tag = newdata;
             }
             throw reason;

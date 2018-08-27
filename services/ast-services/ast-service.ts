@@ -262,7 +262,10 @@ namespace AstParser {
             var ntype = params[type.getText()];
             if (!ntype) throw Errors.throw(Errors.Custom, [`Internal Error: failed to handle type ${type.getText()}`]);
             return AstParser.validateType(ntype, obj, showname, isArray, params);
-            
+
+        } else if (type.getText() === "never") {
+            return undefined;
+
         } else if (type.getText() === "any") {
             /// 99) Any
             return obj;
@@ -308,7 +311,9 @@ namespace AstParser {
 
             /// 1) validate required
             var q = prop.getQuestionTokenNode();
-            if ((!q && !forceOptional) &&
+            /// filter never
+            let never: boolean = prop.getType().getText() === 'never';
+            if ((!q && !forceOptional && !never) &&
                 (obj === undefined || obj === null)) throw Errors.throw(Errors.ParametersRequired, [`<${showname}>`]);
             newdata[name] = AstParser.validateType(type, obj, showname, false, params);
         });

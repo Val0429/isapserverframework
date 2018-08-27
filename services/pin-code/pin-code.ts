@@ -35,18 +35,36 @@ export class PinCode {
     private mongoDb: Db;
     private pins: Promise<Pins>;
 
-    public async next(): Promise<Pin> {
+    // public async next(): Promise<Pin> {
+    //     let pins = await this.pins;
+    //     let { index, total, pin } = pins;
+    //     pin = pin.buffer as any as Buffer;
+    //     let result: string = pin.readUInt32BE((index % total) *unitSize) + "";
+    //     /// update db
+    //     let col = this.mongoDb.collection(collectionName);
+    //     /// wait for update
+    //     //await new Promise((resolve) => col.updateOne({}, { "$inc": { index: 1 } }, () => resolve() ) );
+    //     col.updateOne({}, { "$inc": { index: 1 } });
+    //     pins.index++;
+    //     return result;
+    // }
+
+    public async next(count: number = 1): Promise<Pin[]> {
+        let rtn = [];
+        if (count <= 0) return rtn;
         let pins = await this.pins;
         let { index, total, pin } = pins;
         pin = pin.buffer as any as Buffer;
-        let result: string = pin.readUInt32BE((index % total) *unitSize) + "";
+
+        for (let i=0; i<count; ++i) {
+            let result: string = pin.readUInt32BE((index++ % total) *unitSize) + "";
+            rtn.push(result);
+        }
         /// update db
         let col = this.mongoDb.collection(collectionName);
-        /// wait for update
-        //await new Promise((resolve) => col.updateOne({}, { "$inc": { index: 1 } }, () => resolve() ) );
-        col.updateOne({}, { "$inc": { index: 1 } });
-        pins.index++;
-        return result;
+        col.updateOne({}, { "$inc": { index: count } });
+        pins.index = index;
+        return rtn;
     }
 
     constructor() {

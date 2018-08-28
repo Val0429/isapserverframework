@@ -136,6 +136,12 @@ namespace AstParser {
                 result = [...result, ...AstParser.getInterfaceMembers(data)];
             }
         });
+        /// 2.1) make unique
+        result = result.filter( (info, index) => {
+            let name = info.getName();
+            for (let i=0; i<index; ++i) if (result[i].getName() === name) return false;
+            return true;
+        });
 
         if (showinfo) {
             result.forEach( (info) => {

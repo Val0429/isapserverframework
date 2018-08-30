@@ -2,10 +2,10 @@ import {
     express, Request, Response, Router,
     Parse, IRole, IUser, RoleList,
     Action, Errors,
-    Restful, EventSubjects, ParseObject,
+    Restful, EventSubjects, ParseObject, getEnumKey, EventList
 } from 'core/cgi-package';
 
-import { IScheduleTimes, IScheduleActions, ISchedulers, Schedulers, ScheduleTimes, ScheduleActions } from 'models/schedulers/schedulers.base';
+import { IScheduleTimes, IScheduleActions, ISchedulers, Schedulers } from 'models/schedulers/schedulers.base';
 
 
 var action = new Action({
@@ -13,19 +13,21 @@ var action = new Action({
     permission: [RoleList.Administrator]
 });
 
+const filter = { event: (value) => getEnumKey(EventList, value) };
+
 /// CRUD start /////////////////////////////////
 /********************************
  * C: create object
  ********************************/
 type InputC = Restful.InputC<ISchedulers>;
-type OutputC = Restful.OutputC<ISchedulers, { parseObject: false }>;
+type OutputC = Restful.OutputC<ISchedulers>;
 
 action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
     /// 1) Create Object
     var obj = new Schedulers(data.inputType);
     await obj.save(null, { useMasterKey: true });
     /// 2) Output
-    return ParseObject.toOutputJSON(obj);
+    return ParseObject.toOutputJSON(obj, filter);
 });
 
 /********************************
@@ -37,12 +39,10 @@ type OutputR = Restful.OutputR<ISchedulers>;
 action.get<InputR, OutputR>({ inputType: "InputR" }, async (data) => {
     /// 1) Make Query
     var query = new Parse.Query(Schedulers)
-        .include("actions")
-        .include("time");
     /// 2) With Extra Filters
     query = Restful.Filter(query, data.inputType);
     /// 3) Output
-    return Restful.Pagination(query, data.inputType);
+    return Restful.Pagination(query, data.inputType, filter);
 });
 
 /********************************
@@ -54,17 +54,12 @@ type OutputD = Restful.OutputD<ISchedulers>;
 action.delete<InputD, OutputD>({ inputType: "InputD" }, async (data) => {
     /// 1) Get Object
     var { objectId } = data.inputType;
-    var obj = await new Parse.Query(Schedulers)
-        .include("actions")
-        .include("time")
-        .get(objectId);
+    var obj = await new Parse.Query(Schedulers).get(objectId);
     if (!obj) throw Errors.throw(Errors.CustomNotExists, [`Schedulers <${objectId}> not exists.`]);
     /// 2) Delete
-    obj.getValue("time").destroy();
-    obj.getValue("actions").forEach( (data) => data.destroy() );
     obj.destroy({ useMasterKey: true });
     /// 3) Output
-    return ParseObject.toOutputJSON(obj);
+    return ParseObject.toOutputJSON(obj, filter);
 });
 /// CRUD end ///////////////////////////////////
 

@@ -12,6 +12,7 @@ export interface IUser<T = {}> {
     username: string;
     password: string;
     email?: string;
+    publicEmailAddress?: string;
     data: T & IUserData;
     roles: RoleList[];
 }

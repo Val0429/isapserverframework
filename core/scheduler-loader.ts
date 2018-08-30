@@ -7,7 +7,7 @@ import { Config } from './config.gen';
 import { EventSubjects, EventList } from './events.gen';
 import { ScheduleHelper } from 'helpers/schedules/schedule-helper';
 import { retrievePrimaryClass, ParseObject } from 'helpers/parse-server/parse-helper';
-import { Schedulers, ScheduleTimeType, ScheduleTimes, ScheduleActions, ScheduleActionBase } from 'models/schedulers/schedulers.base';
+import { Schedulers, ScheduleTimeType, IScheduleTimes, IScheduleActions, ScheduleControllerBase } from 'models/schedulers/schedulers.base';
 export { EventList } from './events.gen';
 export * from 'models/schedulers/schedulers.base';
 import { EnumConverter } from 'helpers/utility/get-enum-key';
@@ -35,7 +35,7 @@ export class Scheduler {
         let actions = value.getValue("actions");
         if (actions.length === 0) return;
 
-        var ob = time ? ScheduleHelper.scheduleObservable(time.attributes, true) : Observable.of(true);
+        var ob = time ? ScheduleHelper.scheduleObservable(time, true) : Observable.of(true);
         let subject = EventSubjects[eventname];
         if (!subject) return;
 
@@ -46,7 +46,7 @@ export class Scheduler {
                 this.resolve(value, event);
             });
         var previous = this.hashKey[value.id];
-        console.log(`Schedule ${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.attributes.action).join(", ")}>.`);
+        console.log(`Schedule ${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.controller).join(", ")}>.`);
 
         previous && previous.unsubscribe();
         this.hashKey[value.id] = sj;
@@ -57,22 +57,20 @@ export class Scheduler {
         this.hashKey[value.id] = undefined;
     }
 
-    resolve(value: Schedulers, event: ParseObject<IEvent>) {
+    async resolve(value: Schedulers, event: ParseObject<IEvent>) {
         /// Call Action & Template right here
-        //var event = value.getValue("event");
         var time = value.getValue("time");
         var actions = value.getValue("actions");
+        /// load event data
+        await event.fetch();
 
         for (var a of actions) {
-            /// resolve action
-            var attrs = a.attributes;
-            var type: new (data) => ScheduleActionBase = DynamicLoader.get(attrs.action);
+            /// resolve 
+            let { controller, data } = a;
+            let type: new () => ScheduleControllerBase<any,any,any> = DynamicLoader.get(controller);
             if (!type) continue;
-            var instance = new type({
-                event, time,
-                actions: attrs
-            });
-            (<any>instance.do)();
+            let instance = new type();
+            instance.do(event, data);
         }
     }
 }

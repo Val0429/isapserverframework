@@ -1,13 +1,32 @@
 import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
-import { ParseObject } from 'helpers/parse-server/parse-helper';
-import { ScheduleActionBase, IScheduleActionBase } from './core';
-import { ISchedulersHandle } from './../schedulers.base';
+import { ScheduleActionBase } from './core';
 
-export type InputDataEmail = string[];
+/// email core /////////////////////////
+export enum ScheduleActionEmailResult {
+    Success = 0,
+    Failed = 1
+}
+
+export interface IInputScheduleActionEmail {
+    subject: string;
+    body: string;
+    to: string[];
+    CC?: string[];
+    BCC?: string[];
+    attachments?: Parse.File[];
+}
+////////////////////////////////////////
+
 
 @DynamicLoader.set("ScheduleAction.Email")
-export class ScheduleActionEmail extends ScheduleActionBase implements IScheduleActionBase {
-    do(data: ISchedulersHandle<InputDataEmail>): void {
-        console.log("todo send email", data.actions.data);
+export class ScheduleActionEmail extends ScheduleActionBase<IInputScheduleActionEmail, ScheduleActionEmailResult> {
+
+    constructor() {
+        super();
+        this.register( async (input) => {
+            console.log('going to send email', input)
+            return ScheduleActionEmailResult.Success;
+        });
     }
+
 }

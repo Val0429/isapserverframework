@@ -3,6 +3,7 @@ import { IEvent } from 'models/events/events.base';
 import { EventList } from 'core/events.gen';
 export * from './actions/index';
 export * from './templates/index';
+export * from './controllers/index';
 
 export enum ScheduleTimeType {
     Minute = 0, Hour = 1, Day = 2, Week = 3
@@ -21,28 +22,21 @@ export interface IScheduleTimes {
     unitsOfType?: number;
     triggerInterval?: number;
 }
-@registerSubclass() export class ScheduleTimes extends ParseObject<IScheduleTimes> {}
+//@registerSubclass() export class ScheduleTimes extends ParseObject<IScheduleTimes> {}
 
 export interface IScheduleActions {
-    action: string;
+    controller: string;
     /**
      * recipes?
      */
-    data: any[];
-    template: string;
+    data?: any;
 }
-@registerSubclass() export class ScheduleActions extends ParseObject<IScheduleActions> {}
-
-export interface ISchedulersHandle<T> {
-    event: ParseObject<IEvent>;
-    time: ScheduleTimes;
-    actions: IScheduleActions;
-}
+//@registerSubclass() export class ScheduleActions extends ParseObject<IScheduleActions> {}
 
 export interface ISchedulers {
     event: EventList;
-    time: ScheduleTimes;
-    actions: ScheduleActions[];
+    time?: IScheduleTimes;
+    actions: IScheduleActions[];
 }
 @registerSubclass() export class Schedulers extends ParseObject<ISchedulers> {}
 

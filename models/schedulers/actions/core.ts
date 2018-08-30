@@ -1,14 +1,15 @@
-import { ISchedulersHandle } from './../schedulers.base';
-import { ParseObject } from 'helpers/parse-server/parse-helper';
+export type ExtractScheduleActionBaseI<T> = T extends ScheduleActionBase<infer U, infer V> ? U : never;
+export type ExtractScheduleActionBaseO<T> = T extends ScheduleActionBase<infer U, infer V> ? V : never;
 
-export interface IScheduleActionBase {
-    do(data: ISchedulersHandle<any>): void | Promise<void>;
-}
+export class ScheduleActionBase<I, O> {
+    private callback: (input: I) => Promise<O> | O;
 
-export class ScheduleActionBase implements IScheduleActionBase {
-    constructor(data: ISchedulersHandle<any>) {
-        this.do = this.do.bind(this, data);
+    register( callback: (input: I) => Promise<O> | O ) {
+        this.callback = callback;
     }
 
-    do(data: ISchedulersHandle<any>): void | Promise<void>  { throw 'ScheduleAction should define do'; }
+    do(input: I): Promise<O> | O {
+        if (this.callback) return this.callback(input);
+        throw "<ScheduleActionBase> should call register.";
+    }
 }

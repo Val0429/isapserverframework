@@ -1,34 +1,36 @@
 import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
 import { EventLogin } from 'core/events.gen';
 
-import { ScheduleTemplateEmail_PreRegistration, IInputScheduleTemplateEmail_PreRegistration, IOutputScheduleTemplateEmail } from './../templates/email';
-import { IInputScheduleActionEmail, ScheduleActionEmail } from './../actions/email';
-import { ScheduleControllerBase } from './core';
+import { ScheduleControllerBase } from './../controllers/core';
+import { ScheduleActionEmail } from './../actions/email';
+import { ScheduleTemplateEmail_PreRegistrationExample } from './../templates/email';
+
+import pinCode from 'services/pin-code/pin-code';
 
 
 /// just an example
-@DynamicLoader.set("ScheduleController.Email.Login")
-export class ScheduleControllerEmail_Login extends ScheduleControllerBase<
+@DynamicLoader.set("ScheduleController.Email.LoginExample")
+export class ScheduleControllerEmail_LoginExample extends ScheduleControllerBase<
     EventLogin,
-    ScheduleTemplateEmail_PreRegistration,
-    ScheduleActionEmail
+    ScheduleActionEmail,
+    ScheduleTemplateEmail_PreRegistrationExample
     > {
     
     constructor() {
-        super(ScheduleTemplateEmail_PreRegistration, ScheduleActionEmail);
+        super(ScheduleActionEmail, ScheduleTemplateEmail_PreRegistrationExample);
 
         this.registerTemplate( async (event, data) => {
             return {
                 company: {
                     name: "iSap"
                 },
-                pinCode: "123",
+                pinCode: await pinCode.next(),
                 linkPreRegistrationPage: "http",
                 visitor: {
-                    name: event.getValue("owner").getUsername(),
-                    email: event.getValue("owner").getEmail(),
-                    phone: event.getValue("owner").getUsername(),
-                    purposeOfVisit: "0"
+                    name: "Val Liu",
+                    email: "val.liu@isapsolution.com",
+                    phone: "0928240310",
+                    purposeOfVisit: "Visit"
                 }
             }
         });

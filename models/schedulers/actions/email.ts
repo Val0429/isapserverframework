@@ -1,6 +1,8 @@
 import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
 import { ScheduleActionBase } from './core';
 
+import * as nodemailer from 'nodemailer';
+
 /// email core /////////////////////////
 export enum ScheduleActionEmailResult {
     Success = 0,
@@ -17,6 +19,7 @@ export interface IInputScheduleActionEmail {
 }
 ////////////////////////////////////////
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 @DynamicLoader.set("ScheduleAction.Email")
 export class ScheduleActionEmail extends ScheduleActionBase<IInputScheduleActionEmail, ScheduleActionEmailResult> {
@@ -24,7 +27,24 @@ export class ScheduleActionEmail extends ScheduleActionBase<IInputScheduleAction
     constructor() {
         super();
         this.register( async (input) => {
-            console.log('going to send email', input)
+            let transporter = nodemailer.createTransport({
+                host: 'mail.isapsolution.com',
+                port: 25,
+                secure: false,
+                auth: {
+                    user: "val.liu",
+                    pass: "Aa123456"
+                }
+            });
+
+            let mailOptions = {
+                from: "val.liu@isapsolution.com",
+                to: input.to.join(", "),
+                subject: input.subject,
+                html: input.body
+            }
+            await transporter.sendMail(mailOptions);
+
             return ScheduleActionEmailResult.Success;
         });
     }

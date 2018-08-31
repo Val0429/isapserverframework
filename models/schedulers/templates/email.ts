@@ -29,8 +29,7 @@ export interface IInputScheduleTemplateEmail_PreRegistration {
     pinCode: string;
 }
 
-@DynamicLoader.set("ScheduleTemplate.Email.PreRegistration")
-export class ScheduleTemplateEmail_PreRegistration extends ScheduleTemplateBase<
+export class ScheduleTemplateEmail_PreRegistrationExample extends ScheduleTemplateBase<
     IInputScheduleTemplateEmail_PreRegistration,
     IOutputScheduleTemplateEmail
     > {
@@ -42,15 +41,17 @@ export class ScheduleTemplateEmail_PreRegistration extends ScheduleTemplateBase<
             let subject = `Visitor Invitation from ${input.company.name}`;
 
             let body = `
-    Hi ${input.visitor.name},
-    ${input.company.name} has sent you an invitation for your ${input.visitor.purposeOfVisit}.
-    Kindly complete the registration by following the instructions on this link:
-    <a href="${input.linkPreRegistrationPage}">Click here to complete your registration</a> --> Unique Link to Pre-Registration Page
-    Take note of your PinCode / QRCode to verify your registration to our Kiosk.
+    <div style="color: #333; font-family: Calibri Light; font-size: 18;">
+        <p>Hi ${input.visitor.name},</p>
+        <p>${input.company.name} has sent you an invitation for your ${input.visitor.purposeOfVisit}.
+        Kindly complete the registration by following the instructions on this link:</p>
+        <p><a href="${input.linkPreRegistrationPage}">Click here to complete your registration</a> --> Unique Link to Pre-Registration Page
+        Take note of your PinCode / QRCode to verify your registration to our Kiosk.</p>
 
-    Your Pincode is: ${input.pinCode}
+        <p>Your Pincode is: <b style="font-size: 24">${input.pinCode}</b></p>
 
-    For further inquiries contact: ${input.visitor.name} at ${input.visitor.email} / ${input.visitor.phone}
+        <p>For further inquiries contact: <b>${input.visitor.name}</b> at <a href="mailto://${input.visitor.email}">${input.visitor.email}</a> / ${input.visitor.phone}</p>
+    </div>
             `;
 
             return { subject, body };

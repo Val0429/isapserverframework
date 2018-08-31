@@ -15,10 +15,10 @@ export interface ClassConstructor<T> {
 
 export class ScheduleControllerBase<
     EventType,
-    Template extends ScheduleTemplateBase<any, any>,
     Action extends ScheduleActionBase<any, any>,
-    TypeOfTemplate = ClassConstructor<Template>,
-    TypeOfAction = ClassConstructor<Action>
+    Template extends ScheduleTemplateBase<any, any>,
+    TypeOfAction = ClassConstructor<Action>,
+    TypeOfTemplate = ClassConstructor<Template>
     > {
 
     private callbackTemplate: TRegisterTemplateCallback<EventType, Template, Action>;
@@ -26,9 +26,9 @@ export class ScheduleControllerBase<
     private template: TypeOfTemplate;
     private action: TypeOfAction;
 
-    constructor(template: TypeOfTemplate, action: TypeOfAction) {
-        this.template = template;
+    constructor(action: TypeOfAction, template: TypeOfTemplate) {
         this.action = action;
+        this.template = template;
     }
 
     /**

@@ -13,6 +13,7 @@ export interface IUser<T = {}> {
     password: string;
     email?: string;
     publicEmailAddress?: string;
+    phone?: string;
     data: T & IUserData;
     roles: RoleList[];
 }

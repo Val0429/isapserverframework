@@ -45,7 +45,7 @@ export class ScheduleControllerBase<
         this.callbackAction = callback;
     }
 
-    async do(event: EventType, data: any): Promise<ExtractScheduleActionBaseO<Action>> {
+    async do(event: EventType, data: any = null): Promise<ExtractScheduleActionBaseO<Action>> {
         if (!this.callbackTemplate) throw "<ScheduleControllerBase> must call registerTemplate.";
         if (!this.callbackAction) throw "<ScheduleControllerBase> must call registerAction";
 

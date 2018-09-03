@@ -1,10 +1,10 @@
 {
-  "name": "isap-vms-service",
+  "name": "isap-fts-service",
   "version": "1.0.0",
   "config": {
-    "displayname": "iSap VMS Service"
+    "displayname": "iSap FTS Service"
   },
-  "description": "iSap VMS Service v1.00.00",
+  "description": "iSap FTS Service v1.00.00",
   "main": "test",
   "typings": "dist/index",
   "scripts": {
@@ -26,11 +26,12 @@
   "dependencies": {
     "@types/bluebird": "3.5.22",
     "@types/mongodb": "3.0.19",
-    "@types/nodemailer": "^4.6.2",
+    "@types/nodemailer": "4.6.2",
     "@types/parse": "2.4.7",
     "bluebird": "3.5.1",
     "body-parser": "1.17.1",
     "caller": "1.0.1",
+    "edge": "7.10.1",
     "express": "4.15.2",
     "express-ws": "3.0.0",
     "express-ws-routes": "1.1.0",
@@ -41,7 +42,7 @@
     "mongodb": "3.0.10",
     "network": "0.3.2",
     "node-csv-parse": "1.2.0",
-    "nodemailer": "^4.6.8",
+    "nodemailer": "4.6.8",
     "nodemon": "1.17.5",
     "parse": "1.11.0",
     "parse-dashboard": "1.2.0",

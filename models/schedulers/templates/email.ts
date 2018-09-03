@@ -1,6 +1,3 @@
-import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
-import { ScheduleTemplateBase } from './core';
-
 /// email core ////////////////////////////
 export interface IOutputScheduleTemplateEmail {
     subject: string;
@@ -13,6 +10,8 @@ export interface IOutputScheduleTemplateEmail {
 
 
 /// email example
+import { ScheduleTemplateBase } from './core';
+
 export interface IInputScheduleTemplateEmail_PreRegistration {
     company: {
         /// Company name

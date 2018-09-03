@@ -1,4 +1,3 @@
-import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
 import { ScheduleActionBase } from './core';
 
 import * as nodemailer from 'nodemailer';
@@ -21,7 +20,6 @@ export interface IInputScheduleActionEmail {
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-@DynamicLoader.set("ScheduleAction.Email")
 export class ScheduleActionEmail extends ScheduleActionBase<IInputScheduleActionEmail, ScheduleActionEmailResult> {
 
     constructor() {

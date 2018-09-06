@@ -331,7 +331,7 @@ namespace AstParser {
 
                 let base = inf;
                 let declarations: (InterfaceDeclaration | TypeAliasDeclaration | ClassDeclaration)[];
-                while ( (declarations = base.getBaseDeclarations()).length > 0 ) {
+                while ( base.getBaseDeclarations && (declarations = base.getBaseDeclarations()).length > 0 ) {
                     base = declarations[0] as any as InterfaceDeclaration;
                     reason.append( Errors.throw(Errors.Custom, [`${base.getText()}\r\n`]) );
                 }

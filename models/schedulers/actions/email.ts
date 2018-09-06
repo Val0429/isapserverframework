@@ -1,11 +1,13 @@
 import { ScheduleActionBase } from './core';
 
+import { Config } from 'core/config.gen';
 import * as nodemailer from 'nodemailer';
 
 /// email core /////////////////////////
 export enum ScheduleActionEmailResult {
     Success = 0,
-    Failed = 1
+    Failed = 1,
+    Disabled = -1
 }
 
 export interface IInputScheduleActionEmail {
@@ -24,19 +26,22 @@ export class ScheduleActionEmail extends ScheduleActionBase<IInputScheduleAction
 
     constructor() {
         super();
+
         this.register( async (input) => {
+            if (!Config.smtp.enable) return ScheduleActionEmailResult.Disabled;
+
             let transporter = nodemailer.createTransport({
-                host: 'mail.isapsolution.com',
-                port: 25,
+                host: Config.smtp.host,
+                port: Config.smtp.port,
                 secure: false,
                 auth: {
-                    user: "val.liu",
-                    pass: "Aa123456"
+                    user: Config.smtp.email,
+                    pass: Config.smtp.password
                 }
             });
 
             let mailOptions = {
-                from: "val.liu@isapsolution.com",
+                from: Config.smtp.email,
                 to: input.to.join(", "),
                 subject: input.subject,
                 html: input.body

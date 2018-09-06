@@ -8,6 +8,7 @@ export type IOutputScheduleControllerRegisterAction<Action, Template> =
 export type MaybePromise<T> = Promise<T> | T;
 export type TRegisterTemplateCallback<EventType, Template, Action> = ( event: EventType, data: any ) => MaybePromise<ExtractScheduleTemplateBaseI<Template>>;
 export type TRegisterActionCallback<EventType, Template, Action> = (event: EventType, data: any) => MaybePromise<IOutputScheduleControllerRegisterAction<Action, Template>>;
+export type TRegisterShouldExecuteCallback<EventType, Template, Action> = ( event: EventType, data: any ) => MaybePromise<ExtractScheduleActionBaseO<Action> | boolean>;
 
 export interface ClassConstructor<T> {
     new(): T
@@ -23,12 +24,21 @@ export class ScheduleControllerBase<
 
     private callbackTemplate: TRegisterTemplateCallback<EventType, Template, Action>;
     private callbackAction: TRegisterActionCallback<EventType, Template, Action>;
+    private callbackShouldExecute: TRegisterShouldExecuteCallback<EventType, Template, Action>;
+
     private template: TypeOfTemplate;
     private action: TypeOfAction;
 
     constructor(action: TypeOfAction, template: TypeOfTemplate) {
         this.action = action;
         this.template = template;
+    }
+
+    /**
+     * Execute or not. true to continue.
+     */
+    registerShouldExecute( callback: TRegisterShouldExecuteCallback<EventType, Template, Action> ) {
+        this.callbackShouldExecute = callback;
     }
 
     /**
@@ -48,6 +58,11 @@ export class ScheduleControllerBase<
     async do(event: EventType, data: any = null): Promise<ExtractScheduleActionBaseO<Action>> {
         if (!this.callbackTemplate) throw "<ScheduleControllerBase> must call registerTemplate.";
         if (!this.callbackAction) throw "<ScheduleControllerBase> must call registerAction";
+        /// 0) should execute?
+        if (this.callbackShouldExecute) {
+            let result = await this.callbackShouldExecute(event, data);
+            if (result !== true) return result as ExtractScheduleActionBaseO<Action>;
+        }
 
         /// 1) calculate template
         let templateInput = await this.callbackTemplate(event, data);

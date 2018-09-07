@@ -1,6 +1,5 @@
 /// email core ////////////////////////////
 export interface IOutputScheduleTemplateSMS {
-    phone: string;
     message: string;
 }
 ///////////////////////////////////////////

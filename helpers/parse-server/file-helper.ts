@@ -4,6 +4,11 @@ import * as mimeType from 'mime-types';
 
 export namespace FileHelper {
 
+    export function removeBase64Meta(input: string): string {
+        var regex = /^data:([^;]+);base64,/i;
+        return input.replace(regex, "");
+    }
+
     export function toBufferFromBase64(input: string) {
         var regex = /^data:([^;]+);base64,/i;
         var tmpstr = input.replace(regex, "");

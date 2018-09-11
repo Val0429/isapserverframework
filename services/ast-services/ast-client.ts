@@ -197,6 +197,8 @@ namespace AstConverter {
     export async function fromParseObjectEntity(input: ConverterEntity): Promise<ParseObject<any>> {
         if (input.__type__ !== "ParseObject") return;
         var cls: any = retrievePrimaryClass(input.class);
+        /// special case of Parse.User
+        if (input.class === 'User') cls = Parse.User;
         if (!cls) throw Errors.throw(Errors.CustomInvalid, [`Inner type <${input.class}> is not a registered class.`]);
 
         /// pure string object

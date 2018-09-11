@@ -424,6 +424,7 @@ namespace AstConverter {
 
     export function toArray(type: Type<ts.Type>, input: Array<any>, name: string): Array<any> {
         if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
+        if (input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty array.`]);
         var tType = type.getTypeArguments()[0];
         for (var key in input) input[key] = AstParser.validateType(tType, input[key], name, true);
         return input;

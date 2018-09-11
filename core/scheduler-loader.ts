@@ -8,6 +8,7 @@ import { EventSubjects, EventList } from './events.gen';
 import { ScheduleHelper } from 'helpers/schedules/schedule-helper';
 import { retrievePrimaryClass, ParseObject } from 'helpers/parse-server/parse-helper';
 import { Schedulers, ScheduleTimeType, IScheduleTimes, IScheduleActions, ScheduleControllerBase } from 'models/schedulers/schedulers.base';
+export * from 'models/schedulers/schedulers.base';
 export { EventList } from './events.gen';
 export * from 'models/schedulers/schedulers.base';
 import { EnumConverter } from 'helpers/utility/get-enum-key';

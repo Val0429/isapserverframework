@@ -200,7 +200,23 @@ export namespace Restful {
         /// remove paging
         var ps = { ...params, paging: undefined };
         /// including others
-        for (var p in ps) query = query.equalTo(p, ps[p]);
+        // for (var p in ps) query = query.equalTo(p, ps[p]);
+        function queryFilter(query: Parse.Query<T>, params: object, prefix: string = null) {
+        // console.log('prefix', prefix, params);
+            if (Array.isArray(params)) return query.containedIn(prefix, params);
+            if (params instanceof Parse.Object ||
+                params instanceof Parse.User
+                ) return query.equalTo(`${prefix}`, params);
+            if (typeof params === 'object') {
+                for (let key in params) {
+                    queryFilter(query, params[key], (prefix ? `${prefix}.` : '') + key);
+                }
+                return;
+            }
+            return query.equalTo(prefix, params);
+
+        }
+        queryFilter(query, params);
         return query;
     }
 

@@ -30,6 +30,7 @@ export interface IEvents<T = IEvent> {
     owner: Parse.User;
     relatedPerson: Person;
     entity: ParseObject<T>;
+    data: any;
 }
 
 @registerSubclass() export class Events<T extends IEvents = IEvents> extends ParseObject<T> {
@@ -50,6 +51,20 @@ export interface IEvents<T = IEvent> {
             relatedPerson: event.getValue("relatedPerson")
         });
         await evt.save();
+    }
+
+    getValue<U extends keyof T>(key: U): T[U] {
+        if (key == "entity") {
+            /// parse token
+            var token = super.get("entity");
+            if (typeof(token) !== 'string') return token;
+            var regex = /^([^$]+)\$(.+)$/;
+            var [, className, objectId] = token.match(regex);
+            var evt = new (retrievePrimaryClass(className))();
+            evt.id = objectId;
+            return <any>evt;
+        }
+        return super.getValue(key);
     }
 
     static async fetchLast<T extends EventList>(action: T, person: Person): Promise<EventsType<T>> {
@@ -95,6 +110,7 @@ export interface IEvents<T = IEvent> {
         filter() {
             return {
                 action: EnumConverter(EventList),
+                data: false,
                 entity: {
                     action: false,
                     owner: false,
@@ -109,18 +125,5 @@ export interface IEvents<T = IEvent> {
                 }
             }
         }
-    }
-
-    getValue<U extends keyof T>(key: U): T[U] {
-        if (key == "entity") {
-            /// parse token
-            var token = super.get("entity");
-            var regex = /^([^$]+)\$(.+)$/;
-            var [, className, objectId] = token.match(regex);
-            var evt = new (retrievePrimaryClass(className))();
-            evt.id = objectId;
-            return <any>evt;
-        }
-        return super.getValue(key);
     }
 }

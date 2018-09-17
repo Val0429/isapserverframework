@@ -4,6 +4,7 @@ import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType,
 import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
+import { O } from 'helpers/utility/O';
 import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
 
 var reflector: Project = this.reflector = new Project({
@@ -414,7 +415,8 @@ namespace AstConverter {
     }
 
     export function toObject(type: Type<ts.Type>, input: object, name: string, isArray: boolean = false, forceOptional: boolean = false): object {
-        var inf: InterfaceDeclaration = type.getSymbol().getDeclarations()[0] as InterfaceDeclaration;
+        //var inf: InterfaceDeclaration = type.getSymbol().getDeclarations()[0] as InterfaceDeclaration;
+        let inf: InterfaceDeclaration = O(O(O(type).getSymbol()).getDeclarations())[0] as InterfaceDeclaration;
         if (!inf) return {};    /// Anonymous object may not have interface
         var targs = type.getTypeArguments();
         if (targs.length === 0) targs = type.getAliasTypeArguments();

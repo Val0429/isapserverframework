@@ -3,3 +3,4 @@ export * from './task-helper';
 export * from './omit-object';
 export * from './semaphore';
 export * from './deep-merge';
+export * from './O';

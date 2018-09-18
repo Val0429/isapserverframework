@@ -1,10 +1,10 @@
 {
-  "name": "isap-vms-service",
+  "name": "isap-fts-service",
   "version": "1.0.0",
   "config": {
-    "displayname": "iSap VMS Service"
+    "displayname": "iSap FTS Service"
   },
-  "description": "iSap VMS Service v1.00.00",
+  "description": "iSap FTS Service v1.00.00",
   "main": "test",
   "typings": "dist/index",
   "scripts": {
@@ -31,7 +31,7 @@
     "bluebird": "3.5.1",
     "body-parser": "1.17.1",
     "caller": "1.0.1",
-    "edge": "7.10.1",
+    "edge-js": "10.3.1",
     "express": "4.15.2",
     "express-ws": "3.0.0",
     "express-ws-routes": "1.1.0",

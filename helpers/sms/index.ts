@@ -1,4 +1,4 @@
-var edge = require('edge');
+var edge = require('edge-js');
 
 let sms = edge.func({
     assemblyFile: `${__dirname}/lib/sms-dll.dll`,

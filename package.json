@@ -1,10 +1,10 @@
 {
-  "name": "isap-vms-service",
-  "version": "1.0.0",
+  "name": "isap-fts-service",
+  "version": "2.01.02",
   "config": {
-    "displayname": "iSap VMS Service"
+    "displayname": "iSap FTS Service"
   },
-  "description": "iSap VMS Service v1.00.00",
+  "description": "iSap FTS Service v2.01.02",
   "main": "test",
   "typings": "dist/index",
   "scripts": {

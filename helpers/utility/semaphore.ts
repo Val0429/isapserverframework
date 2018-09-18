@@ -14,6 +14,9 @@ export class Semaphore {
         this.promises.push(result);
         return promise;
     }
+    public acquire(): Promise<void> {
+        return this.toPromise();
+    }
     public release() {
         var resolve = this.promises.shift();
         if (resolve === undefined) {

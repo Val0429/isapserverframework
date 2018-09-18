@@ -216,7 +216,7 @@ export namespace Restful {
             return query.equalTo(prefix, params);
 
         }
-        queryFilter(query, params);
+        queryFilter(query, ps);
         return query;
     }
 

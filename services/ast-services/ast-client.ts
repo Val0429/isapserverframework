@@ -125,9 +125,9 @@ namespace AstJSONConverter {
          * 1) boolean
          * 2) string
          * 3) number
-         * 4) Date --- string | number. todo: now only convert to string
+         * 4) Date --- string | number
          * 5) Enum --- string | number
-         * 6) ParseObject --- Object. todo: add createtime & modifytime
+         * 6) ParseObject --- Object
          * 7) Object --- Object
          * 8) Array --- Array
          * 10) Parse.File --- uri
@@ -174,7 +174,6 @@ namespace AstJSONConverter {
                         if (cfilter === null) result[key] = undefined;
                         else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
                         else result[key] = neutualize(data[key], cfilter);
-                        /// todo: function transfer
                     } return result;
                 } else {
                     throw `Inner Error: ${type} is not accepted output type.`;

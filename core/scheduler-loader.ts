@@ -20,8 +20,6 @@ export class Scheduler {
     hashKey: { [index: string]: Subscription } = {};
 
     async register(value: Schedulers) {
-        /// todo: currently only allow event + time(?)
-
         /// code hook will have no id, generate one.
         if (!value.id) value.id = uuidv1();
 

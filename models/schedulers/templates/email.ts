@@ -1,13 +1,4 @@
-/// email core ////////////////////////////
-export interface IOutputScheduleTemplateEmail {
-    subject: string;
-    body: string;
-}
-///////////////////////////////////////////
-
-
-
-
+import { ScheduleActionEmail } from './../actions/email';
 
 /// email example
 import { ScheduleTemplateBase } from './core';
@@ -29,8 +20,8 @@ export interface IInputScheduleTemplateEmail_PreRegistration {
 }
 
 export class ScheduleTemplateEmail_PreRegistrationExample extends ScheduleTemplateBase<
-    IInputScheduleTemplateEmail_PreRegistration,
-    IOutputScheduleTemplateEmail
+    ScheduleActionEmail,
+    IInputScheduleTemplateEmail_PreRegistration
     > {
 
     constructor() {

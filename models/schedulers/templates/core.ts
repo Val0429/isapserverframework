@@ -1,8 +1,11 @@
+import { ExtractScheduleActionBaseIT } from './../actions/core';
 
-export type ExtractScheduleTemplateBaseI<T> = T extends ScheduleTemplateBase<infer U, infer V> ? U : never;
-export type ExtractScheduleTemplateBaseO<T> = T extends ScheduleTemplateBase<infer U, infer V> ? V : never;
+export type ExtractScheduleTemplateBaseI<T> = T extends ScheduleTemplateBase<infer K, infer V, infer U> ? V : never;
+export type ExtractScheduleTemplateBaseO<T> = T extends ScheduleTemplateBase<infer K, infer V, infer U> ? U : never;
 
-export class ScheduleTemplateBase<I, O> {
+export class ScheduleTemplateBase<Action, I,
+    O = ExtractScheduleActionBaseIT<Action>
+> {
     private callback: (input: I) => Promise<O> | O;
 
     register( callback: (input: I) => Promise<O> | O ) {

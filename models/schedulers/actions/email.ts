@@ -10,9 +10,12 @@ export enum ScheduleActionEmailResult {
     Disabled = -1
 }
 
-export interface IInputScheduleActionEmail {
+export interface IInputScheduleActionEmail_FromTemplate {
     subject: string;
     body: string;
+}
+
+export interface IInputScheduleActionEmail_FromController {
     to: string[];
     CC?: string[];
     BCC?: string[];
@@ -22,7 +25,10 @@ export interface IInputScheduleActionEmail {
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-export class ScheduleActionEmail extends ScheduleActionBase<IInputScheduleActionEmail, ScheduleActionEmailResult> {
+export class ScheduleActionEmail extends ScheduleActionBase<
+    IInputScheduleActionEmail_FromTemplate,
+    IInputScheduleActionEmail_FromController,
+    ScheduleActionEmailResult> {
 
     constructor() {
         super();

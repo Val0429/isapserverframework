@@ -9,10 +9,30 @@ export enum ScheduleActionSMSResult {
     Disabled = -1
 }
 
-export type IInputScheduleActionSMS = SMSCommand;
+// export type IInputScheduleActionSMS = SMSCommand;
+export interface SMSCommand {
+    comPort: string;
+    phone: string;
+    message: string;
+    timeout: number;
+}
+
+export interface IInputScheduleActionSMS_FromTemplate {
+    message: string;
+}
+
+export interface IInputScheduleActionSMS_FromController {
+    comPort: string;
+    phone: string;
+    timeout: number;
+}
+
 ////////////////////////////////////////
 
-export class ScheduleActionSMS extends ScheduleActionBase<IInputScheduleActionSMS, ScheduleActionSMSResult> {
+export class ScheduleActionSMS extends ScheduleActionBase<
+    IInputScheduleActionSMS_FromTemplate,
+    IInputScheduleActionSMS_FromController,
+    ScheduleActionSMSResult> {
 
     constructor() {
         super();

@@ -1,9 +1,8 @@
-import { ExtractScheduleActionBaseI, ExtractScheduleActionBaseO, ScheduleActionBase } from './../actions/core';
+import { ExtractScheduleActionBaseIT, ExtractScheduleActionBaseIC, ExtractScheduleActionBaseO, ScheduleActionBase } from './../actions/core';
 import { ExtractScheduleTemplateBaseI, ExtractScheduleTemplateBaseO, ScheduleTemplateBase } from './../templates/core';
 import { ObjectDiff } from 'helpers/parse-server/parse-helper';
 
-export type IOutputScheduleControllerRegisterAction<Action, Template> =
-    ObjectDiff< ExtractScheduleActionBaseI<Action>, ExtractScheduleTemplateBaseO<Template> >;
+export type IOutputScheduleControllerRegisterAction<Action, Template> = ExtractScheduleActionBaseIC<Action>;
 
 export type MaybePromise<T> = Promise<T> | T;
 export type TRegisterTemplateCallback<EventType, Template, Action> = ( event: EventType, data: any ) => MaybePromise<ExtractScheduleTemplateBaseI<Template>>;
@@ -16,7 +15,7 @@ export interface ClassConstructor<T> {
 
 export class ScheduleControllerBase<
     EventType,
-    Action extends ScheduleActionBase<any, any>,
+    Action extends ScheduleActionBase<any, any, any>,
     Template extends ScheduleTemplateBase<any, any>,
     TypeOfAction = ClassConstructor<Action>,
     TypeOfTemplate = ClassConstructor<Template>

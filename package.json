@@ -9,10 +9,21 @@
   "typings": "dist/index",
   "scripts": {
     "start": "npm run build:live",
+    "debug": "npm run build:live",
+    "build": "ts-node --cacheDirectory ./.cache main.ts",
     "build:live": "nodemon --exec ts-node --cacheDirectory ./.cache main.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "install-windows-service": "winser -i -s -a --startwithnpm --displayname \"%npm_package_config_displayname%\"",
     "uninstall-windows-service": "winser -r -x -s"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      ".git/*",
+      ".cache/*",
+      "logs/*",
+      "node_modules/*"
+    ],
+    "delay": "2000"
   },
   "author": "",
   "license": "ISC",

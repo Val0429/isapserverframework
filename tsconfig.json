@@ -14,9 +14,9 @@
         "experimentalDecorators": true
     },
     "exclude": [
+        ".git",
+        ".cache",
         "node_modules",
-        "client",
-        "build",
-        "config"
+        "logs"
     ]
 }

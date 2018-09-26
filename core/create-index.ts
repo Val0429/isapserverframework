@@ -2,6 +2,7 @@ import { serverReady } from './pending-tasks';
 import { Config } from './config.gen';
 import { RoleList } from './userRoles.gen';
 import { createIndex } from 'helpers/parse-server/parse-helper';
+import { autoIndex } from 'helpers/shells/auto-index';
 
 Config.mongodb.enable &&
 (async () => {
@@ -17,6 +18,12 @@ createIndex("_Session", "expiresTTL",
 createIndex("_Session", "createdAt",
     { createdAt: -1 }
 );
+////////////////////////////
+
+/// file indexes ///////////
+autoIndex("./../models/schedulers/actions");
+autoIndex("./../models/schedulers/controllers");
+autoIndex("./../models/schedulers/templates");
 ////////////////////////////
 
 })();

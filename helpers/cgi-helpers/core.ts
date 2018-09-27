@@ -126,6 +126,8 @@ export class Action<T = any, U = any> {
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {
                             var result = await realfunc({...request ,request, response});
+                            /// don't do anything, if delegate doesn't return
+                            if (result === undefined) return;
                             response.send(result);
                         } catch(reason) {
                             next(reason);

@@ -26,7 +26,7 @@ action.post<Input>({
         timeout: Config.sms.timeout
     });
 
-    return;
+    return "";
 });
 /////////////////////////////////////////////////////
 

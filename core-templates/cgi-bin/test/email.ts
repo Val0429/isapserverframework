@@ -25,7 +25,7 @@ action.post<Input>({
         to: [data.inputType.email]
     });
 
-    return;
+    return "";
 });
 /////////////////////////////////////////////////////
 

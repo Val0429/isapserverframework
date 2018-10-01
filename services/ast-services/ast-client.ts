@@ -62,16 +62,15 @@ export class AstClient {
             }
         });
 
-        /// don't do init for now
-        // (async () => {
-        //     await serverReady;
-        //     /// send init
-        //     var data: RequestInit = {
-        //         action: EnumRequestType.init,
-        //         actions
-        //     };
-        //     this.process.send(data);
-        // })();
+        (async () => {
+            await serverReady;
+            /// send init
+            var data: RequestInit = {
+                action: EnumRequestType.init,
+                actions
+            };
+            this.process.send(data);
+        })();
     }
 
     request(request: RequestBase): Promise<any> {

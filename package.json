@@ -63,7 +63,7 @@
     "rxjs": "5.5.11",
     "sharp": "^0.20.8",
     "ts-node": "3.3.0",
-    "ts-simple-ast": "12.4.0",
+    "ts-simple-ast": "16.0.1",
     "ts-transformer-keys": "0.3.1",
     "typings": "2.1.1",
     "uuid": "3.3.0",

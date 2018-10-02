@@ -42,10 +42,10 @@ export class ParseObject<T> extends Parse.Object {
         data && super.set(data);
     }
     getValue<U extends keyof T>(key: U): T[U] {
-        return super.get(key);
+        return super.get(key as string);
     }
     setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean {
-        return super.set(key, <any>value, options);
+        return super.set(key as string, <any>value, options);
     }
     /**
      * important: decorator <registerPrimaryKey> required.
@@ -174,7 +174,7 @@ export interface ParseTypedGetterSetter<T> {
     set<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean;
 }
 
-export type StringLiteralDiff<T, U extends string> = ({[P in keyof T]: P } & {[P in U]: never } & { [x: string]: never })[keyof T];
+export type StringLiteralDiff<T, U extends string | number | symbol> = ({[P in keyof T]: P } & {[P in U]: never } & { [x: string]: never })[keyof T];
 export type Omit<T, K extends keyof T> = Pick<T, StringLiteralDiff<T, K>>;
 export type ObjectDiff<T, U> = Pick<T, StringLiteralDiff<T, keyof U>>;
 

@@ -40,6 +40,7 @@ export function autoIndex(path: string) {
         }
     }
     let data = templates.filter( (p) => p ).join("\r\n");
+    if (!data) data = "export default undefined;";
 
     /// 2) compare with current index file
     let indexPath = `${path}/${indexName}.ts`;

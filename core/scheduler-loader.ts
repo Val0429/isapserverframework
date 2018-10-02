@@ -67,7 +67,10 @@ export class Scheduler {
             /// resolve 
             let { controller, data } = a;
             let type: new () => ScheduleControllerBase<any,any,any> = DynamicLoader.get(controller);
-            if (!type) continue;
+            if (!type) {
+                console.log(`<Error> ${controller} not found.`);
+                continue;
+            }
             let instance = new type();
             instance.do(event, data);
         }

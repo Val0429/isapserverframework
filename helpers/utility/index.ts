@@ -4,3 +4,4 @@ export * from './omit-object';
 export * from './semaphore';
 export * from './deep-merge';
 export * from './O';
+export * from './log';

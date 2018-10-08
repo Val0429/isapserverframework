@@ -11,7 +11,7 @@ import { Schedulers, ScheduleTimeType, IScheduleTimes, IScheduleActions, Schedul
 export * from 'models/schedulers/schedulers.base';
 export { EventList } from './events.gen';
 export * from 'models/schedulers/schedulers.base';
-import { EnumConverter } from 'helpers/utility/get-enum-key';
+import { EnumConverter, Log } from 'helpers/utility';
 import { Observable, Subscription } from 'rxjs';
 
 const uuidv1 = require('uuid/v1');
@@ -19,7 +19,16 @@ const uuidv1 = require('uuid/v1');
 export class Scheduler {
     hashKey: { [index: string]: Subscription } = {};
 
-    async register(value: Schedulers) {
+    async register(value: Schedulers): Promise<void>;
+    async register(value: Schedulers[]): Promise<void>;
+    async register(value: Schedulers | Schedulers[]): Promise<void> {
+        /// flattern array
+        if (Array.isArray(value)) {
+            for (let scheduler of value)
+                await this.register(scheduler);
+            return;
+        }
+
         /// code hook will have no id, generate one.
         if (!value.id) value.id = uuidv1();
 
@@ -45,7 +54,8 @@ export class Scheduler {
                 this.resolve(value, event);
             });
         var previous = this.hashKey[value.id];
-        console.log(`Schedule ${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.controller).join(", ")}>.`);
+        Log.Info("Schedule", `${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.controller).join(", ")}>.`);
+        //console.log(`Schedule ${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.controller).join(", ")}>.`);
 
         previous && previous.unsubscribe();
         this.hashKey[value.id] = sj;
@@ -54,6 +64,11 @@ export class Scheduler {
     unregister(value: Schedulers) {
         this.hashKey[value.id] && this.hashKey[value.id].unsubscribe();
         this.hashKey[value.id] = undefined;
+    }
+    unregisterAll() {
+        for (let key in this.hashKey)
+            this.hashKey[key].unsubscribe();
+        this.hashKey = {};
     }
 
     async resolve(value: Schedulers, event: ParseObject<IEvent>) {

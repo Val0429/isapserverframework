@@ -47,6 +47,7 @@
     "express": "4.15.2",
     "express-ws": "3.0.0",
     "express-ws-routes": "1.1.0",
+    "getmac": "1.4.6",
     "json-prune": "1.1.0",
     "longjohn": "0.2.12",
     "mime-types": "2.1.19",
@@ -61,12 +62,13 @@
     "parse-server": "2.7.2",
     "request": "2.87.0",
     "rxjs": "5.5.11",
-    "sharp": "^0.20.8",
+    "sharp": "0.20.8",
     "ts-node": "3.3.0",
     "ts-simple-ast": "16.0.1",
     "typings": "2.1.1",
     "uuid": "3.3.0",
     "websocket": "1.0.25",
-    "winser": "https://github.com/Val0429/winser.git"
+    "winser": "https://github.com/Val0429/winser.git",
+    "xml2js": "0.4.19"
   }
 }

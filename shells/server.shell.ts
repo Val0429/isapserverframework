@@ -17,6 +17,8 @@ import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
+import { Action } from 'helpers/cgi-helpers/core';
+import { Log } from 'helpers/utility';
 
 import { Config } from 'core/config.gen';
 
@@ -43,6 +45,7 @@ if (Config.core.accessControlAllowOrigin) app.use(<any>accessControlAllowOrigin)
 var tLoadRouter = `
 /// Load Routers!
 var actions = routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.core.cgiPath);
+Log.Info('API Loaded', \`Totally \${Action.count(actions)} APIs.\`);
 `;
 
 var tRunParseServer = `
@@ -171,6 +174,7 @@ function main(): string {
 
 const genFilePath = `${__dirname}/../core/main.gen.ts`;
 const tmplPath = `${__dirname}/server.shell.ts`;
+import { Log } from 'helpers/utility';
 
 import * as fs from 'fs';
 
@@ -178,6 +182,7 @@ shellWriter2(
     genFilePath,
     main(),
     () => {
-        console.log("<Generated> Server file updated!");
+        Log.Info("Code Generator", "Server file updated!");
     }
 );
+

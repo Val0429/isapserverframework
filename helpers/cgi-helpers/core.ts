@@ -49,6 +49,23 @@ export class Action<T = any, U = any> {
         var callback = arg2 || arg1; if (arg2) this[`func${type}Config`] = typeof arg1 === 'string' ? { path: arg1 } : arg1; this[`func${type}`] = <any>callback; return this;
     }
 
+    /**
+     * count number of apis
+     */
+    count(): number {
+        let count = 0;
+        let data = ["All", "Get", "Post", "Put", "Delete", "Ws"];
+        for (let key of data) {
+            this[`func${key}`] && count++;
+        }
+        return count;
+    }
+    public static count(actions: Action[]) {
+        return actions.reduce( (final, action) => {
+            return final + action.count();
+        }, 0);
+    }
+
     public funcAllConfig: ActionConfig;
     private funcAll: ActionCallback<T, U>;
     all(callback: ActionCallback<T, U>): Action<T, U> { this.funcAll = callback; return this; }

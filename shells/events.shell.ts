@@ -180,6 +180,7 @@ const customDefPath = `${__dirname}/../workspace/define/events/events.define.ts`
 var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
+import { Log } from 'helpers/utility';
 
 shellWriter(
     [defPath, tmplPath, customDefPath],
@@ -187,14 +188,7 @@ shellWriter(
     () => {
         var merged: Config = <any>[...events, ...cevents];
         fs.writeFileSync(genFilePath, main(merged));
-        console.log("<Generated> Event file updated!");        
+        Log.Info("Code Generator", "Event file updated!");
     }
 );
 
-// shellWriter2(
-//     genFilePath,
-//     main(<any>[...events, ...cevents]),
-//     () => {
-//         console.log("<Generated> Event file updated!");
-//     }
-// );

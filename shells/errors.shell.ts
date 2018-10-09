@@ -125,6 +125,7 @@ const customDefPath = `${__dirname}/../workspace/define/cgis/errors.define.ts`;
 var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
+import { Log } from 'helpers/utility';
 
 // shellWriter(
 //     [defPath, tmplPath, customDefPath],
@@ -132,7 +133,6 @@ import * as fs from 'fs';
 //     () => {
 //         var merged = [...events, ...cevents];
 //         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
-//         console.log("<Generated> Error file updated!");        
 //     }
 // );
 
@@ -140,6 +140,6 @@ shellWriter2(
     genFilePath,
     main([...events, ...cevents]),
     () => {
-        console.log("<Generated> Error file updated!");
+        Log.Info("Code Generator", "Error file updated!");
     }
 );

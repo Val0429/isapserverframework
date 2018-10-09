@@ -1,6 +1,7 @@
 import { autoPad } from 'helpers/shells/shell-writer';
 import * as fs from 'fs';
 import * as p from 'path';
+import { Log } from 'helpers/utility';
 
 // import coreConfig, { Config as coreConfigType } from 'config_default/core';
 // import mongodbConfig, { Config as mongodbConfigType } from 'config_default/mongodb';
@@ -155,7 +156,7 @@ var origin = fs.existsSync(genFilePath) ? fs.readFileSync(genFilePath, "UTF-8") 
 var data = main();
 if (origin !== data) {
     fs.writeFileSync(genFilePath, data);
-    console.log("<Generated> Config file updated!");            
+    Log.Info("Code Generator", "Config file updated!");
 }
 
 /// 3) merge configs

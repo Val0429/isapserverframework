@@ -19,11 +19,13 @@ function main(): string {
 
 const genFilePath = `${__dirname}/../package.json`;
 const tmplPath = `${__dirname}/../workspace/package.json`;
+import { Log } from 'helpers/utility';
 
 shellWriter2(
     genFilePath,
     main(),
     () => {
-        console.log("<Generated> Package file updated!");
+        Log.Info("Code Generator", "Package file updated!");
     }
 );
+

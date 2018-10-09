@@ -140,6 +140,7 @@ const customDefPath = `${__dirname}/../workspace/define/userRoles/userRoles.defi
 // var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
+import { Log } from 'helpers/utility';
 
 // shellWriter(
 //     [tmplPath, customDefPath],
@@ -147,7 +148,6 @@ import * as fs from 'fs';
 //     () => {
 //         var merged = [/*...events,*/ ...cevents];
 //         fs.writeFileSync(genFilePath, main(merged), "UTF-8");
-//         console.log("<Generated> UserRole file updated!");        
 //     }
 // );
 
@@ -155,6 +155,7 @@ shellWriter2(
     genFilePath,
     main([...cevents]),
     () => {
-        console.log("<Generated> UserRole file updated!");
+        Log.Info("Code Generator", "UserRole file updated!");
     }
 );
+

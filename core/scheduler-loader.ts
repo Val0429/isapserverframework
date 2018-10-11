@@ -54,7 +54,7 @@ export class Scheduler {
                 this.resolve(value, event);
             });
         var previous = this.hashKey[value.id];
-        Log.Info("Schedule", `${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.controller).join(", ")}>.`);
+        Log.Info("Scheduler", `${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.controller).join(", ")}>.`);
         //console.log(`Schedule ${previous ? "re" : ""}loaded with <${eventname}>, do <${actions.map(data => data.controller).join(", ")}>.`);
 
         previous && previous.unsubscribe();

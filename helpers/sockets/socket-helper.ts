@@ -38,6 +38,7 @@ export class Socket {
     send(data: any, cb?: (err: Error) => void): void;
     send(data: any, options: { mask?: boolean; binary?: boolean }, cb?: (err: Error) => void): void;
     send(data: any, arg2: any, arg3?: any) {
+        typeof data === 'object' && (data = JSON.stringify(data));
         var cb = arg3 || arg2;
         cb = this.wrapper(cb);
         this.sendCount.next(this.sendCount.getValue()+1);

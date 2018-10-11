@@ -47,6 +47,15 @@ export class ParseObject<T> extends Parse.Object {
     setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean {
         return super.set(key as string, <any>value, options);
     }
+
+    async fetchOrNull<U extends ParseObject<T>>(this: U): Promise<U | null> {
+        try {
+            return await this.fetch();
+        } catch(e) {
+            return null;
+        }
+    }
+
     /**
      * important: decorator <registerPrimaryKey> required.
      * If not exists, insert. else fetch.

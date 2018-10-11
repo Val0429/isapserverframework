@@ -64,6 +64,8 @@ export var EventSubjects: {
 {1}
 };
 
+export var EventsSubject: Subject<Events> = new Subject<Events>();
+
 (async () => {
     await serverReady;
 
@@ -84,6 +86,16 @@ export var EventSubjects: {
             EventSubjects[event].next(rtn);
         });
     }
+
+    var instance = db.collection("Events");
+    var stream = instance.watch();
+    stream.on("change", (change) => {
+        if (change.operationType !== 'insert') return;
+        let rtn = new Events();
+        rtn.id = change.documentKey._id;
+        EventsSubject.next(rtn);
+    });
+
 })();
 `;
 

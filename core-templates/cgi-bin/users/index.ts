@@ -60,7 +60,7 @@ action.get<InputR, OutputR>({ inputType: "InputR" }, async (data) => {
 
     query = Restful.Filter(query, data.inputType);
 
-    return Restful.Pagination(query, data.inputType);
+    return Restful.Pagination(query, data.parameters);
 });
 ///////////////////////////////////////////
 

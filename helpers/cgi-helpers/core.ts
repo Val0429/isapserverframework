@@ -239,13 +239,13 @@ export namespace Restful {
         return query;
     }
 
-    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, params: IInputPaging<any>, filter: any = null, tuner: ((input: T[])=> Promise<T[]>) = null, findOptions: Parse.Query.FindOptions = undefined ): Promise<IOutputPaging<any>> {
+    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T>, params: IInputPaging<any>, filter: any = null, tuner: ((input: T[])=> Promise<T[]>) = null): Promise<IOutputPaging<any>> {
         var paging = params.paging || {};
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
         var all = "true" == paging.all;
         if (all) pageSize = Number.MAX_SAFE_INTEGER;
-        var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find(findOptions);
+        var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
         var total = await query.count();
         var totalPages = Math.ceil(total / pageSize);
 

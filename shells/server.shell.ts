@@ -9,6 +9,7 @@ import 'shells/events.shell';
 import * as express from 'express';
 import { expressWsRoutes } from 'helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
+import * as p from 'path';
 import { noCache } from 'helpers/middlewares/no-cache';
 import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from 'helpers/routers/router-loader';
@@ -82,7 +83,18 @@ app.use(Config.parseDashboard.serverPath, Dashboard);
 `;
 
 var tRunWeb = `
-app.use('/', express.static(\`\${__dirname}/../workspace/custom/web\`));
+let webPath = \`\${__dirname}/../workspace/custom/web\`;
+fs.exists(webPath, (exists) => {
+    if (!exists) return;
+    app.use('/', express.static(webPath));
+    let webIndexPath = p.resolve(webPath, 'index.html');
+    fs.exists(webIndexPath, (exists) => {
+        if (!exists) return;
+        app.use((req, res, next) => {
+            res.sendFile(webIndexPath);
+        });
+    });
+});
 `;
 
 var tFinalizeError = `

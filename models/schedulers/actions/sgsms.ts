@@ -28,7 +28,7 @@ export class ScheduleActionSGSMS extends ScheduleActionBase<
         this.register( async (input) => {
             if (!Config.sgsms.enable) return ScheduleActionSMSResult.Disabled;
 
-            let url = `${Config.sgsms.url}?username=${input.username}&password=${input.password}&to=${input.phone}&from=${input.from}&message=${input.message}`;
+            let url = `${Config.sgsms.url}?username=${input.username}&password=${input.password}&to=${encodeURIComponent(input.phone)}&from=${input.from}&message=${input.message}`;
 
             await new Promise( (resolve, reject) => {
                 request({

@@ -58,6 +58,7 @@ if (Config.mongodb.enable) {
         masterKey: Config.parseServer.masterKey,
         fileKey: Config.parseServer.fileKey,
         serverURL: \`http://localhost:\${Config.core.port}\${Config.parseServer.serverPath}\`,
+        sessionLength: Config.core.sessionExpireSeconds
     });
     app.use(Config.parseServer.serverPath, ParseServer);
 }

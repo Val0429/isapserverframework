@@ -3,7 +3,8 @@ var config: Config = {
     disableCache: true,
     accessControlAllowOrigin: true,
     cgiPath: "",
-    publicExternalIP: "localhost"
+    publicExternalIP: "localhost",
+    sessionExpireSeconds: 3600
 };
 export default config;
 
@@ -23,4 +24,5 @@ export interface Config {
      */
     cgiPath: string;
     publicExternalIP: string;
+    sessionExpireSeconds: number;
 }

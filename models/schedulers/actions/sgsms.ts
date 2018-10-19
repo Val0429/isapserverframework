@@ -4,6 +4,7 @@ import { Config } from 'core/config.gen';
 import * as request from 'request';
 
 import { ScheduleActionSMSResult } from './sms';
+import { Log } from 'helpers/utility';
 
 export interface IInputScheduleActionSGSMS_FromTemplate {
     message: string;
@@ -37,7 +38,7 @@ export class ScheduleActionSGSMS extends ScheduleActionBase<
                 }, (err, res, body) => {
                     /// temporarily show error
                     if (body.indexOf("ERROR") >= 0) {
-                        console.log(`<SGSMS Error> ${body}`);
+                        Log.Error("SGSMS", body);
                     }
                     resolve();
                 });

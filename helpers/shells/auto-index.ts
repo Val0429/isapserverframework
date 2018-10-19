@@ -3,6 +3,7 @@ import * as p from 'path';
 var caller = require('caller');
 
 import 'colors';
+import { Log } from 'helpers/utility';
 
 function isDirectory(path: string) {
     return fs.lstatSync(path).isDirectory();
@@ -47,6 +48,6 @@ export function autoIndex(path: string) {
     let origin = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, "UTF-8") : "";
     if (origin !== data) {
         fs.writeFileSync(indexPath, data);
-        console.log(`${"<".magenta}${"Indexing".yellow}${">".magenta} location: ${p.resolve(path)}.`);
+        Log.Info("Indexing", `location: ${p.resolve(path)}.`);
     }
 }

@@ -112,7 +112,7 @@ var tRunServer = `
 import 'colors';
 app.listen(Config.core.port, async () => {
     let packinfo = require(\`\${__dirname}/../package.json\`);
-    console.log(\`\${"<".magenta}\${packinfo.config.displayname.yellow}\${">".magenta} running at port \${Config.core.port}.\`);
+    Log.Info(packinfo.config.displayname, \`running at port \${Config.core.port}.\`);
 
     /// todo: this is a workaround. create database at the beginning.
     let { ip, port, collection } = Config.mongodb;

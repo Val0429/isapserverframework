@@ -2,6 +2,7 @@ import { createMongoDB } from 'helpers/parse-server/parse-helper';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { makeReadyPromise } from 'helpers/utility/task-helper';
 import { serverReady } from 'core/pending-tasks';
+import { Log } from 'helpers/utility';
 
 function shuffle(array) {
     let currentIndex = array.length, temporaryValue, randomIndex;
@@ -94,8 +95,8 @@ export class PinCode {
             if (pins !== null) { makeSubjectReady(pins); return; }
 
             /// if not exists, create
-            console.log("<PinCode> Creating...");
-            console.time(`<PinCode> ${digits} Digits PinCode Created`);
+            Log.Info("PinCode", "Creating...");
+            Log.time("PinCode", `${digits} Digits PinCode Created`);
             let pinNumbers = new Array();
             for (let i=min, j=0; i<max; ++i, ++j) pinNumbers[j] = i;
             shuffle(pinNumbers);
@@ -107,7 +108,7 @@ export class PinCode {
                 index: 0, total: totalSize, pin: buf
             }, () => {
                 makeSubjectReady(pins);
-                console.timeEnd(`<PinCode> ${digits} Digits PinCode Created`);
+                Log.timeEnd("PinCode", `${digits} Digits PinCode Created`);
             });
 
         })();

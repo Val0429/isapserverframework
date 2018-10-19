@@ -21,7 +21,7 @@ var primaryKeyMap = {};
 export const registerPrimaryKey = (primaryKey: string) => {
     return <T>(target: new () => T) => {
         var name = (new target).constructor.name;
-        if (primaryKeyMap[name]) console.error(`<registerPrimaryKey> conflicts with key "${name}".`);
+        if (primaryKeyMap[name]) Log.Error("registerPrimaryKey", `conflicts with key "${name}`);
         primaryKeyMap[name] = primaryKey;
     }
 }
@@ -196,6 +196,7 @@ export interface ParseObjectJSONRule {
  */
 import { Config } from 'core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
+import { Log } from 'helpers/utility';
 
 export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> {
     let { ip, port, collection } = Config.mongodb;
@@ -223,7 +224,7 @@ export async function createIndex(collectionName: string, indexName: string, fie
         if (!await instance.indexExists(indexName)) throw null;
     } catch(reason) {
         var showname = collectionName.replace(/^\_/, '');
-        console.log(`<Indexing> Make index on <${showname}.${indexName}>.`);
+        Log.Info("Indexing", `Make index on <${showname}.${indexName}>.`);
         instance.createIndex(fieldOrSpec, {background: true, name: indexName, ...options});
     }
 }

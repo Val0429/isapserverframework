@@ -2,6 +2,7 @@
 "use strict";
 
 import './core/alias';
+import './services/ast-services/ast-client';
 
  /// todo remove: log loading time
 console.time("compiler");  /// 27
@@ -24,4 +25,3 @@ console.time("workspace/main");  /// 6
 import './workspace/main';
 console.timeEnd("workspace/main");
 
-import './services/ast-services/ast-client';

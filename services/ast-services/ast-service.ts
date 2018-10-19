@@ -368,7 +368,11 @@ namespace AstConverter {
 
     export function toNumber(input: string | number, name: string, isArray: boolean = false): number {
         if (typeof input !== 'string' && typeof input !== 'number') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be number${isArray?'[]':''}.`]);
-        if (typeof input === 'string') return parseInt(input, 10);
+        if (typeof input === 'string') {
+            let result = parseInt(input, 10);
+            if (Number.isNaN(result)) throw Errors.throw(Errors.CustomInvalid, [`value of <${name}> is not convertable to number.`]); 
+            return result;
+        }
         return input;
     }
 

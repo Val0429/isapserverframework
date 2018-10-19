@@ -6,6 +6,7 @@ declare module 'express/lib/request' {
 }
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
 import { bodyParserJson, bodyParser } from './../../middlewares/body-parser';
+import { Errors } from 'core/errors.gen';
 
 
 /// BodyParser --> + parameters ////////////////////////////
@@ -24,7 +25,8 @@ declare module 'helpers/cgi-helpers/core' {
 
 export function VBodyParserJson(options = null): RequestHandler {
     return <any>((req: Request, res: Response, next: NextFunction): any => {
-        return bodyParser.json(options)(req, res, () => {
+        return bodyParser.json(options)(req, res, (err) => {
+            if (err) return next( Errors.throw(Errors.CustomBadRequest, [`<JSON Parse Error> ${err.message}`]) );
             /// reduce down query
             var result = {};
             for (var query in req.query) {

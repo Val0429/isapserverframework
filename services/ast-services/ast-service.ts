@@ -1,6 +1,6 @@
 import './../../core/alias';
 
-import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType, RequestNormal, ResponseNormal, ConverterEntity } from './ast-core';
+import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType, RequestNormal, ResponseNormal, RequestReportType, ResponseReportType, ConverterEntity } from './ast-core';
 import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
@@ -49,6 +49,29 @@ class AstService {
         return data;
     }
 
+    /**
+     * report type
+     */
+    reportType(request: RequestReportType) {
+        var type = AstParser.getType(request.type);
+        if (!type) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
+        let data = AstParser.reportType(type);
+
+        return data;
+        // console.log('type???', type.get);
+        // let inf: InterfaceDeclaration = O(O(O(type).getSymbol()).getDeclarations())[0] as InterfaceDeclaration;
+        // if (!inf) throw Errors.throw(Errors.CustomBadRequest, ["<ASTService> Cannot get type definition."]);
+
+        // let tmpary = [];
+        // let base = inf;
+        // let declarations: (InterfaceDeclaration | TypeAliasDeclaration | ClassDeclaration)[];
+        // while ( base.getBaseDeclarations && (declarations = base.getBaseDeclarations()).length > 0 ) {
+        //     base = declarations[0] as any as InterfaceDeclaration;
+        //     tmpary.push(base.getText());
+        // }
+        // return tmpary.join("\r\n\r\n");
+    }
+
 }
 
 var ast = new AstService();
@@ -79,6 +102,26 @@ process.on('message', (data: Request) => {
                 data: rtn
             } as ResponseNormal);
             break;
+        
+        case EnumRequestType.requestType:
+            var rtrequest = getRequestType(data.action, data);
+            var rtn: any;
+            try {
+                rtn = ast.reportType(rtrequest).join("\r\n\r\n");
+            } catch(reason) {
+                if (!(reason instanceof Errors)) {
+                    console.log(`ASTError: ${reason}`);
+                    return;
+                }
+                rtn = reason;
+            }
+            process.send({
+                action: rtrequest.action,
+                sessionId: rtrequest.sessionId,
+                data: rtn
+            } as ResponseReportType);
+            break;
+        
         default:
             console.log(`Unknown ASTService type: ${data}`);
     }
@@ -276,6 +319,31 @@ namespace AstParser {
         } else if (type.getText() === "any") {
             /// 99) Any
             return obj;
+        }
+        
+        throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);
+    }
+
+
+    export function reportType(type: Type<ts.Type>): string[] {
+        if (type.isInterface() || type.isAnonymous()) {
+            return [AstParser.getTypeInfo(type)];
+
+        } else if (type.isIntersection()) {
+            /// 12) Intersection
+            var types = type.getIntersectionTypes();
+            let rtn = [AstParser.getTypeInfo(type)];
+            for (let key=0; key<types.length; ++key)
+                rtn = [...rtn, AstParser.getTypeInfo(types[key])];
+            return rtn;
+    
+        } else if (type.isUnion()) {
+            /// 13) Union
+            var types = type.getUnionTypes();
+            var rtn = [AstParser.getTypeInfo(type)];
+            for (var key = 0; key < types.length; ++key)
+                rtn = [...rtn, AstParser.getTypeInfo(types[key])];
+            return rtn;
         }
         
         throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);

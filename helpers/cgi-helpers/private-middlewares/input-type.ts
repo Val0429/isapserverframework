@@ -18,6 +18,7 @@ declare module "helpers/cgi-helpers/core" {
          * Default = null.
          */
         inputType?: string;
+        outputType?: string;
     }
 }
 
@@ -27,8 +28,48 @@ declare module 'express/lib/request' {
     }
 }
 
-export function inputType(caller: string, type: string): RequestHandler {
+const keyOfHelp: string = "help";
+
+export function inputType(caller: string, type: string, outputType?: string): RequestHandler {
     return <any>(async (req: Request, res: Response, next: NextFunction) => {
+        var helpKey: string = keyOfHelp;
+        var help: string = req.parameters[helpKey];
+
+        if (help !== undefined) {
+            let rtnary = [];
+            try {
+                let ir, or;
+                ir = await ast.requestReportType({
+                    path: caller,
+                    type
+                });
+                rtnary.push(`
+Input Interface:
+==================================
+
+${ir}
+                `);
+
+                if (outputType) {
+                or = await ast.requestReportType({
+                    path: caller,
+                    type: outputType
+                });
+                rtnary.push(`
+Output Interface:
+==================================
+
+${or}
+                `);
+                }
+
+                return res.end(rtnary.join("\r\n"));
+
+            } catch(reason) {
+                return next( reason );
+            }
+        }
+
         try {
             var rtn = await ast.requestValidation({
                 path: caller,

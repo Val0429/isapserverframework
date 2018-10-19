@@ -5,15 +5,16 @@ import { Errors } from 'core/errors.gen';
 export enum EnumRequestType {
     init = 0,
     normal = 1,
-    json = 2,
+    requestType = 2,
 }
 
-export type Request = RequestInit | RequestNormal;
+export type Request = RequestInit | RequestNormal | RequestReportType;
 export type Response = ResponseNormal;
 
 export type RequestType<T> =
     T extends EnumRequestType.init ? RequestInit :
     T extends EnumRequestType.normal ? RequestNormal :
+    T extends EnumRequestType.requestType ? RequestReportType :
     never;
 
 export type ResponseType<T> =
@@ -46,6 +47,16 @@ export interface RequestNormal extends RequestBase {
 export interface ResponseNormal extends RequestBase {
     action: EnumRequestType.normal;
     data: any;
+}
+
+export interface RequestReportType extends RequestBase {
+    action: EnumRequestType.requestType;
+    type: TypesFromAction;
+}
+
+export interface ResponseReportType extends RequestBase {
+    action: EnumRequestType.requestType;
+    data: string;
 }
 
 export interface TypesFromAction {

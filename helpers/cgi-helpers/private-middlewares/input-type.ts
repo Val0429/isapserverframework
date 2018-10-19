@@ -5,8 +5,6 @@ import { RoleList } from 'core/userRoles.gen';
 import { Errors } from 'core/errors.gen';
 import ast from './../../../services/ast-services/ast-client';
 
-import './../core';
-
 /// requiredParameters /////////////////////////////////////
 declare module "helpers/cgi-helpers/core" {
     export interface ActionParam<T> {

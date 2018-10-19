@@ -1,5 +1,3 @@
-/// <reference path="./core.d.ts" />
-
 /// Express
 import * as express from 'express';
 import { Request } from 'express/lib/request';
@@ -35,6 +33,38 @@ import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { requiredParameters } from './private-middlewares/required-parameters';
 import { inputType } from './private-middlewares/input-type';
+
+
+export interface ActionConfig {
+    /**
+     * How to describe this action? ex: Create a new user.
+     * Default = none.
+     */
+    description?: string;
+
+    /**
+     * Which path apply to route?
+     * Default = *
+     */
+    path?: string;
+
+    /**
+     * Which middlewares should be injected into route?
+     * Default = none.
+     */
+    middlewares?: any[];
+}
+
+export interface ActionCallback<T, U> {
+    (data: ActionParam<T>): U | Promise<U>;
+}
+
+export interface ActionParam<T> {
+    socket: Socket;
+    request: Request;
+    response: Response;
+}
+
 
 export class Action<T = any, U = any> {
     config: ActionConfig;

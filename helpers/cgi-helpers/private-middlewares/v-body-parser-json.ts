@@ -1,8 +1,12 @@
 import { Request } from 'express/lib/request';
+declare module 'express/lib/request' {
+    interface Request {
+        parameters: any;
+    }
+}
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
 import { bodyParserJson, bodyParser } from './../../middlewares/body-parser';
 
-import './../core';
 
 /// BodyParser --> + parameters ////////////////////////////
 declare module 'helpers/cgi-helpers/core' {
@@ -15,11 +19,6 @@ declare module 'helpers/cgi-helpers/core' {
          * How many bytes allowed for the post body?
          */
         postSizeLimit?: number;
-    }
-}
-declare module 'express/lib/request' {
-    interface Request {
-        parameters: any;
     }
 }
 

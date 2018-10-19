@@ -4,7 +4,6 @@ import { NextFunction, RequestHandler } from 'express/lib/router/index';
 import { RoleList } from 'core/userRoles.gen';
 import { Errors } from 'core/errors.gen';
 
-import './../core';
 
 /// requiredParameters /////////////////////////////////////
 declare module "helpers/cgi-helpers/core" {

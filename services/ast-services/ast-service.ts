@@ -53,11 +53,38 @@ class AstService {
      * report type
      */
     reportType(request: RequestReportType) {
-        var type = AstParser.getType(request.type);
+        let arytmp = [];
+        /// Input Type
+        let type = AstParser.getType(request.type);
         if (!type) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
-        let data = AstParser.reportType(type);
+        let ir = AstParser.reportType(type);
+        arytmp.push(`
+Input Interface:
+==================================
 
-        return data;
+${ir}
+        `);
+        /// Output Type
+        let otype = AstParser.getOutputType(request.type);
+        if (otype) {
+        let or = AstParser.reportType(otype);
+        arytmp.push(`
+Output Interface:
+==================================
+
+${or}
+        `);
+        }
+
+        return arytmp.join("\r\n");
+
+        // var type = AstParser.getType(request.type);
+        // //AstParser.getOutputType(request.type);
+        // if (!type) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
+        // let data = AstParser.reportType(type);
+
+        // return data;
+
         // console.log('type???', type.get);
         // let inf: InterfaceDeclaration = O(O(O(type).getSymbol()).getDeclarations())[0] as InterfaceDeclaration;
         // if (!inf) throw Errors.throw(Errors.CustomBadRequest, ["<ASTService> Cannot get type definition."]);
@@ -107,7 +134,7 @@ process.on('message', (data: Request) => {
             var rtrequest = getRequestType(data.action, data);
             var rtn: any;
             try {
-                rtn = ast.reportType(rtrequest).join("\r\n\r\n");
+                rtn = ast.reportType(rtrequest);
             } catch(reason) {
                 if (!(reason instanceof Errors)) {
                     console.log(`ASTError: ${reason}`);
@@ -141,6 +168,17 @@ namespace AstParser {
         fileNameToSourceMap[key] = cache;
         return cache;
     }
+
+    export function getOutputType(type: TypesFromAction): Type<ts.Type> {
+        let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
+
+        let document = sourceFile.getFullText();
+        let regex = new RegExp(`\<\s*${type.type}\s*\,\s*([^\>\s]+)\s*\>`);
+        let matches = document.match(regex);
+        if (!matches || matches.length <= 1) return null;
+        return getType({ path: type.path, type: matches[1].trim() });
+    }
+
     export function getType(type: TypesFromAction): Type<ts.Type> {
         let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
         /// 1) get interface from source directly

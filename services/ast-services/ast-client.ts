@@ -114,18 +114,6 @@ export class AstClient {
         return this.request(send);
     }
 
-    // requestValidation(nameOfType: string, data: any): Promise<any> {
-
-    // }
-    // requestValidation(type: TypesFromAction, data: any): Promise<any> {
-    //     var send: RequestNormal = {
-    //         action: EnumRequestType.normal,
-    //         type,
-    //         data
-    //     };
-    //     return this.request(send);
-    // }
-
 }
 
 var ast = new AstClient();

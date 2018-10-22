@@ -16,7 +16,7 @@ var action = new Action({
 type InputC = Restful.InputC<I{0}>;
 type OutputC = Restful.OutputC<I{0}>;
 
-action.post<InputC, OutputC>({ inputType: "InputC", outputType: "OutputC" }, async (data) => {
+action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
     /// 1) Create Object
     var obj = new {0}(data.inputType);
     await obj.save(null, { useMasterKey: true });
@@ -30,7 +30,7 @@ action.post<InputC, OutputC>({ inputType: "InputC", outputType: "OutputC" }, asy
 type InputR = Restful.InputR<I{0}>;
 type OutputR = Restful.OutputR<I{0}>;
 
-action.get<InputR, OutputR>({ inputType: "InputR", outputType: "OutputR" }, async (data) => {
+action.get<InputR, OutputR>({ inputType: "InputR" }, async (data) => {
     /// 1) Make Query
     var query = new Parse.Query({0});
     /// 2) With Extra Filters
@@ -45,7 +45,7 @@ action.get<InputR, OutputR>({ inputType: "InputR", outputType: "OutputR" }, asyn
 type InputU = Restful.InputU<I{0}>;
 type OutputU = Restful.OutputU<I{0}>;
 
-action.put<InputU, OutputU>({ inputType: "InputU", outputType: "OutputU" }, async (data) => {
+action.put<InputU, OutputU>({ inputType: "InputU" }, async (data) => {
     /// 1) Get Object
     var { objectId } = data.inputType;
     var obj = await new Parse.Query({0}).get(objectId);
@@ -62,7 +62,7 @@ action.put<InputU, OutputU>({ inputType: "InputU", outputType: "OutputU" }, asyn
 type InputD = Restful.InputD<I{0}>;
 type OutputD = Restful.OutputD<I{0}>;
 
-action.delete<InputD, OutputD>({ inputType: "InputD", outputType: "OutputD" }, async (data) => {
+action.delete<InputD, OutputD>({ inputType: "InputD" }, async (data) => {
     /// 1) Get Object
     var { objectId } = data.inputType;
     var obj = await new Parse.Query({0}).get(objectId);

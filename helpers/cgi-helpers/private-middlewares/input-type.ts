@@ -18,7 +18,6 @@ declare module "helpers/cgi-helpers/core" {
          * Default = null.
          */
         inputType?: string;
-        outputType?: string;
     }
 }
 
@@ -38,32 +37,11 @@ export function inputType(caller: string, type: string, outputType?: string): Re
         if (help !== undefined) {
             let rtnary = [];
             try {
-                let ir, or;
-                ir = await ast.requestReportType({
+                let data = await ast.requestReportType({
                     path: caller,
                     type
                 });
-                rtnary.push(`
-Input Interface:
-==================================
-
-${ir}
-                `);
-
-                if (outputType) {
-                or = await ast.requestReportType({
-                    path: caller,
-                    type: outputType
-                });
-                rtnary.push(`
-Output Interface:
-==================================
-
-${or}
-                `);
-                }
-
-                return res.end(rtnary.join("\r\n"));
+                return res.end(data);
 
             } catch(reason) {
                 return next( reason );

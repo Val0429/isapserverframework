@@ -31,7 +31,6 @@ import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
 import { permissionCheck } from './private-middlewares/permission-check';
 import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
-import { requiredParameters } from './private-middlewares/required-parameters';
 import { inputType } from './private-middlewares/input-type';
 
 
@@ -146,8 +145,6 @@ export class Action<T = any, U = any> {
         config.loginRequired && middlewares.push(loginRequired);
         /// 3) permission
         config.permission && middlewares.push(permissionCheck(config.permission));
-        /// 4) requiredParameters
-        config.requiredParameters && middlewares.push(requiredParameters(config.requiredParameters));
         /// 4) inputType
         config.inputType && middlewares.push(inputType(caller, config.inputType));
         /// mount others

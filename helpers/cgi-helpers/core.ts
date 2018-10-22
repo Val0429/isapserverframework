@@ -28,11 +28,12 @@ import { O, _O } from 'helpers/utility/O';
 var caller = require('caller');
 
 /// private middlewares
-import { VBodyParserJson } from './private-middlewares/v-body-parser-json';
+import { VBodyParserJson, VBodyParserRaw } from './private-middlewares/v-body-parser-json';
 import { permissionCheck } from './private-middlewares/permission-check';
 import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { inputType } from './private-middlewares/input-type';
+import { transform } from './private-middlewares/transform';
 
 
 export interface ActionConfig {
@@ -142,9 +143,15 @@ export class Action<T = any, U = any> {
 
         /// 1) bodyParser
         let cfPostSizeLimit = fetchConfig("postSizeLimit");
-        middlewares.push(
-            VBodyParserJson( cfPostSizeLimit ? { limit: cfPostSizeLimit } : null )
-        );
+        let cfTransform = fetchConfig("transform");
+        if (!cfTransform) {
+            middlewares.push(
+                VBodyParserJson( cfPostSizeLimit ? { limit: cfPostSizeLimit } : null )
+            );
+        } else {
+            middlewares.push( VBodyParserRaw() );
+            middlewares.push( transform(cfTransform) );
+        }
 
         /// 2) login
         let cfLoginRequired = fetchConfig("loginRequired");

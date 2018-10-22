@@ -24,6 +24,7 @@ export * from './../sockets/socket-helper';
 import { omitObject } from './../utility/omit-object';
 import { ParseObject, ParseObjectJSONRule, retrievePrimaryClass } from './../parse-server/parse-helper';
 import CRUDMaker from 'shells/crud.shell';
+import { O, _O } from 'helpers/utility/O';
 var caller = require('caller');
 
 /// private middlewares
@@ -130,25 +131,33 @@ export class Action<T = any, U = any> {
     ws(arg1, arg2 = null) { return this._get("Ws", arg1, arg2); }
 
     /// translate ActionConfig to array of middlewares
-    static configTranslate(config: ActionConfig, caller: string): any[] {
+    configTranslate(config: ActionConfig, caller: string): any[] {
         var middlewares = [];
-        if (!config) return middlewares;
+        if (!config && !this.config) return middlewares;
         /////////////////////////////////////////////
         /// mount middlewares
+        let fetchConfig = <T extends keyof ActionConfig>(key: T): ActionConfig[T] => {
+            return _O(this.config)[key] || _O(config)[key];
+        }
 
         /// 1) bodyParser
+        let cfPostSizeLimit = fetchConfig("postSizeLimit");
         middlewares.push(
-            VBodyParserJson( config.postSizeLimit ? { limit: config.postSizeLimit } : null )
+            VBodyParserJson( cfPostSizeLimit ? { limit: cfPostSizeLimit } : null )
         );
 
         /// 2) login
-        config.loginRequired && middlewares.push(loginRequired);
+        let cfLoginRequired = fetchConfig("loginRequired");
+        cfLoginRequired && middlewares.push(loginRequired);
         /// 3) permission
-        config.permission && middlewares.push(permissionCheck(config.permission));
+        let cfPermission = fetchConfig("permission");
+        cfPermission && middlewares.push(permissionCheck(cfPermission));
         /// 4) inputType
-        config.inputType && middlewares.push(inputType(caller, config.inputType));
+        let cfInputType = fetchConfig("inputType");
+        cfInputType && middlewares.push(inputType(caller, cfInputType));
         /// mount others
-        config.middlewares && (middlewares = [...middlewares, ...config.middlewares]);
+        let cfMiddlewares = fetchConfig("middlewares");
+        cfMiddlewares && (middlewares = [...middlewares, ...cfMiddlewares]);
         /////////////////////////////////////////////
 
         return middlewares;
@@ -158,7 +167,7 @@ export class Action<T = any, U = any> {
         var router: Router = express.Router();
 
         /// mount middlewares
-        router.use(Action.configTranslate(this.config, this.caller));
+        //router.use(this.configTranslate(this.config, this.caller));
 
         var funcs = ["All", "Get", "Post", "Put", "Delete"];
         for (var func of funcs) {
@@ -166,7 +175,7 @@ export class Action<T = any, U = any> {
                 let realfunc = this[`func${func}`];
                 let config: ActionConfig = this[`func${func}Config`];
                 let realpath = (config ? config.path : "*") || "*";
-                router[func.toLowerCase()](realpath, Action.configTranslate(config, this.caller), mergeParams,
+                router[func.toLowerCase()](realpath, this.configTranslate(config, this.caller), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {
                             var result = await realfunc({...request ,request, response});
@@ -185,7 +194,7 @@ export class Action<T = any, U = any> {
             let realfunc = this.funcWs;
             let config: ActionConfig = this.funcWsConfig;
             let realpath = (config ? config.path : "*") || "*";
-            router["websocket"](realpath, ...Action.configTranslate(config, this.caller), mergeParams,
+            router["websocket"](realpath, ...this.configTranslate(config, this.caller), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {
                     var request = <any>info.req;
                     var response = <any>info.res;

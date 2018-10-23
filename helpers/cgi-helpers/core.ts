@@ -36,7 +36,7 @@ import { inputType } from './private-middlewares/input-type';
 import { transform } from './private-middlewares/transform';
 
 
-export interface ActionConfig {
+export interface ActionConfig<T = any, U = any> {
     /**
      * How to describe this action? ex: Create a new user.
      * Default = none.
@@ -71,7 +71,7 @@ export class Action<T = any, U = any> {
     config: ActionConfig;
     caller: string;
 
-    constructor(config: ActionConfig) {
+    constructor(config: ActionConfig<T, U>) {
         this.caller = caller();
         this.config = config;
     }
@@ -103,31 +103,31 @@ export class Action<T = any, U = any> {
 
     public funcGetConfig: ActionConfig;
     private funcGet: ActionCallback<T, U>;
-    get<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    get<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     get<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     get(arg1, arg2 = null) { return this._get("Get", arg1, arg2); }
 
     public funcPostConfig: ActionConfig;
     private funcPost: ActionCallback<T, U>;
-    post<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    post<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     post<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     post(arg1, arg2 = null) { return this._get("Post", arg1, arg2); }
 
     public funcPutConfig: ActionConfig;
     private funcPut: ActionCallback<T, U>;
-    put<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    put<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     put<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     put(arg1, arg2 = null) { return this._get("Put", arg1, arg2); }
 
     public funcDeleteConfig: ActionConfig;
     private funcDelete: ActionCallback<T, U>;
-    delete<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    delete<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     delete<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     delete(arg1, arg2 = null) { return this._get("Delete", arg1, arg2); }
 
     public funcWsConfig: ActionConfig;
     private funcWs: ActionCallback<T, U>;
-    ws<K = null, V = null>(path: string | ActionConfig, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
+    ws<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws(arg1, arg2 = null) { return this._get("Ws", arg1, arg2); }
 

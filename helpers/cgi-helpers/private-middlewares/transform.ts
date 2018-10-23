@@ -3,23 +3,23 @@ import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
 
 /// requiredParameters /////////////////////////////////////
-export interface Transformer {
-    (body: Buffer, mimeType?: string): any;
+export interface Transformer<T> {
+    (body: Buffer, mimeType?: string): T;
 }
 
 declare module "helpers/cgi-helpers/core" {
-    export interface ActionConfig {
+    export interface ActionConfig<T, U> {
         /**
          * transform body by self.
          * Default = null.
          */
-        transform?: Transformer;
+        transform?: Transformer<Partial<T>>;
     }
 }
 
 const keyOfHelp: string = "help";
 
-export function transform(func: Transformer): RequestHandler {
+export function transform(func: Transformer<any>): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             req.parameters = { ...req.parameters, ...await func(req.body, req.headers['content-type']) };

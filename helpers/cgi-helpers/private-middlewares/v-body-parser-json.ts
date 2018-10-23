@@ -23,25 +23,29 @@ declare module 'helpers/cgi-helpers/core' {
     }
 }
 
+function parseQuery(queries: Request['query']) {
+    let result = {};
+    for (var query in queries) {
+        var value = queries[query];
+        var paths = query.split(".");
+        var base = result;
+        for (var i=0; i<paths.length; ++i) {
+            var final = (i+1) >= paths.length;
+            var path = paths[i];
+            if (final) { base[path] = value; break; }
+            if (base[path]) base = base[path];
+            else base = base[path] = {};
+        }
+    }
+    return result;
+}
+
 export function VBodyParserJson(options = null): RequestHandler {
     return <any>((req: Request, res: Response, next: NextFunction): any => {
         return bodyParser.json(options)(req, res, (err) => {
             if (err) return next( Errors.throw(Errors.CustomBadRequest, [`<JSON Parse Error> ${err.message}`]) );
             /// reduce down query
-            var result = {};
-            for (var query in req.query) {
-                var value = req.query[query];
-                var paths = query.split(".");
-                var base = result;
-                for (var i=0; i<paths.length; ++i) {
-                    var final = (i+1) >= paths.length;
-                    var path = paths[i];
-                    if (final) { base[path] = value; break; }
-                    if (base[path]) base = base[path];
-                    else base = base[path] = {};
-                }
-            }
-            req.parameters = { ...result, ...req.body };
+            req.parameters = { ...parseQuery(req.query), ...req.body };
 
             next();
         });
@@ -54,22 +58,8 @@ export function VBodyParserRaw(options = null): RequestHandler {
         !options.type && (options.type = "*/*");
         return bodyParser.raw(options)(req, res, (err) => {
             if (err) return next( Errors.throw(Errors.CustomBadRequest, [`<Raw Parse Error> ${err.message}`]) );
-
             /// reduce down query
-            var result = {};
-            for (var query in req.query) {
-                var value = req.query[query];
-                var paths = query.split(".");
-                var base = result;
-                for (var i=0; i<paths.length; ++i) {
-                    var final = (i+1) >= paths.length;
-                    var path = paths[i];
-                    if (final) { base[path] = value; break; }
-                    if (base[path]) base = base[path];
-                    else base = base[path] = {};
-                }
-            }
-            req.parameters = { ...result };
+            req.parameters = { ...parseQuery(req.query) };
 
             next();
         });

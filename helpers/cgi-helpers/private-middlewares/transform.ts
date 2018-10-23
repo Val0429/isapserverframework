@@ -21,7 +21,11 @@ const keyOfHelp: string = "help";
 
 export function transform(func: Transformer): RequestHandler {
     return async (req: Request, res: Response, next: NextFunction) => {
-        req.parameters = { ...req.parameters, ...await func(req.body) };
+        try {
+            req.parameters = { ...req.parameters, ...await func(req.body) };
+        } catch(reason) {
+            return next(reason);
+        }
         next();
     }
 }

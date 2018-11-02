@@ -2,12 +2,13 @@
 "use strict";
 
 import './core/alias';
-import './services/ast-services/ast-client';
 
  /// todo remove: log loading time
 console.time("compiler");  /// 27
 import './core/compiler';
 console.timeEnd("compiler");
+
+import './services/ast-services/ast-client';
 
 console.time("create-index"); /// 562
 import './core/create-index';

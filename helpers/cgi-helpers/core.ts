@@ -144,6 +144,7 @@ export class Action<T = any, U = any> {
         /// 1) bodyParser
         let cfPostSizeLimit = fetchConfig("postSizeLimit");
         let cfTransform = fetchConfig("transform");
+
         if (!cfTransform) {
             middlewares.push(
                 VBodyParserJson( cfPostSizeLimit ? { limit: cfPostSizeLimit } : null )
@@ -168,6 +169,13 @@ export class Action<T = any, U = any> {
         /////////////////////////////////////////////
 
         return middlewares;
+    }
+    transferSocketMiddleware(middlewares: any[]) {
+        return middlewares.map( (middleware) => {
+            return (info, cb, next) => {
+                middleware(info.req, info.res, next);
+            }
+        });
     }
 
     mount(): Router {
@@ -201,7 +209,7 @@ export class Action<T = any, U = any> {
             let realfunc = this.funcWs;
             let config: ActionConfig = this.funcWsConfig;
             let realpath = (config ? config.path : "*") || "*";
-            router["websocket"](realpath, ...this.configTranslate(config, this.caller), mergeParams,
+            router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller)), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {
                     var request = <any>info.req;
                     var response = <any>info.res;

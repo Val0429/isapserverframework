@@ -48,4 +48,10 @@ export namespace FileHelper {
         return url;
     }
 
+    export async function downloadParseFile(file: Parse.File): Promise<Buffer> {
+        var url = getURL(file);
+        var res = await Parse.Cloud.httpRequest({ url });
+        return res.buffer;
+    }
+
 }

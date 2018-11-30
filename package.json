@@ -1,6 +1,6 @@
 {
   "name": "isap-vms-service",
-  "version": "1.00.01",
+  "version": "1.00.03",
   "config": {
     "displayname": "iSap VMS Service"
   },
@@ -27,14 +27,9 @@
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@types/node": "7.0.12",
-    "nodemon": "1.11.0",
-    "ts-node": "3.0.2",
-    "typescript": "3.1.1",
-    "typings": "2.1.1"
-  },
+  "devDependencies": {},
   "dependencies": {
+    "@types/node": "8.10.38",
     "@types/bluebird": "3.5.22",
     "@types/mongodb": "3.0.19",
     "@types/nodemailer": "4.6.2",
@@ -67,6 +62,7 @@
     "ts-node": "6.2.0",
     "ts-simple-ast": "16.0.1",
     "typings": "2.1.1",
+    "typescript": "3.1.1",
     "uuid": "3.3.0",
     "websocket": "1.0.25",
     "winser": "https://github.com/Val0429/winser.git",

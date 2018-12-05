@@ -2,8 +2,9 @@
 "use strict";
 
 import './core/alias';
+import './core/create-file-index';
 
- /// todo remove: log loading time
+/// todo remove: log loading time
 console.time("compiler");  /// 27
 import './core/compiler';
 console.timeEnd("compiler");

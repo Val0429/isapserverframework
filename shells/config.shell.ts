@@ -72,15 +72,19 @@ function main(): string {
     }
     var template = `import {0}Config, { Config as {0}ConfigType } from 'workspace/config/custom/{1}';`;
     var dir = wsCustomPath;
-    var files = fs.readdirSync(dir);
-    for (var file of files) {
-        var name = p.parse(file).name;
-        keys.push(name);
-        tmp.push(
-            template.replace(/\{0\}/g, capitalize(name))
-                    .replace(/\{1\}/g, name)
-        );
+
+    if (fs.existsSync(dir)) {
+        var files = fs.readdirSync(dir);
+        for (var file of files) {
+            var name = p.parse(file).name;
+            keys.push(name);
+            tmp.push(
+                template.replace(/\{0\}/g, capitalize(name))
+                        .replace(/\{1\}/g, name)
+            );
+        }
     }
+
     tmpstr.push(
         tHeaderSpecial.replace(/^[\r\n]+/, '')
                       .replace("{0}", tmp.join("\r\n"))
@@ -177,6 +181,7 @@ for (var file of files) {
 /// 3.2) load workspace paths
 var dirs = [wsDefPath, wsCustomPath];
 for (var dir of dirs) {
+    if (!fs.existsSync(dir)) continue;
     var files = fs.readdirSync(dir);
     for (var file of files) {
         var { name, config, stats } = loadConfig(dir, file);

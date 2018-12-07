@@ -37,14 +37,28 @@ export class KeepAliveHost {
         return this.sjRealtimeAlives.asObservable();
     }
 
+    send(data: string);
+    send(filter: (data: KeepAliveData) => boolean, data: string);
+    send(filter: ((data: KeepAliveData) => boolean) | string, data?: string) {
+        let mfilter: (data: KeepAliveData) => boolean = data ? filter as any : null;
+        let mdata: string = data || filter as any;
+
+        this.alives.forEach( (instance) => {
+            if (mfilter && !mfilter(instance)) return;
+            instance.socket.send(mdata);
+        })
+    }
+
     next<T>(data: ActionParam<T>) {
         let { user, socket } = data;
         
         /// if already exists, throw error
-        let found: boolean = this.alives.find( (instance) => {
-            return instance.instance.id === user.id ? true : false
-        }) !== undefined;
-        if (found) throw Errors.throw(Errors.CustomBadRequest, [`Cannot keep alive single ${this.name || 'instance'} multiple times.`]);
+        if (user) {
+            let found: boolean = this.alives.find( (instance) => {
+                return instance.instance.id === user.id ? true : false
+            }) !== undefined;
+            if (found) throw Errors.throw(Errors.CustomBadRequest, [`Cannot keep alive single ${this.name || 'instance'} multiple times.`]);
+        }
 
         /// otherwise add
         this.alives.push({ instance: user, socket });
@@ -53,9 +67,8 @@ export class KeepAliveHost {
 
         /// take over socket
         socket.io.on("close", () => {
-            /// remove instance
             let idx = this.alives.findIndex( (instance) => {
-                return instance.instance.id === user.id ? true : false
+                return instance.socket === socket ? true : false
             });
             if (idx < 0) return;
     

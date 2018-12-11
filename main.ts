@@ -4,26 +4,31 @@
 import './core/alias';
 import './core/create-file-index';
 
+import { Log } from 'helpers/utility';
+const LogTitle = "Startup";
+
 /// todo remove: log loading time
-console.time("compiler");  /// 27
+Log.time(LogTitle, "Compiler");
 import './core/compiler';
-console.timeEnd("compiler");
+Log.timeEnd(LogTitle, "Compiler");
 
+Log.time(LogTitle, "AST Service");
 import './services/ast-services/ast-client';
+Log.timeEnd(LogTitle, "AST Service");
 
-console.time("create-index"); /// 562
+Log.time(LogTitle, "Create Index");
 import './core/create-index';
-console.timeEnd("create-index");
+Log.timeEnd(LogTitle, "Create Index");
 
-console.time("scheduler-loader"); /// 21
+Log.time(LogTitle, "Scheduler Loader");
 import './core/scheduler-loader';
-console.timeEnd("scheduler-loader");
+Log.timeEnd(LogTitle, "Scheduler Loader");
 
-console.time("main.gen");  /// 2774
+Log.time(LogTitle, "Load Main Application");
 import './core/main.gen';
-console.timeEnd("main.gen");
+Log.timeEnd(LogTitle, "Load Main Application");
 
-console.time("workspace/main");  /// 6
+Log.time(LogTitle, "Load Workspace");
 import './workspace/main';
-console.timeEnd("workspace/main");
+Log.timeEnd(LogTitle, "Load Workspace");
 

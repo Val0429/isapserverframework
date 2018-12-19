@@ -92,7 +92,7 @@ fs.exists(webPath, (exists) => {
     fs.exists(webIndexPath, (exists) => {
         if (!exists) return;
         app.use((req, res, next) => {
-            res.sendFile(webIndexPath);
+            res.sendFile('./../workspace/custom/web/index.html', { root: __dirname });
         });
     });
 });

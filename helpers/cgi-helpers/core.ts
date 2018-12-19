@@ -25,6 +25,7 @@ import { omitObject } from './../utility/omit-object';
 import { ParseObject, ParseObjectJSONRule, retrievePrimaryClass } from './../parse-server/parse-helper';
 import CRUDMaker from 'shells/crud.shell';
 import { O, _O } from 'helpers/utility/O';
+import { getEnumKeyArray } from 'helpers/utility/get-enum-key';
 var caller = require('caller');
 
 /// private middlewares
@@ -66,10 +67,13 @@ export interface ActionParam<T> {
     response: Response;
 }
 
+type ActionTypes = "All" | "Get" | "Post" | "Put" | "Delete" | "Ws";
+let actionTypes: ActionTypes[] = ["All", "Get", "Post", "Put", "Delete", "Ws"];
 
 export class Action<T = any, U = any> {
     config: ActionConfig;
     caller: string;
+    uri: string;
 
     constructor(config: ActionConfig<T, U>) {
         this.caller = caller();
@@ -80,12 +84,19 @@ export class Action<T = any, U = any> {
         var callback = arg2 || arg1; if (arg2) this[`func${type}Config`] = typeof arg1 === 'string' ? { path: arg1 } : arg1; this[`func${type}`] = <any>callback; return this;
     }
 
+    list(): ActionTypes[] {
+        return actionTypes.reduce( (final, value) => {
+            this[`func${value}`] && (final.push(value));
+            return final;
+        }, []);
+    }
+
     /**
      * count number of apis
      */
     count(): number {
         let count = 0;
-        let data = ["All", "Get", "Post", "Put", "Delete", "Ws"];
+        let data = actionTypes;
         for (let key of data) {
             this[`func${key}`] && count++;
         }

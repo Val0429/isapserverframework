@@ -12,7 +12,7 @@ export interface Input {
 export default new Action<Input>({
     loginRequired: true
 })
-.post(async (data) => {
+.post({inputType: "Input"}, async (data) => {
     /// Perform Logout
     data.session.destroy({ sessionToken: data.parameters.sessionId });
 

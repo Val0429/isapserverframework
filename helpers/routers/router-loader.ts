@@ -9,7 +9,7 @@ const hiddenPath = "__api__";
 export var actions: Action[] = [];
 
 /// meant to be called only once
-export function routerLoader(app, path, cgiPath = null, first = true, level = 0): Action[] {
+export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */, routeBasePath = '', first = true, level = 0): Action[] {
     let name = p.parse(path).name;
     if (name === hiddenPath) return;
 
@@ -105,7 +105,8 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
         }
 
         for (var file of files) {
-            routerLoader(app, `${path}/${file}`, cgiPath, false, first ? 0 : level+1);
+            let callPath = first ? '' : `${routeBasePath}/${name}`;
+            routerLoader(app, `${path}/${file}`, cgiPath, callPath, false, first ? 0 : level+1);
         }
 
     } else {
@@ -115,6 +116,7 @@ export function routerLoader(app, path, cgiPath = null, first = true, level = 0)
 
         var types = [];
         if (route instanceof Action) {
+            route.uri = `${routeBasePath}${name ? `/${name}` : ''}`;
             actions.push(route);
             if (app !== null) app.use(`/${routename}`, route.mount());
             /// message ///

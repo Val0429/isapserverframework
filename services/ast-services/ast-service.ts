@@ -55,26 +55,41 @@ class AstService {
     reportType(request: RequestReportType) {
         let arytmp = [];
         /// Input Type
-        let type = AstParser.getType(request.type);
-        if (!type) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
-        let ir = AstParser.reportType(type);
+        let ir = [];
+        let types = AstParser.getReportType(request.type);
+        if (!types) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
+        for (let type of types) {
+            if (typeof type === 'string') {
+                ir.push(type); continue;
+            }
+            ir = [...ir, ...AstParser.reportType(type)];
+        }
+        if (ir.length > 0) {
         arytmp.push(`
 Input Interface:
 ==================================
 
-${ir}
+${ir.join("\r\n")}
         `);
+        }
         /// Output Type
-        let otype = AstParser.getOutputType(request.type);
-        if (otype) {
-        let or = AstParser.reportType(otype);
+        let otypes = AstParser.getOutputType(request.type);
+        if (otypes) {
+        let or = [];
+        for (let type of otypes) {
+            if (typeof type === 'string') {
+                or.push(type); continue;
+            }
+            or = [...or, ...AstParser.reportType(type)];
+        }
+        if (or.length > 0) {
         arytmp.push(`
 Output Interface:
 ==================================
 
-${or}
+${or.join("\r\n")}
         `);
-        }
+        }}
 
         return arytmp.join("\r\n");
 
@@ -169,14 +184,14 @@ namespace AstParser {
         return cache;
     }
 
-    export function getOutputType(type: TypesFromAction): Type<ts.Type> {
+    export function getOutputType(type: TypesFromAction): (Type<ts.Type> | string)[] {
         let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
 
         let document = sourceFile.getFullText();
         let regex = new RegExp(`\<\s*${type.type}\s*\,\s*([^\>\s]+)\s*\>`);
         let matches = document.match(regex);
         if (!matches || matches.length <= 1) return null;
-        return getType({ path: type.path, type: matches[1].trim() });
+        return getReportType({ path: type.path, type: matches[1].trim() });
     }
 
     export function getType(type: TypesFromAction): Type<ts.Type> {
@@ -203,6 +218,32 @@ namespace AstParser {
             return final;
         }, null);
         return rtn;
+    }
+
+    export function getReportType(type: TypesFromAction): (Type<ts.Type> | string)[] {
+        let sourceFile = type.path instanceof SourceFile ? type.path : reflector.getSourceFileOrThrow(type.path);
+        /// 1) get interface from source directly
+        var inf = sourceFile.getInterface(type.type);
+        if (inf) return [inf.getType()];
+        var tas = sourceFile.getTypeAlias(type.type);
+        if (tas) return [tas.getText(), tas.getType()];
+
+        /// 2) get from named import
+        /// 3) and also get from asterisk export
+        var rtn: Type<ts.Type> = sourceFile.getImportDeclarations().reduce<Type<ts.Type>>( (final, imd, i, ary) => {
+            var result = imd.getNamedImports().reduce<Type<ts.Type>>( (final, ims, i, ary2) => {
+                if (ims.getName() === type.type) {
+                    /// found
+                    //var sf = ims.getNameNode().getDefinitions()[0].getSourceFile();
+                    let sf = getSourceFileFromImport(sourceFile, ims);
+                    ary.length = ary2.length = 0;
+                    return AstParser.getType({path: sf, type: type.type});
+                } return final;
+            }, null);
+            if (result) return result;
+            return final;
+        }, null);
+        return rtn ? [rtn] : null;
     }
 
     export function getInterfaceMembers(inf: InterfaceDeclaration, showinfo: boolean = false): PropertySignature[] {
@@ -259,7 +300,7 @@ namespace AstParser {
 
         var showname = prefix;
         var obj = data;
-        var debug = false;
+        var debug = true;
 
         if (typeof obj === 'undefined') return undefined;
 
@@ -382,6 +423,14 @@ namespace AstParser {
             for (var key = 0; key < types.length; ++key)
                 rtn = [...rtn, AstParser.getTypeInfo(types[key])];
             return rtn;
+
+        } else if (type.isObject() && type.getTypeArguments().length > 0) {
+            /// 14) Generic
+            return [];
+
+        } else if (type.getText() === "any") {
+            /// 99) Any
+            return [];
         }
         
         throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);

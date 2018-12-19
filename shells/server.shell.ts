@@ -20,6 +20,7 @@ import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
 import { Action } from 'helpers/cgi-helpers/core';
 import { Log } from 'helpers/utility';
+import { deployWeb } from 'helpers/deploy-web';
 
 import { Config } from 'core/config.gen';
 
@@ -85,17 +86,7 @@ app.use(Config.parseDashboard.serverPath, Dashboard);
 
 var tRunWeb = `
 let webPath = \`\${__dirname}/../workspace/custom/web\`;
-fs.exists(webPath, (exists) => {
-    if (!exists) return;
-    app.use('/', express.static(webPath));
-    let webIndexPath = p.resolve(webPath, 'index.html');
-    fs.exists(webIndexPath, (exists) => {
-        if (!exists) return;
-        app.use((req, res, next) => {
-            res.sendFile('./../workspace/custom/web/index.html', { root: __dirname });
-        });
-    });
-});
+deployWeb(webPath, app);
 `;
 
 var tFinalizeError = `

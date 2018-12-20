@@ -17,10 +17,15 @@ export class Socket {
         return new Promise( (resolve) => {
             var ws, info, cb;
             if (!arg2) {
-                if (arg1 instanceof WSSocket) ws = arg1;
-                else ws = (<any>arg1)._websocket;   /// check response
-                if (!ws) { resolve(null); return; }
-                info = ws.info; cb = ws.cb;
+                if (arg1 instanceof WSSocket) {
+                    ws = arg1;
+                    info = {}; cb = (c) => {c(ws)};
+                } else {
+                    ws = (<any>arg1)._websocket;   /// check response
+                    if (!ws) { resolve(null); return; }
+                    info = ws.info; cb = ws.cb;
+                }
+                
             } else {
                 info = arg1; cb = arg2;
             }

@@ -443,8 +443,9 @@ export namespace Restful {
             V extends ApisExtractOutput<T["Post"][K]>,
             P extends ApisExtractLoginRequired<T["Post"][K]>,
             C extends (P extends false ? U : ApisSessionRequired & U)
-            >(key: K, data: U, spec: 'POST' | 'PUT' = 'POST'): Promise<V> {
+            >(key: K, data?: U, spec: 'POST' | 'PUT' = 'POST'): Promise<V> {
 
+            if (!data) data = {} as any;
             /// apply sessionId
             this.sessionId && (data.sessionId = this.sessionId);
 
@@ -470,8 +471,9 @@ export namespace Restful {
             V extends ApisExtractOutput<T["Get"][K]>,
             P extends ApisExtractLoginRequired<T["Get"][K]>,
             C extends (P extends false ? U : ApisSessionRequired & U)
-            >(key: K, data: U, spec: 'GET' | 'DELETE' = 'GET'): Promise<V> {
+            >(key: K, data?: U, spec: 'GET' | 'DELETE' = 'GET'): Promise<V> {
 
+            if (!data) data = {} as any;
             /// apply sessionId
             this.sessionId && (data.sessionId = this.sessionId);
 
@@ -521,11 +523,13 @@ export namespace Restful {
             V extends ApisExtractOutput<T["Ws"][K]>,
             P extends ApisExtractLoginRequired<T["Ws"][K]>,
             C extends (P extends false ? U : ApisSessionRequired & U)
-            >(key: K, data: U): Promise<Socket> {
+            >(key: K): Promise<Socket> {
             
             return new Promise<Socket>( (resolve, reject) => {
                 const ws = new WSSocket(this.makeUrl(key as string, true));
-                ws.on("open", () => resolve( Socket.get(ws) ));
+                ws.on("open", async () => {
+                    resolve( await Socket.get(ws) )
+                });
             });
         }        
     }

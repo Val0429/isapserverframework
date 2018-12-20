@@ -300,7 +300,7 @@ namespace AstParser {
 
         var showname = prefix;
         var obj = data;
-        var debug = true;
+        var debug = false;
 
         if (typeof obj === 'undefined') return undefined;
 

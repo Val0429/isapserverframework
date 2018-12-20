@@ -1,5 +1,7 @@
 /// Express
 import * as express from 'express';
+import * as request from 'request';
+import * as WSSocket from 'ws';
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { Router, NextFunction, RequestHandler } from 'express/lib/router/index';
@@ -35,6 +37,7 @@ import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { inputType } from './private-middlewares/input-type';
 import { transform } from './private-middlewares/transform';
+import { Log } from 'helpers/utility';
 
 
 export interface ActionConfig<T = any, U = any> {
@@ -338,6 +341,193 @@ export namespace Restful {
         } else {
             throw `Internal Error: <${className}> should be a valid object for CRUD.`;
         }
+    }
+
+    /// Server
+    export type ApisType = 'All' | 'Get' | 'Post' | 'Put' | 'Delete' | 'Ws';
+    export type ApisPathObject = {
+        [K in ApisType]?: {
+            input: string;
+            output: string;
+            loginRequired: boolean;
+        }
+    }
+    export interface ApisOutput {
+        [path: string]: ApisPathObject;
+    }
+
+    interface IServerConfig {
+        ip: string;
+        port: number;
+        account: string;
+        password: string;
+    }
+    export async function Server(config: IServerConfig) {
+        let { ip, port, account: username, password } = config;
+        const LogTitle = "Restful.Server";
+
+        do {
+        /// 1) connect server
+        let sessionId: string;
+        try {
+            sessionId = await new Promise<string>( (resolve, reject) => {
+                /// login first
+                request({
+                    url: `http://${config.ip}:${config.port}/users/login`,
+                    method: 'POST',
+                    json: true,
+                    body: { username, password }
+                }, (err, res, body) => {
+                    if (res.statusCode !== 200) return reject(body);
+                    resolve(body.sessionId);
+                });
+            });
+        } catch(e) {
+            Log.Error(LogTitle, e);
+            break;
+        }
+
+        /// 2) load apis
+        let apis: ApisOutput;
+        try {
+            apis = await new Promise<ApisOutput>( (resolve, reject) => {
+                request({
+                    url: `http://${config.ip}:${config.port}/apis?sessionId=${sessionId}`,
+                    method: 'GET',
+                    json: true
+                }, (err, res, body) => {
+                    if (res.statusCode !== 200) return reject(body);
+                    resolve(body);
+                });
+            });
+        } catch(e) {
+            Log.Error(LogTitle, e);
+            break;
+        }
+        
+        } while(0);
+    }
+
+    /// Server Implement
+    export interface ApisRequestArg {
+        [path: string]: [any, any, boolean];
+    }
+    export type ApisRequestBase = {
+        [K in ApisType]?: ApisRequestArg;
+    }
+
+    type ApisExtractInput<T> = T extends [infer K, infer U, infer V] ? K : never;
+    type ApisExtractOutput<T> = T extends [infer K, infer U, infer V] ? U : never;
+    type ApisExtractLoginRequired<T> = T extends [infer K, infer U, infer V] ? V : never;
+    type ApisSessionRequired = { sessionId: string };
+
+    interface IiSAPServerBaseConfig {
+        ip: string;
+        port: number;
+    }
+    export class iSAPServerBase<T extends ApisRequestBase> {
+        private config: IiSAPServerBaseConfig;
+        private sessionId: string = null;
+        constructor(config: IiSAPServerBaseConfig) {
+            this.config = config;
+        }
+
+        private makeUrl(uri: string, ws: boolean = false): string {
+            return `${ws ? 'ws' : 'http'}://${this.config.ip}:${this.config.port}${uri}`;
+        }
+        private 
+
+        async C<
+            K extends keyof T["Post"],
+            U extends ApisExtractInput<T["Post"][K]>,
+            V extends ApisExtractOutput<T["Post"][K]>,
+            P extends ApisExtractLoginRequired<T["Post"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K, data: U, spec: 'POST' | 'PUT' = 'POST'): Promise<V> {
+
+            /// apply sessionId
+            this.sessionId && (data.sessionId = this.sessionId);
+
+            return new Promise<V>( (resolve, reject) => {
+                request({
+                    url: this.makeUrl(key as string),
+                    method: spec,
+                    json: true,
+                    body: data
+                }, (err, res, body) => {
+                    if (res.statusCode !== 200) return reject(body);
+                    /// handle sessionId
+                    if (body.sessionId && /login/.test(key as string)) this.sessionId = body.sessionId;
+                    resolve(body);
+                });
+            });
+        
+        }
+
+        async R<
+            K extends keyof T["Get"],
+            U extends ApisExtractInput<T["Get"][K]>,
+            V extends ApisExtractOutput<T["Get"][K]>,
+            P extends ApisExtractLoginRequired<T["Get"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K, data: U, spec: 'GET' | 'DELETE' = 'GET'): Promise<V> {
+
+            /// apply sessionId
+            this.sessionId && (data.sessionId = this.sessionId);
+
+            /// todo: stringify data
+            let params = Object.keys(data).map( (k) => `${k}=${data[k]}` ).join("&");
+
+            return new Promise<V>( (resolve, reject) => {
+                request({
+                    url: `${this.makeUrl(key as string)}?${params}`,
+                    method: spec,
+                    json: true,
+                }, (err, res, body) => {
+                    if (res.statusCode !== 200) return reject(body);
+                    /// handle sessionId
+                    if (body.sessionId && /login/.test(key as string)) this.sessionId = body.sessionId;
+                    resolve(body);
+                });
+            });
+                    
+        }
+
+        async U<
+            K extends keyof T["Put"],
+            U extends ApisExtractInput<T["Put"][K]>,
+            V extends ApisExtractOutput<T["Put"][K]>,
+            P extends ApisExtractLoginRequired<T["Put"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K, data: U): Promise<V> {
+            
+            return this.C(key, data, 'PUT');
+        }
+
+        async D<
+            K extends keyof T["Delete"],
+            U extends ApisExtractInput<T["Delete"][K]>,
+            V extends ApisExtractOutput<T["Delete"][K]>,
+            P extends ApisExtractLoginRequired<T["Delete"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K, data: U): Promise<V> {
+            
+            return this.R(key, data, 'DELETE');
+        }
+
+        async WS<
+            K extends keyof T["Ws"],
+            U extends ApisExtractInput<T["Ws"][K]>,
+            V extends ApisExtractOutput<T["Ws"][K]>,
+            P extends ApisExtractLoginRequired<T["Ws"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K, data: U): Promise<Socket> {
+            
+            return new Promise<Socket>( (resolve, reject) => {
+                const ws = new WSSocket(this.makeUrl(key as string, true));
+                ws.on("open", () => resolve( Socket.get(ws) ));
+            });
+        }        
     }
 
 }

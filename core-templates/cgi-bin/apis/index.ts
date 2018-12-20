@@ -7,7 +7,6 @@ import {
 import * as request from 'request';
 import { actions } from 'helpers/routers/router-loader';
 
-
 var action = new Action({
     loginRequired: true,
     permission: [RoleList.Administrator]
@@ -17,63 +16,49 @@ var action = new Action({
 /********************************
  * R: get object
  ********************************/
-interface PathObject {
-    [index: string]: {
-        input: string;
-        output: string;
-    }
-}
-interface Output {
-    [path: string]: PathObject;
-}
-
-// let bodyparam = { session_id: this.sessionId, start_time: starttime, end_time: endtime, page_size : 20, skip_pages: page };
-// request({
-//     url,
-//     method: 'POST',
-//     json: true,
-//     body: bodyparam
-// }, (err, res, body) => {
-//     // console.log('body', body);
-//     var result = (body.result || body.group_list || {});
-//     var results = result.verify_results;
-//     //console.log(url, bodyparam, results.length);
-//     if (!results || results.length === 0) {
-//         observer.complete();
-//         return;
-//     }
-//     observer.next(results);
-//     doRequest.call(this, observer, result.page_index+1);
-// });
-
-
 action.get( async (data) => {
-    let final: Output = {};
+    let final: Restful.ApisOutput = {};
 
     for (let action of actions) {
         let uri = action.uri;
         if (uri === '/apis') continue;
-        !final[uri] && (final[uri] = {});
-        let obj = final[uri];
+        // !final[uri] && (final[uri] = {});
+        let obj = {};
 
         for (let proto of action.list()) {
+            let loginRequired: boolean = false;
+            let hasInputType: boolean = false;
             switch (proto) {
                 case 'All':
                 case 'Get':
                 case 'Post':
                 case 'Put':
                 case 'Delete':
+                    /// get configs
+                    /// login required?
+                    loginRequired = (action[`func${proto}Config`] || {}).loginRequired || ((action.config || {}).loginRequired);
+                    hasInputType = (action[`func${proto}Config`] || {}).inputType || ((action.config || {}).inputType) ? true : false;
+                    if (!hasInputType) {
+                        obj[proto] = { input: null, output: null, loginRequired };
+                        break;
+                    }
+
                     let method = (proto === 'All' ? 'Get' : proto).toUpperCase();
 
-                    let result: string = await new Promise<string>( (resolve, reject) => {
-                        console.log('request...', `http://localhost:${Config.core.port}${uri}?help&sessionId=${data.parameters.sessionId}`);
+                    let result: string;
+                    try {
+                    result = await new Promise<string>( (resolve, reject) => {
                         request({
                             url: `http://localhost:${Config.core.port}${uri}?help&sessionId=${data.parameters.sessionId}`,
                             method,
                         }, (err, res, body) => {
+                            if (res.statusCode === 401) return reject(401);
                             resolve(body);
                         });
                     });
+                    } catch(e) {
+                        continue;
+                    }
 
                     /// extract input interface
                     const iRegex = /Input Interface:(?:\r?\n|\r)=+(?:\r?\n|\r)*/;
@@ -97,37 +82,22 @@ action.get( async (data) => {
                         output = result.substring(ostart, oend).replace(/(?:\r?\n|\r)*$/, '');
                     }
 
-                    obj[proto] = { input, output };
+                    obj[proto] = { input, output, loginRequired };
 
                     break;
                 case 'Ws':
-                    obj[proto] = { input: null, output: null };
+                    /// get configs
+                    /// login required?
+                    loginRequired = (action[`func${proto}Config`] || {}).loginRequired || ((action.config || {}).loginRequired);
+                    obj[proto] = { input: null, output: null, loginRequired };
                 default:
                     break;
             }
         }
+        if (Object.keys(obj).length !== 0 && obj.constructor === Object) final[uri] = obj;
     }
 
     return final;
-
-    // return actions.reduce( (final, action) => {
-    //     //return action.list()
-    //     let uri = action.uri;
-    //     !final[uri] && (final[uri] = {});
-    //     let obj = final[uri];
-
-    //     for () action.list()
-
-    //     //return action.uri
-    // }, {});
-
-
-    // /// 1) Make Query
-    // var query = new Parse.Query(Floors);
-    // /// 2) With Extra Filters
-    // query = Restful.Filter(query, data.inputType);
-    // /// 3) Output
-    // return Restful.Pagination(query, data.parameters);
 });
 /// CRUD end ///////////////////////////////////
 

@@ -11,13 +11,14 @@ export class Socket {
     private sendCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
     static get(response: Response);
+    static get(ws: WSSocket);
     static get(info: ExpressWsRouteInfo, cb: ExpressWsCb);
     static get(arg1: any, arg2?: any): Promise<Socket> {
         return new Promise( (resolve) => {
             var ws, info, cb;
             if (!arg2) {
-                /// check response
-                ws = (<any>arg1)._websocket;
+                if (arg1 instanceof WSSocket) ws = arg1;
+                else ws = (<any>arg1)._websocket;   /// check response
                 if (!ws) { resolve(null); return; }
                 info = ws.info; cb = ws.cb;
             } else {

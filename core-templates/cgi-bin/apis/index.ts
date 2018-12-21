@@ -9,7 +9,6 @@ import { actions } from 'helpers/routers/router-loader';
 
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Administrator]
 });
 
 /// CRUD start /////////////////////////////////

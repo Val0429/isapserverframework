@@ -26,6 +26,7 @@ export * from './../sockets/socket-helper';
 import { omitObject } from './../utility/omit-object';
 import { ParseObject, ParseObjectJSONRule, retrievePrimaryClass } from './../parse-server/parse-helper';
 import CRUDMaker from 'shells/crud.shell';
+import ServerMaker from 'shells/server-maker.shell';
 import { O, _O } from 'helpers/utility/O';
 import { getEnumKeyArray } from 'helpers/utility/get-enum-key';
 var caller = require('caller');
@@ -361,51 +362,60 @@ export namespace Restful {
         port: number;
         account: string;
         password: string;
+        loginPath?: string; /// default as /users/login
     }
-    export async function Server(config: IServerConfig) {
-        let { ip, port, account: username, password } = config;
-        const LogTitle = "Restful.Server";
+    export function Server(config: IServerConfig, typeless: boolean = false) {
+        config.loginPath = config.loginPath || "/users/login";
+        let callerz = caller();
+        (async () => {
 
-        do {
-        /// 1) connect server
-        let sessionId: string;
-        try {
-            sessionId = await new Promise<string>( (resolve, reject) => {
-                /// login first
-                request({
-                    url: `http://${config.ip}:${config.port}/users/login`,
-                    method: 'POST',
-                    json: true,
-                    body: { username, password }
-                }, (err, res, body) => {
-                    if (res.statusCode !== 200) return reject(body);
-                    resolve(body.sessionId);
+            let { ip, port, account: username, password } = config;
+            const LogTitle = "Restful.Server";
+    
+            do {
+            /// 1) connect server
+            let sessionId: string;
+            try {
+                sessionId = await new Promise<string>( (resolve, reject) => {
+                    /// login first
+                    request({
+                        url: `http://${config.ip}:${config.port}${config.loginPath}`,
+                        method: 'POST',
+                        json: true,
+                        body: { username, password }
+                    }, (err, res, body) => {
+                        console.log('???', `http://${config.ip}:${config.port}${config.loginPath}`, err, res, body);
+                        if (res.statusCode !== 200) return reject(body);
+                        resolve(body.sessionId);
+                    });
                 });
-            });
-        } catch(e) {
-            Log.Error(LogTitle, e);
-            break;
-        }
-
-        /// 2) load apis
-        let apis: ApisOutput;
-        try {
-            apis = await new Promise<ApisOutput>( (resolve, reject) => {
-                request({
-                    url: `http://${config.ip}:${config.port}/apis?sessionId=${sessionId}`,
-                    method: 'GET',
-                    json: true
-                }, (err, res, body) => {
-                    if (res.statusCode !== 200) return reject(body);
-                    resolve(body);
+            } catch(e) {
+                Log.Error(LogTitle, e);
+                break;
+            }
+    
+            /// 2) load apis
+            let apis: ApisOutput;
+            try {
+                apis = await new Promise<ApisOutput>( (resolve, reject) => {
+                    request({
+                        url: `http://${config.ip}:${config.port}/apis?sessionId=${sessionId}`,
+                        method: 'GET',
+                        json: true
+                    }, (err, res, body) => {
+                        if (res.statusCode !== 200) return reject(body);
+                        resolve(body);
+                    });
                 });
-            });
-        } catch(e) {
-            Log.Error(LogTitle, e);
-            break;
-        }
-        
-        } while(0);
+            } catch(e) {
+                Log.Error(LogTitle, e);
+                break;
+            }
+            ServerMaker(callerz, apis, typeless);
+            
+            } while(0);
+            
+        })();
     }
 
     /// Server Implement

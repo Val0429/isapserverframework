@@ -118,6 +118,7 @@ export default action;
 
 import * as fs from 'fs';
 import { Restful } from 'helpers/cgi-helpers/core';
+import { Log } from 'helpers/utility';
 
 export default function main(path: string, className: string, options: Restful.CRUDOptions, isClass: boolean = true) {
     if (isClass) createClass(path, className, options);
@@ -160,7 +161,7 @@ function createClass(path: string, className: string, options: Restful.CRUDOptio
         origin.substring(epos || origin.length, origin.length)
     ].join("");
 
-    console.log(`CRUD resolved for path <${path}>.`);
+    Log.Info("Restful.CRUD", `Resolved for path <${path}>.`);
     fs.writeFileSync(path, data);
 }
 
@@ -174,6 +175,6 @@ function createInterface(path: string, className: string, options: Restful.CRUDO
         origin.substring(epos || origin.length, origin.length)
     ].join("");
 
-    console.log(`CRUD resolved for path <${path}>.`);
+    Log.Info("Restful.CRUD", `Resolved for path <${path}>.`);
     fs.writeFileSync(path, data);
 }

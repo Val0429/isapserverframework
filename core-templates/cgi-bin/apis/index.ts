@@ -37,10 +37,6 @@ action.get( async (data) => {
                     /// login required?
                     loginRequired = (action[`func${proto}Config`] || {}).loginRequired || ((action.config || {}).loginRequired);
                     hasInputType = (action[`func${proto}Config`] || {}).inputType || ((action.config || {}).inputType) ? true : false;
-                    if (!hasInputType) {
-                        obj[proto] = { input: null, output: null, loginRequired };
-                        break;
-                    }
 
                     let method = (proto === 'All' ? 'Get' : proto).toUpperCase();
 
@@ -57,6 +53,10 @@ action.get( async (data) => {
                     });
                     } catch(e) {
                         continue;
+                    }
+                    if (!hasInputType) {
+                        obj[proto] = { input: null, output: null, loginRequired };
+                        break;
                     }
 
                     /// extract input interface

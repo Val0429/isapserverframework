@@ -364,7 +364,7 @@ export namespace Restful {
         password: string;
         loginPath?: string; /// default as /users/login
     }
-    export function Server(config: IServerConfig, typeless: boolean = false) {
+    export function Server(config: IServerConfig, typeless: boolean = true) {
         config.loginPath = config.loginPath || "/users/login";
         let callerz = caller();
         (async () => {
@@ -384,7 +384,6 @@ export namespace Restful {
                         json: true,
                         body: { username, password }
                     }, (err, res, body) => {
-                        console.log('???', `http://${config.ip}:${config.port}${config.loginPath}`, err, res, body);
                         if (res.statusCode !== 200) return reject(body);
                         resolve(body.sessionId);
                     });

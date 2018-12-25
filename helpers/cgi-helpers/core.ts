@@ -38,7 +38,8 @@ import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { inputType } from './private-middlewares/input-type';
 import { transform } from './private-middlewares/transform';
-import { Log } from 'helpers/utility';
+import { Log, Mutex, retry } from 'helpers/utility';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 
 export interface ActionConfig<T = any, U = any> {
@@ -434,10 +435,11 @@ export namespace Restful {
         ip: string;
         port: number;
     }
-    export class iSAPServerBase<T extends ApisRequestBase> {
-        private config: IiSAPServerBaseConfig;
-        private sessionId: string = null;
-        constructor(config: IiSAPServerBaseConfig) {
+    export class iSAPServerBase<T extends ApisRequestBase, W extends IiSAPServerBaseConfig = IiSAPServerBaseConfig> {
+        protected config: W;
+        protected sessionId: string = null;
+        protected sjLogined: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+        constructor(config: W) {
             this.config = config;
         }
 
@@ -465,9 +467,12 @@ export namespace Restful {
                     json: true,
                     body: data
                 }, (err, res, body) => {
-                    if (res.statusCode !== 200) return reject(body);
+                    if (res.statusCode !== 200) return reject([res, body]);
                     /// handle sessionId
-                    if (body.sessionId && /login/.test(key as string)) this.sessionId = body.sessionId;
+                    if (body.sessionId && /login/.test(key as string)) {
+                        this.sessionId = body.sessionId;
+                        this.sjLogined.next(true);
+                    }
                     resolve(body);
                 });
             });
@@ -495,9 +500,12 @@ export namespace Restful {
                     method: spec,
                     json: true,
                 }, (err, res, body) => {
-                    if (res.statusCode !== 200) return reject(body);
+                    if (res.statusCode !== 200) return reject([res, body]);
                     /// handle sessionId
-                    if (body.sessionId && /login/.test(key as string)) this.sessionId = body.sessionId;
+                    if (body.sessionId && /login/.test(key as string)) {
+                        this.sessionId = body.sessionId;
+                        this.sjLogined.next(true);
+                    }
                     resolve(body);
                 });
             });
@@ -537,10 +545,84 @@ export namespace Restful {
             return new Promise<Socket>( (resolve, reject) => {
                 const ws = new WSSocket(this.makeUrl(key as string, true));
                 ws.on("open", async () => {
+                    ws.on("close", (e) => console.log('close...', e))
+                    ws.on("message", (data) => console.log('data', data))
                     resolve( await Socket.get(ws) )
                 });
             });
-        }        
+        }
+
+        getSessionId(): string { return this.sessionId; }
+    }
+
+    interface IiSAPServerAutoConfig extends IiSAPServerBaseConfig {
+        username: string;
+        password: string;
+        loginPath?: string;
+    }
+    export class iSAPAutoServerBase<T extends ApisRequestBase, W extends IiSAPServerAutoConfig = IiSAPServerAutoConfig> extends iSAPServerBase<T, W> {
+        protected sjRequestLogin: Subject<void> = new Subject<void>();
+        protected mtxLogin: Mutex = new Mutex();
+        constructor(config: W) {
+            super(config);
+            config.loginPath = config.loginPath || "/users/login";
+            this.sjRequestLogin.subscribe( () => this.doLogin() );
+        }
+
+        private async doLogin() {
+            if (this.mtxLogin.isLocked()) return;
+            await this.mtxLogin.acquire();
+            this.sjLogined.next(false);
+            
+            let { username, password } = this.config;
+            this.C("/users/login", {
+                username, password
+            } as any)
+            .then( () => this.mtxLogin.release() )
+            .catch( e => {
+                Log.Error(this.constructor.name, `Auto login failed: ${e}`);
+                this.mtxLogin.release();
+                setTimeout(() => this.doLogin(), 1000);
+            });
+        }
+
+        async C<
+            K extends keyof T["Post"],
+            U extends ApisExtractInput<T["Post"][K]>,
+            V extends ApisExtractOutput<T["Post"][K]>,
+            P extends ApisExtractLoginRequired<T["Post"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K, data?: U, spec: 'POST' | 'PUT' = 'POST'): Promise<V> {
+
+            return retry<V>( async (resolve, reject) => {
+                super.C(key, data, spec)
+                    .then( resolve )
+                    .catch( async (e) => {
+                        this.sjRequestLogin.next();
+                        await this.sjLogined.filter(v=>v).first().toPromise();
+                        reject(e);
+                    });
+            }, 0, "iSAPServerC");
+        }
+
+        async R<
+            K extends keyof T["Get"],
+            U extends ApisExtractInput<T["Get"][K]>,
+            V extends ApisExtractOutput<T["Get"][K]>,
+            P extends ApisExtractLoginRequired<T["Get"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K, data?: U, spec: 'GET' | 'DELETE' = 'GET'): Promise<V> {
+
+            return retry<V>( async (resolve, reject) => {
+                super.R(key, data, spec)
+                    .then( resolve )
+                    .catch( async (e) => {
+                        this.sjRequestLogin.next();
+                        await this.sjLogined.filter(v=>v).first().toPromise();
+                        reject(e);
+                    });
+            }, 0, "iSAPServerC");
+        }
     }
 
 }

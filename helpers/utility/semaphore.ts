@@ -33,4 +33,7 @@ export class Semaphore {
         this.completed.push(result);
         return promise;
     }
+    public isLocked(): boolean {
+        return this.count === 0;
+    }
 }

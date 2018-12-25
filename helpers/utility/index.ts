@@ -2,6 +2,7 @@ export * from './get-enum-key';
 export * from './task-helper';
 export * from './omit-object';
 export * from './semaphore';
+export * from './mutex';
 export * from './deep-merge';
 export * from './O';
 export * from './log';

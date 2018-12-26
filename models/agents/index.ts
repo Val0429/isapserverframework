@@ -1,6 +1,7 @@
 import { Log } from "helpers/utility";
-import { Restful } from 'helpers/cgi-helpers/core';
+import { Restful, ActionParam } from 'helpers/cgi-helpers/core';
 import ObjectID from './bson-objectid';
+import { Observable, Observer, Subject } from "rxjs";
 export { ObjectID };
 
 interface IAgentInstance {
@@ -21,11 +22,12 @@ interface IAgentRegisterConfig {
     description?: string;
 }
 
+const LogTitle = "Agent";
+
 /**
  * Agent declaration.
  */
 export namespace Agent {
-    const LogTitle = "Agent";
     let agentMap: { [name: string]: IAgentInstance } = {};
     let base: IAgentInstance = {functions:{}};
     let delayApply: [string?, any?, IAgentFunction?] = [];
@@ -59,6 +61,7 @@ export namespace Agent {
      */
     export function Function(config?: IAgentFunction) {
         return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            /// 1) Try add this Function as a feature of class
             let addBaseFunction = (key, config) => {
                 base.functions[key] = config;
                 Object.keys(agentMap).forEach( (v) => {
@@ -66,10 +69,23 @@ export namespace Agent {
                     ins.functions[key] = config;
                 })
             }
-            if (target.constructor === Base) { addBaseFunction(propertyKey, config); return; }
+            if (target.constructor === Base) {
+                addBaseFunction(propertyKey, config);
+            } else {
+                let tryApply: boolean = tryApplyFunction(propertyKey, target.constructor, config);
+                if (tryApply === false) delayApply.push( [propertyKey, target.constructor, config] );
+            }
 
-            let tryApply: boolean = tryApplyFunction(propertyKey, target.constructor, config);
-            if (tryApply === false) delayApply.push( [propertyKey, target.constructor, config] );
+            /// 2) Wrap this Function with another
+            let oldMethod = descriptor.value;
+            descriptor.value = function(this: Agent.Base<any>, args) {
+                let remote = (this as any).remote as IRemoteAgent;
+                // let agentType = this.constructor.name;
+                let agentType = Agent.getByObject(this).name;
+                if (remote) return sharedAgentJob.relay(agentType, propertyKey, args, remote);
+                return oldMethod.call(this, args);
+            }
+            return descriptor;
         }
     }
 
@@ -82,17 +98,30 @@ export namespace Agent {
         constructor(config: T, remote?: IRemoteAgent) {
             this.config = config;
             this.remote = remote;
+
+            let agentType = Agent.getByObject(this).name;
+            if (remote) sharedAgentJob.relay(agentType, "Initialize", config, remote).subscribe();
         }
         @Agent.Function({
             description: "Start this agent."
         })
-        public Start() { throw "Not implemented." }
+        public Start(): Observable<void> {
+            return Observable.create( async (observer: Observer<void>) => {
+                await this.doStart();
+                observer.complete();
+            });
+        }
         protected doStart() { throw "Not implemented." }
 
         @Agent.Function({
             description: "Stop this agent."
         })
-        public Stop() { throw "Not implemented." }
+        public Stop(): Observable<void> {
+            return Observable.create( async (observer: Observer<void>) => {
+                await this.doStop();
+                observer.complete();
+            });
+        }
         protected doStop() { throw "Not implemented." }
     }
 
@@ -104,13 +133,19 @@ export namespace Agent {
         return true;
     }
 
-    function get(name: string): IAgentInstance {
+    export function get(name: string): IAgentInstance {
         return agentMap[name];
     }
     function getByInstance(instance: any): IAgentInstance {
         return Object.keys(agentMap).reduce<IAgentInstance>( (final, key) => {
             let ins = agentMap[key];
             return ins.instance === instance ? ins : final;
+        }, null);
+    }
+    export function getByObject(object: any): IAgentInstance {
+        return Object.keys(agentMap).reduce<IAgentInstance>( (final, key) => {
+            let ins = agentMap[key];
+            return object instanceof ins.instance ? ins : final;
         }, null);
     }
 
@@ -163,17 +198,91 @@ export namespace Agent {
      * @param config Config of SmartCare Server.
      */
     export function ImAgent(config: IServerConfig) {
+        let objects = {};
+
         (async () => {
+            let ioOnMessage = (data: IAgentRequest) => {
+                Log.Info("ImAgent", data as any);
+                let pdata = JSON.parse(data as any);
+                
+                if (pdata.funcName === 'Initialize') {
+                    let obj = objects[pdata.objectKey] = (objects[pdata.objectKey] || new (Agent.get(pdata.agentType).instance)(pdata.data));
+                } else {
+                    let obj = objects[pdata.objectKey];
+                    obj[pdata.funcName](pdata.data)
+                        .subscribe( (data) => {
+                            let response: IAgentResponse = {
+                                agentType: pdata.agentType,
+                                funcName: pdata.funcName,
+                                requestKey: pdata.requestKey,
+                                objectKey: pdata.objectKey,
+                                data,
+                                status: EnumAgentResponseStatus.Data
+                            }
+
+                            socket.send(JSON.stringify(response));
+                        }, (err) => {
+                            let response: IAgentResponse = {
+                                agentType: pdata.agentType,
+                                funcName: pdata.funcName,
+                                requestKey: pdata.requestKey,
+                                objectKey: pdata.objectKey,
+                                data: err,
+                                status: EnumAgentResponseStatus.Error
+                            }
+                            socket.send(JSON.stringify(response));
+                        }, () => {
+                            let response: IAgentResponse = {
+                                agentType: pdata.agentType,
+                                funcName: pdata.funcName,
+                                requestKey: pdata.requestKey,
+                                objectKey: pdata.objectKey,
+                                data: null,
+                                status: EnumAgentResponseStatus.Complete
+                            }
+                            socket.send(JSON.stringify(response));
+                        });
+                }
+
+                //console.log('???', Agent)
+                //let obj = objects[data.objectKey] = (objects[data.objectKey] || new (Agent.get(data.agentType).instance))
+            }
+
+            /// For an Agent,
+            /// 1) Login into server
+            /// 2) Connect agent socket
+            let socket;
             let svr = new iSAPBasicServer(config);
-            console.log('try socket')
-            let socket = await svr.WS("/users/alive");
-            console.log('socket?', socket)
+            let tryConnect = async () => {
+                try {
+                    await svr.C("/users/login", config);
+                    socket = await svr.WS("/agents/connect");
+                } catch(e) {
+                    Log.Info(LogTitle, "SmartCare Server connect error. try reconnect...");
+                    console.log('error...');
+                    setTimeout(() => {
+                        tryConnect();
+                    }, 1000);
+                    return;
+                }
+                Log.Info(LogTitle, "SmartCare Server connected.");
+                socket.io.on("message", ioOnMessage);
+                socket.io.on("close", () => {
+                    Log.Info(LogTitle, "SmartCare Server connection closed. try reconnect...");
+                    tryConnect();
+                });
+                socket.io.on("error", () => {
+                    Log.Info(LogTitle, "SmartCare Server connection error. try reconnect...");
+                    tryConnect();
+                });
+            }
+            tryConnect();
         })();
     }
 
     /// internal use iSAPBasicServer
 
-    export class iSAPBasicServer extends Restful.iSAPAutoServerBase<RestfulRequest> {
+    export class iSAPBasicServer extends Restful.iSAPServerBase<RestfulRequest> {
 
     }
     /// /users/login - All /////////////////////////////////////
@@ -210,7 +319,116 @@ export namespace Agent {
         },
         "Ws": {
             "/users/alive": [any, any, true],
+            "/agents/connect": [any, any, true],
         },
     }
     
 }
+
+
+import { Socket } from 'helpers/sockets/socket-helper';
+interface IAgentDetail {
+    user: Parse.User;
+    socket: Socket;
+}
+
+interface IAgentRequest {
+    agentType: string;
+    objectKey: string;
+    requestKey: string;
+    funcName: string;
+    data: any;
+}
+
+enum EnumAgentResponseStatus {
+    Start,
+    Data,
+    Error,
+    Complete
+}
+
+interface IAgentResponse {
+    agentType: string;
+    objectKey: string;
+    requestKey: string;
+    funcName: string;
+    data: any;
+    status: EnumAgentResponseStatus;
+}
+
+export let agentInstances: {
+    [objectId: string]: IAgentDetail;
+} = {};
+
+let messages: {
+    [requestKey: string]: Subject<IAgentResponse>;
+} = {};
+
+class AgentJob {
+    public sjCheckIn: Subject<IAgentDetail> = new Subject<IAgentDetail>();
+
+    checkIn(data: ActionParam<any>) {
+        let detail = {
+            user: data.user,
+            socket: data.socket
+        };
+        detail.socket.io.on("message", (data: IAgentResponse) => {
+            data = JSON.parse(data as any);
+            messages[data.requestKey] && messages[data.requestKey].next(data);
+        });
+        agentInstances[data.user.id] = detail;
+        this.sjCheckIn.next(detail);
+    }
+
+    /**
+     * 
+     * @param name Function name.
+     * @param arg Function arg.
+     * @param remote Remote info.
+     */
+    relay<T>(agentType: string, funcName: string, data: any, remote: Agent.IRemoteAgent): Observable<T> {
+        return Observable.create( (observer: Observer<any>) => {
+            let objectKey = remote.name;
+            let requestKey = new ObjectID().str;
+            let sjMe = messages[requestKey] = new Subject<IAgentResponse>();
+
+            let trySend = (agent: IAgentDetail, data) => {
+                agent.socket.send(JSON.stringify({
+                    agentType,
+                    objectKey,
+                    requestKey,
+                    funcName,
+                    data
+                }));
+            }
+
+            let id = remote.agent.id;
+            let agentdetail = agentInstances[id];
+            if (agentdetail) {
+                trySend(agentdetail, data);
+            } else {
+                this.sjCheckIn
+                    .filter( (v) => v.user.id === id )
+                    .first()
+                    .subscribe( (v) => trySend(v, data) )
+            }
+
+            /// hook on request / response
+            sjMe.subscribe( (data) => {
+                switch (data.status) {
+                    case EnumAgentResponseStatus.Data:
+                        observer.next(data.data); break;
+                    case EnumAgentResponseStatus.Error:
+                        observer.error(data.data); break;
+                    case EnumAgentResponseStatus.Complete:
+                        observer.complete();
+                }
+            }, (err) => {}, () => {
+
+            });
+
+        });
+    }
+}
+const sharedAgentJob = new AgentJob();
+export { sharedAgentJob };

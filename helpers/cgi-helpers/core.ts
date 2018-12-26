@@ -40,6 +40,7 @@ import { inputType } from './private-middlewares/input-type';
 import { transform } from './private-middlewares/transform';
 import { Log, Mutex, retry } from 'helpers/utility';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { IncomingMessage } from 'http';
 
 
 export interface ActionConfig<T = any, U = any> {
@@ -230,6 +231,8 @@ export class Action<T = any, U = any> {
                     var request = <any>info.req;
                     var response = <any>info.res;
                     var socket = await Socket.get(info, cb);
+                    /// send 200 ok
+                    socket.io.send(JSON.stringify({statusCode: 200}));
                     try {
                         var result = await realfunc({...request, request, response, socket});
                     } catch(reason) {
@@ -435,6 +438,21 @@ export namespace Restful {
         ip: string;
         port: number;
     }
+    export interface IGeneralRequestError {
+        errno: string;
+        code: string;
+        syscall: string;
+        hostname: string;
+        host: string;
+        port: string;
+    }
+    
+    export interface IGeneralRequestRejection {
+        err: IGeneralRequestError;
+        res: IncomingMessage;
+        body: any;
+    }
+    
     export class iSAPServerBase<T extends ApisRequestBase, W extends IiSAPServerBaseConfig = IiSAPServerBaseConfig> {
         protected config: W;
         protected sessionId: string = null;
@@ -446,7 +464,6 @@ export namespace Restful {
         private makeUrl(uri: string, ws: boolean = false): string {
             return `${ws ? 'ws' : 'http'}://${this.config.ip}:${this.config.port}${uri}`;
         }
-        private 
 
         async C<
             K extends keyof T["Post"],
@@ -467,7 +484,8 @@ export namespace Restful {
                     json: true,
                     body: data
                 }, (err, res, body) => {
-                    if (res.statusCode !== 200) return reject([res, body]);
+                    if (err) return reject({err});
+                    if (res.statusCode !== 200) return reject({res, body});
                     /// handle sessionId
                     if (body.sessionId && /login/.test(key as string)) {
                         this.sessionId = body.sessionId;
@@ -500,7 +518,8 @@ export namespace Restful {
                     method: spec,
                     json: true,
                 }, (err, res, body) => {
-                    if (res.statusCode !== 200) return reject([res, body]);
+                    if (err) return reject({err});
+                    if (res.statusCode !== 200) return reject({res, body});
                     /// handle sessionId
                     if (body.sessionId && /login/.test(key as string)) {
                         this.sessionId = body.sessionId;
@@ -542,12 +561,34 @@ export namespace Restful {
             C extends (P extends false ? U : ApisSessionRequired & U)
             >(key: K): Promise<Socket> {
             
+            // return new Promise<Socket>( (resolve, reject) => {
+            //     const url = `${this.makeUrl(key as string, true)}?sessionId=${this.sessionId}`;
+            //     const ws = new WSSocket(url);
+            //     ws.on("open", async () => {
+            //         resolve( await Socket.get(ws) )
+            //     });
+            // });
+
             return new Promise<Socket>( (resolve, reject) => {
-                const ws = new WSSocket(this.makeUrl(key as string, true));
+                const url = `${this.makeUrl(key as string, true)}?sessionId=${this.sessionId}`;
+                const ws = new WSSocket(url);
+                ws.on("error", (err) => {
+                    reject({err});
+                });
                 ws.on("open", async () => {
-                    ws.on("close", (e) => console.log('close...', e))
-                    ws.on("message", (data) => console.log('data', data))
-                    resolve( await Socket.get(ws) )
+                    let socket = await Socket.get(ws);
+                    let callback = (data) => {
+                        let result = JSON.parse(data);
+                        do {
+                            if (result.statusCode===200) { resolve(socket); break; }
+                            reject({
+                                res: { statusCode: result.statusCode },
+                                body: result.message
+                            });
+                        } while(0);
+                        socket.io.removeListener("message", callback);
+                    }
+                    socket.io.addListener("message", callback);
                 });
             });
         }
@@ -575,15 +616,25 @@ export namespace Restful {
             this.sjLogined.next(false);
             
             let { username, password } = this.config;
-            this.C("/users/login", {
+            this.C(this.config.loginPath, {
                 username, password
             } as any)
-            .then( () => this.mtxLogin.release() )
-            .catch( e => {
-                Log.Error(this.constructor.name, `Auto login failed: ${e}`);
+            .then( () => {
                 this.mtxLogin.release();
-                setTimeout(() => this.doLogin(), 1000);
+            })
+            .catch( (e: IGeneralRequestRejection) => {
+                Log.Error(this.constructor.name, `Auto login failed: ${JSON.stringify(e)}`);
+                this.mtxLogin.release();
+                // setTimeout(() => this.doLogin(), 1000);
             });
+        }
+
+        private waitForLogin(): Promise<boolean> {
+            return this.sjLogined.filter(v=>v).first().toPromise();
+        }
+
+        private rejection(e: IGeneralRequestRejection): boolean {
+            return (e.res && e.res.statusCode===403) ? true : false;
         }
 
         async C<
@@ -595,14 +646,20 @@ export namespace Restful {
             >(key: K, data?: U, spec: 'POST' | 'PUT' = 'POST'): Promise<V> {
 
             return retry<V>( async (resolve, reject) => {
+                if (key !== this.config.loginPath) {
+                    this.sjLogined.getValue() === false && (this.sjRequestLogin.next());
+                    await this.waitForLogin();
+                }
                 super.C(key, data, spec)
                     .then( resolve )
-                    .catch( async (e) => {
+                    .catch( async (e: IGeneralRequestRejection) => {
+                        /// don't do relogin if rejection
+                        if (this.rejection(e)) return reject(e);
                         this.sjRequestLogin.next();
-                        await this.sjLogined.filter(v=>v).first().toPromise();
+                        await this.waitForLogin();
                         reject(e);
                     });
-            }, 0, "iSAPServerC");
+            }, 0, "iSAPServerC", this.rejection );
         }
 
         async R<
@@ -614,14 +671,52 @@ export namespace Restful {
             >(key: K, data?: U, spec: 'GET' | 'DELETE' = 'GET'): Promise<V> {
 
             return retry<V>( async (resolve, reject) => {
+                if (key !== this.config.loginPath) {
+                    this.sjLogined.getValue() === false && (this.sjRequestLogin.next());
+                    await this.waitForLogin();
+                }
+
                 super.R(key, data, spec)
                     .then( resolve )
                     .catch( async (e) => {
                         this.sjRequestLogin.next();
-                        await this.sjLogined.filter(v=>v).first().toPromise();
+                        await this.waitForLogin();
                         reject(e);
                     });
             }, 0, "iSAPServerC");
+        }
+
+        async WS<
+            K extends keyof T["Ws"],
+            U extends ApisExtractInput<T["Ws"][K]>,
+            V extends ApisExtractOutput<T["Ws"][K]>,
+            P extends ApisExtractLoginRequired<T["Ws"][K]>,
+            C extends (P extends false ? U : ApisSessionRequired & U)
+            >(key: K): Promise<Socket> {
+
+            return retry<Socket>( async (resolve, reject) => {
+                this.sjLogined.getValue() === false && (this.sjRequestLogin.next());
+                await this.waitForLogin();
+
+                super.WS(key)
+                    .then( resolve )
+                    .catch( (e) => {
+                        console.log('reject!', e);
+                        reject(e);
+                    });
+
+                //let ws = await super.WS(key);
+
+                // let callback = (data) => {
+                //     let result = JSON.parse(data);
+                //     do {
+                //         if (result.statusCode===200) { resolve(ws); break; }
+                //         reject(result);
+                //     } while(0);
+                //     ws.io.removeListener("message", callback);
+                // }
+                // ws.io.addListener("message", callback);
+            });
         }
     }
 

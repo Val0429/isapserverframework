@@ -51,14 +51,21 @@ Log.Info('API Loaded', \`Totally \${Action.count(actions)} APIs.\`);
 `;
 
 var tRunParseServer = `
+let myServerUrl = !Config.core.httpDisabled ?
+    \`http://localhost:\${Config.core.port}\` :
+    \`https://localhost:\${Config.core.httpsPort}\`;
+
 if (Config.mongodb.enable) {
     /// run parse server ////
+    let serverURL = !Config.core.httpDisabled ?
+        \`\${myServerUrl}\${Config.parseServer.serverPath}\` :
+        \`\${myServerUrl}\${Config.parseServer.serverPath}\`;
     var ParseServer = new parse.ParseServer({
         databaseURI: \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`,
         appId: Config.parseServer.appId,
         masterKey: Config.parseServer.masterKey,
         fileKey: Config.parseServer.fileKey,
-        serverURL: \`http://localhost:\${Config.core.port}\${Config.parseServer.serverPath}\`,
+        serverURL,
         sessionLength: Config.core.sessionExpireSeconds
     });
     app.use(Config.parseServer.serverPath, ParseServer);
@@ -72,7 +79,7 @@ if (Config.mongodb.enable && Config.parseDashboard.enable) {
 var Dashboard = new ParseDashboard({
     "apps": [
     {
-        "serverURL": \`http://localhost:\${Config.core.port}\${Config.parseServer.serverPath}\`,
+        "serverURL": \`\${myServerUrl}\${Config.parseServer.serverPath}\`,
         "appId": Config.parseServer.appId,
         "masterKey": Config.parseServer.masterKey,
         "appName": Config.parseDashboard.appName
@@ -99,25 +106,102 @@ app.use( (reason, req, res, next) => {
 });
 `;
 
+// var tRunServer = `
+// import 'colors';
+// app.listen(Config.core.port, async () => {
+//     let packinfo = require(\`\${__dirname}/../package.json\`);
+//     Log.Info(packinfo.config.displayname, \`running at port \${Config.core.port}.\`);
+
+//     /// todo: this is a workaround. create database at the beginning.
+//     let { ip, port, collection } = Config.mongodb;
+//     let db = await sharedMongoDB();
+//     await db.createCollection("_SCHEMA");
+//     ////////////////////////////////////////////////////////////////
+
+//     makeServerReady();
+// });
+
+// export {
+//   app
+// }
+// `;
+
 var tRunServer = `
-import 'colors';
-app.listen(Config.core.port, async () => {
-    let packinfo = require(\`\${__dirname}/../package.json\`);
-    Log.Info(packinfo.config.displayname, \`running at port \${Config.core.port}.\`);
+let packinfo = require(\`\${__dirname}/../package.json\`);
 
-    /// todo: this is a workaround. create database at the beginning.
-    let { ip, port, collection } = Config.mongodb;
-    let db = await sharedMongoDB();
-    await db.createCollection("_SCHEMA");
-    ////////////////////////////////////////////////////////////////
+let jobHttp = () => {
+    if (Config.core.httpDisabled) return null;
+    let http = require('http');
+    return new Promise( (resolve) => {
+        let httpServer = http.createServer(app);
+        httpServer.wsServer = expressWsRoutes.createWebSocketServer(httpServer, app, {});
+        httpServer.listen(Config.core.port, async () => {
+            Log.Info(packinfo.config.displayname, \`running at port \${Config.core.port}. (http)\`);
+            resolve();
+        });
+    });
+}
 
+let jobHttps = () => {
+    if (!Config.core.httpsEnabled) return null;
+    let https = require('https');
+    return new Promise( (resolve) => {
+        let key = fs.readFileSync(\`\${__dirname}/../workspace/custom/certificates/mykey.pem\`);
+        let cert = fs.readFileSync(\`\${__dirname}/../workspace/custom/certificates/mycert.pem\`);
+        let httpsServer = https.createServer({key, cert}, app);
+        httpsServer.wsServer = expressWsRoutes.createWebSocketServer(httpsServer, app, {});
+        httpsServer.listen(Config.core.httpsPort, async () => {
+            Log.Info(packinfo.config.displayname, \`running at port \${Config.core.httpsPort}. (https)\`);
+            resolve();
+        });
+    });
+}
+
+let jobCreateDB = () => {
+    return new Promise( async (resolve) => {
+        /// todo: this is a workaround. create database at the beginning.
+        let { ip, port, collection } = Config.mongodb;
+        let db = await sharedMongoDB();
+        await db.createCollection("_SCHEMA");
+        ////////////////////////////////////////////////////////////////
+        resolve();
+    });
+}
+
+(async () => {
+    await Promise.all([jobHttp(), jobHttps(), jobCreateDB()]);
     makeServerReady();
-});
+})();
 
 export {
   app
 }
 `;
+
+// httpServer.listen(Config.core.port, async () => {
+    
+//     Log.Info(packinfo.config.displayname, \`running at port \${Config.core.port}. (http)\`);
+
+//     /// todo: this is a workaround. create database at the beginning.
+//     let { ip, port, collection } = Config.mongodb;
+//     let db = await sharedMongoDB();
+//     await db.createCollection("_SCHEMA");
+//     ////////////////////////////////////////////////////////////////
+
+//     await new Promise( (resolve) => {
+//         if (Config.core.httpsEnabled) {
+//             let key = fs.readFileSync(\`\${__dirname}/../workspace/custom/certificates/mykey.pem\`);
+//             let cert = fs.readFileSync(\`\${__dirname}/../workspace/custom/certificates/mycert.pem\`);
+//             let httpsServer = https.createServer({key, cert}, app);
+//             httpsServer.wsServer = expressWsRoutes.createWebSocketServer(httpsServer, app, {});
+//             httpsServer.listen(Config.core.httpsPort, async () => {
+//                 Log.Info(packinfo.config.displayname, \`running at port \${Config.core.httpsPort}. (https)\`);
+//             });
+//         } else resolve();
+//     });
+    
+//     makeServerReady();
+// });
 
 function autoPad(input: string, value: number) {
     return input.replace(

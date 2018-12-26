@@ -21,6 +21,7 @@ import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
 import { Action } from 'helpers/cgi-helpers/core';
 import { Log } from 'helpers/utility';
 import { deployWeb } from 'helpers/deploy-web';
+import 'colors';
 
 import { Config } from 'core/config.gen';
 

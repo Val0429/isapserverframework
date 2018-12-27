@@ -41,6 +41,7 @@ import { transform } from './private-middlewares/transform';
 import { Log, Mutex, retry } from 'helpers/utility';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
+import { UserHelper } from 'helpers/parse-server/user-helper';
 
 
 export interface ActionConfig<T = any, U = any> {
@@ -233,6 +234,21 @@ export class Action<T = any, U = any> {
                     var socket = await Socket.get(info, cb);
                     /// send 200 ok
                     socket.io.send(JSON.stringify({statusCode: 200}));
+
+                    /// auto update session ///////////////////////
+                    if (Config.core.sessionExpireSeconds >= 0) {
+                        let sessionId: string = request.session.id;
+                        /// tick maximum to 30 minutes
+                        let tick: number = Math.min(Config.core.sessionExpireSeconds*1000/2, 30*60*1000);
+                        let intv = setInterval( () => {
+                            UserHelper.extendSessionExpires(sessionId);
+                        }, tick );
+                        socket.io.addListener("close", () => {
+                            clearInterval(intv);
+                        })
+                    }
+                    ///////////////////////////////////////////////
+
                     try {
                         var result = await realfunc({...request, request, response, socket});
                     } catch(reason) {

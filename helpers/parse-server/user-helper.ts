@@ -2,6 +2,9 @@ import * as Parse from 'parse/node';
 import { Errors } from 'core/errors.gen';
 import { RoleList } from 'core/userRoles.gen';
 import { getEnumKey } from 'helpers/utility/get-enum-key';
+import { Config } from 'core/config.gen';
+import { sharedMongoDB } from './parse-helper';
+import { ObjectID } from 'mongodb';
 
 export namespace UserHelper {
 
@@ -33,6 +36,16 @@ export namespace UserHelper {
         }
         
         return { sessionId, user };
+    }
+    //////////////////////////////////////////////////////////////////////
+
+    /// session //////////////////////////////////////////////////////////
+    export async function extendSessionExpires(id: string) {
+        if (Config.core.sessionExpireSeconds > 0) {
+            let db = await sharedMongoDB();
+            var instance = db.collection("_Session");
+            instance.updateOne({_id: id }, { $set: {expiresAt: new Date(new Date().valueOf()+Config.core.sessionExpireSeconds*1000) } } );
+        }
     }
     //////////////////////////////////////////////////////////////////////
 

@@ -4,7 +4,7 @@ import { Errors } from 'core/errors.gen';
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
-
+import { UserHelper } from 'helpers/parse-server/user-helper';
 
 /// loginRequired //////////////////////////////////////////
 declare module "helpers/cgi-helpers/core" {
@@ -50,7 +50,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
                 .include("user")
                 .include("user.roles")
                 .first({sessionToken: sessionId}) as Parse.Session;
-            
+
         /// session not match
         if (!session || session.getSessionToken() != sessionId) return next( Errors.throw(Errors.LoginRequired) );
 
@@ -60,6 +60,9 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
         /// get user roles
         role = user.get("roles");
 
+        /// update session expiresAt
+        UserHelper.extendSessionExpires(session.id);
+
     } catch(reason) {
         return next( Errors.throw(Errors.SessionNotExists) );
     }
@@ -68,7 +71,7 @@ export async function loginRequired(req: Request, res: Response, next: NextFunct
     req.session = session;
     req.user = user;
     req.role = role;
-    
+
     next();
 }
 ////////////////////////////////////////////////////////////

@@ -20,7 +20,7 @@
   "nodemonConfig": {
     "ignore": [
       ".git/*",
-      ".cache/*",
+      ".cache*/*",
       "logs/*",
       "node_modules/*"
     ],

@@ -1,6 +1,7 @@
 import { shellWriter2, autoPad } from 'helpers/shells/shell-writer';
 
 var tHeader = `
+import * as util from 'util';
 import { ErrorObject } from 'models/cgis/errors.base';
 export * from 'models/cgis/errors.base';
 export * from 'models/cgis/cgis.base';
@@ -78,6 +79,10 @@ export class Errors {
             })();
         }
         return message;
+    }
+
+    [util.inspect.custom]() {
+        return this.resolve(null, true);
     }
 }
 `;

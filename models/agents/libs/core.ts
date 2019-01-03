@@ -1,8 +1,9 @@
 import { Socket } from 'helpers/sockets/socket-helper';
 
 export interface IRemoteAgent {
-    name: string;
     agent: Parse.User;
+    name?: string;
+    syncDB?: boolean;
 }
 
 export interface IAgentSocketDescriptor {

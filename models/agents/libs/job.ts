@@ -4,8 +4,7 @@ import { ActionParam } from 'helpers/cgi-helpers/core';
 import { IAgentSocketDescriptor, IAgentRequest, IAgentResponse, IRemoteAgent, EnumAgentResponseStatus } from './core';
 import * as shortid from './shortid';
 import { Errors } from "core/errors.gen";
-
-
+import { ServerTask } from "./server-task";
 
 export let agentSocketDescriptors: {
     [objectId: string]: IAgentSocketDescriptor;
@@ -32,8 +31,15 @@ export class Job {
         };
         detail.socket.io.on("message", (data: IAgentResponse) => {
             data = JSON.parse(data as any);
+
             messages[data.requestKey] && messages[data.requestKey].next(data);
         });
+
+        (async () => {
+            let tasks = await ServerTask.getAll(detail.user);
+            console.log('tasks', tasks)
+        })();
+
         agentSocketDescriptors[data.user.id] = detail;
         this.sjCheckIn.next(detail);
     }

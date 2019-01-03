@@ -1,7 +1,10 @@
 import { IRemoteAgent } from './core';
 import { Job } from './job';
+import { ServerTask } from './server-task';
 const sharedAgentJob = Job.sharedInstance();
 import { Observable, Observer } from "rxjs";
+import { Mutex } from 'helpers/utility';
+import * as shortid from './shortid';
 
 /**
  * todo
@@ -39,6 +42,7 @@ interface IAgentRegisterConfig {
 export function Register(config: IAgentRegisterConfig) {
     let { name, description, initialize } = config;
     return (classObject) => {
+        let CO: typeof Base = classObject;
         agentMap[name] = { name, description, classObject, functions: { Initialize: initialize, ...agentBase.functions } };
 
         /// try apply delayed, after register complete
@@ -52,6 +56,34 @@ export function Register(config: IAgentRegisterConfig) {
             let key = applied[i];
             delayApply.splice(key, 1);
         }
+
+        /// overwrite class
+        return class extends CO<any> {
+            dbMtx: Mutex = new Mutex();
+            dbInstance: ServerTask;
+            constructor(config, remote: IRemoteAgent) {
+                super(config, remote);
+                /// handle syncDB here.
+                if (remote.syncDB) (async () => {
+                    await this.dbMtx.acquire();
+
+                    this.dbInstance = await ServerTask.sync({
+                        agent: remote.agent,
+                        agentClass: getAgentDescriptorByClassObject(classObject).name,
+                        objectKey: remote.name,
+                        initArgument: config,
+                        tasks: []
+                    });
+
+                    this.dbMtx.release();
+                })();
+            }
+
+            Dispose(): Observable<void> {
+                this.dbInstance && this.dbInstance.revoke();
+                return super.Dispose();
+            }
+        } as any;
     }
 }
 
@@ -96,6 +128,9 @@ export function Function(config?: IAgentFunction) {
  * These Functions must be overwritten:
  * doStart(): Observable<void> | Promise<Observable<void>>;
  * doStop(): Observable<void> | Promise<Observable<void>>;
+ * 
+ * These Function is optionally overwritable:
+ * doDispose(): Observable<void> | Promise<Observable<void>>;  /// default to call doStop()
  */
 export class Base<T> {
     private config: T;
@@ -103,6 +138,10 @@ export class Base<T> {
     constructor(config: T, remote?: IRemoteAgent) {
         this.config = config;
         this.remote = remote;
+        /// initial remote name
+        if (this.remote && !this.remote.name) {
+            this.remote.name = shortid.generate();
+        }
 
         let agentType = getAgentDescriptorByInstance(this).name;
         if (remote) sharedAgentJob.relay(agentType, "Initialize", config, remote).subscribe();
@@ -128,6 +167,17 @@ export class Base<T> {
         });
     }
     protected doStop() { throw "Not implemented." }
+
+    @Function({
+        description: "Dispose this agent."
+    })
+    public Dispose(): Observable<void> {
+        return Observable.create( async (observer: Observer<void>) => {
+            await this.doDispose();
+            observer.complete();
+        });
+    }
+    protected doDispose() { return this.Stop().toPromise(); }
 }
 
 export function getAgentDescriptorByName(name: string): IAgentDescriptor {

@@ -1,15 +1,9 @@
-import { IRemoteAgent } from './core';
+import { IRemoteAgent, IServerScheduler, JSONata, IFunctionRemoteInfo } from './core';
 import { Job } from './job';
 import { ServerTask } from './server-task';
-const sharedAgentJob = Job.sharedInstance();
 import { Observable, Observer } from "rxjs";
 import { Mutex } from 'helpers/utility';
 import * as shortid from './shortid';
-
-/**
- * todo
- * sharedAgentJob
- */
 
 type AgentMapType = { [name: string]: IAgentDescriptor };
 const agentMap: AgentMapType = {};
@@ -43,7 +37,6 @@ export function Register(config: IAgentRegisterConfig) {
     let { name, description, initialize } = config;
     return (classObject) => {
         let CO: typeof Base = classObject;
-        agentMap[name] = { name, description, classObject, functions: { Initialize: initialize, ...agentBase.functions } };
 
         /// try apply delayed, after register complete
         let applied = [];
@@ -58,25 +51,20 @@ export function Register(config: IAgentRegisterConfig) {
         }
 
         /// overwrite class
-        return class extends CO<any> {
-            dbMtx: Mutex = new Mutex();
+        let newClass = class extends CO<any> {
             dbInstance: ServerTask;
             constructor(config, remote: IRemoteAgent) {
                 super(config, remote);
                 /// handle syncDB here.
-                if (remote.syncDB) (async () => {
-                    await this.dbMtx.acquire();
-
-                    this.dbInstance = await ServerTask.sync({
+                if (remote.syncDB) {
+                    this.dbInstance = ServerTask.sync({
                         agent: remote.agent,
-                        agentClass: getAgentDescriptorByClassObject(classObject).name,
+                        agentClass: name,
                         objectKey: remote.name,
                         initArgument: config,
                         tasks: []
                     });
-
-                    this.dbMtx.release();
-                })();
+                }
             }
 
             Dispose(): Observable<void> {
@@ -84,6 +72,8 @@ export function Register(config: IAgentRegisterConfig) {
                 return super.Dispose();
             }
         } as any;
+        agentMap[name] = { name, description, classObject: newClass, functions: { Initialize: initialize, ...agentBase.functions } };
+        return newClass;
     }
 }
 
@@ -103,7 +93,8 @@ export function Function(config?: IAgentFunction) {
                 ins.functions[key] = config;
             })
         }
-        if (target.constructor === Base) {
+        let baseFunction: boolean = target.constructor === Base;
+        if (baseFunction) {
             addBaseFunction(propertyKey, config);
         } else {
             let tryApply: boolean = tryApplyFunction(propertyKey, target.constructor, config);
@@ -112,11 +103,25 @@ export function Function(config?: IAgentFunction) {
 
         /// 2) Wrap this Function with another
         let oldMethod = descriptor.value;
-        descriptor.value = function(this: Base<any>, args) {
+        descriptor.value = function(this: Base<any>, args, info?: IFunctionRemoteInfo) {
             let remote = (this as any).remote as IRemoteAgent;
-            // let agentType = this.constructor.name;
+            const sharedAgentJob = Job.sharedInstance();
             let agentType = getAgentDescriptorByInstance(this).name;
-            if (remote) return sharedAgentJob.relay(agentType, propertyKey, args, remote);
+            if (remote) {
+                if (!info) info = { requestKey: shortid.generate() };
+                /// save into db
+                let funcInfo = {
+                    argument: args,
+                    funcName: propertyKey,
+                    ...info
+                }
+                !baseFunction && ((this as any).dbInstance as ServerTask).syncFunction(funcInfo);
+                return sharedAgentJob.relay(agentType, propertyKey, args, remote, info)
+                    .finally( () => {
+                        /// remove from db when finished
+                        !baseFunction && ((this as any).dbInstance as ServerTask).revokeFunction(funcInfo);
+                    });
+            }
             return oldMethod.call(this, args);
         }
         return descriptor;
@@ -143,6 +148,7 @@ export class Base<T> {
             this.remote.name = shortid.generate();
         }
 
+        const sharedAgentJob = Job.sharedInstance();
         let agentType = getAgentDescriptorByInstance(this).name;
         if (remote) sharedAgentJob.relay(agentType, "Initialize", config, remote).subscribe();
     }

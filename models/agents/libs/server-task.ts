@@ -1,55 +1,30 @@
 import { registerSubclass, ParseObject } from 'helpers/parse-server/parse-helper';
-import { EventList } from 'core/events.gen';
+import { IServerFunctionUnit } from './core';
+import { Mutex } from 'helpers/utility';
 
-// export interface IAgentRequestInDB {
-//     /// e.g. FRSAgent
-//     agentType: string;
-//     /// unique key of Agent Class object.
-//     objectKey: string;
-//     /// unique key of Function request.
-//     requestKey: string;
-//     /// e.g. LiveFaces
+// export interface IServerFunctionUnit {
+//     /**
+//      * Executing function of Agent Class.
+//      * e.g. LiveFaces
+//      */
 //     funcName: string;
-//     /// argument of Function.
-//     data: any;
-// }    
 
-type JSONata = string;
+//     /**
+//      * Unique key of function request.
+//      */
+//     requestKey: string;
 
-export interface IServerScheduler {
-    /**
-     * Key registered in scheduler.
-     */
-    schedulerType: string;
-    /**
-     * Argument that pass into this scheduler.
-     */
-    argument: any;
-}
+//     /**
+//      * Argument that pass into this function.
+//      */
+//     argument: any;
 
-export interface IServerFunctionUnit {
-    /**
-     * Executing function of Agent Class.
-     * e.g. LiveFaces
-     */
-    funcName: string;
+//     scheduler?: IServerScheduler;
 
-    /**
-     * Unique key of function request.
-     */
-    requestKey: string;
+//     filter?: JSONata;
 
-    /**
-     * Argument that pass into this function.
-     */
-    argument: any;
-
-    scheduler?: IServerScheduler;
-
-    filter?: JSONata;
-
-    outputEvent?: EventList;
-}
+//     outputEvent?: EventList;
+// }
 
 /// Server Task ////////////////////////////////////
 export interface IServerTask {
@@ -79,19 +54,81 @@ export interface IServerTask {
      */
     tasks: IServerFunctionUnit[];
 }
+
+// var attributes = this.attributes;
+// if (typeof this.constructor.readOnlyAttributes === 'function') {
+//   var readonly = this.constructor.readOnlyAttributes() || [];
+//   // Attributes are frozen, so we have to rebuild an object,
+//   // rather than delete readonly keys
+//   var copy = {};
+//   for (var a in attributes) {
+//     if (readonly.indexOf(a) < 0) {
+//       copy[a] = attributes[a];
+//     }
+//   }
+//   attributes = copy;
+// }
+// if (clone.set) {
+//   clone.set(attributes);
+// }
+
 @registerSubclass() export class ServerTask extends ParseObject<IServerTask> {
+    private mtx: Mutex = new Mutex();
+    private static map: { [objectKey: string]: ServerTask } = {};
+
     /// sync ServerTask into Server
-    static async sync(config: IServerTask): Promise<ServerTask> {
-        /// 1) try fetch old records.
-        let task: ServerTask = await new Parse.Query(ServerTask)
-            .equalTo("agent", config.agent)
-            .equalTo("objectKey", config.objectKey)
-            .first();
-        /// found. finished
-        if (task) return task;
-        task = new ServerTask(config);
-        await task.save();
+    static sync(config: IServerTask): ServerTask {
+        let task: ServerTask = new ServerTask(config);
+        (async () => {
+            await task.mtx.acquire();
+            /// 1) try fetch old records
+            let entity: ServerTask = await new Parse.Query(ServerTask)
+                .equalTo("agent", config.agent)
+                .equalTo("objectKey", config.objectKey)
+                .first();
+            /// found. finished
+            if (entity) {
+                let attrs = entity.attributes;
+                let ctor = entity.constructor as any;
+                if (typeof ctor.readOnlyAttributes === 'function') {
+                    var readonly = ctor.readOnlyAttributes() || [];
+                    var copy: any = {};
+                    for (var a in attrs) if (readonly.indexOf(a) < 0) copy[a] = attrs[a];
+                }
+                attrs = copy;
+                task.set(attrs);
+                task.id = entity.id;
+            } else {
+                await task.save();
+            }
+            task.mtx.release();
+        })();
+        this.map[config.objectKey] = task;
         return task;
+    }
+
+    async syncFunction(config: IServerFunctionUnit): Promise<void> {
+        await this.mtx.acquire();
+        let tasks = [...this.attributes.tasks];
+        let idx = tasks.findIndex((task) => task.requestKey === config.requestKey);
+        if (idx >= 0) {
+            tasks = [...tasks.slice(0, idx), config, ...tasks.slice(idx+1, tasks.length)];
+        } else tasks.push(config);
+        this.set("tasks", tasks);
+        await this.save();
+        this.mtx.release();
+    }
+
+    async revokeFunction(config: IServerFunctionUnit): Promise<void> {
+        await this.mtx.acquire();
+        let tasks = [...this.attributes.tasks];
+        let idx = tasks.findIndex((task) => task.requestKey === config.requestKey);
+        if (idx >= 0) {
+            tasks = [...tasks.slice(0, idx), ...tasks.slice(idx+1, tasks.length)];
+            this.set("tasks", tasks);
+            await this.save();
+        }
+        this.mtx.release();
     }
 
     static async getAll(agent: Parse.User): Promise<ServerTask[]> {
@@ -106,21 +143,3 @@ export interface IServerTask {
     }
 }
 ////////////////////////////////////////////////////
-
-// do {
-//     /// 1) try fetch old records.
-//     let task: ServerTask = await new Parse.Query(ServerTask)
-//         .equalTo("agent", remote.agent)
-//         .equalTo("objectKey", remote.name)
-//         .first();
-//     /// found. finished
-//     if (task) { this.dbInstance = task; break; }
-//     task = new ServerTask({
-//         agent: remote.agent,
-//         agentClass: getAgentDescriptorByClassObject(classObject).name,
-//         objectKey: remote.name,
-//         initArgument: config,
-//         tasks: []
-//     });
-//     await task.save();
-// } while(0);

@@ -1,4 +1,5 @@
 import { Socket } from 'helpers/sockets/socket-helper';
+import { EventList } from 'core/events.gen';
 
 export interface IRemoteAgent {
     agent: Parse.User;
@@ -22,6 +23,9 @@ export interface IAgentRequest {
     funcName: string;
     /// argument of Function.
     data: any;
+
+    scheduler?: IServerScheduler;
+    filter?: JSONata;
 }
 
 export enum EnumAgentResponseStatus {
@@ -44,4 +48,49 @@ export interface IAgentResponse {
     data: any;
     /// response status
     status: EnumAgentResponseStatus;
+}
+
+
+export type JSONata = string;
+
+export interface IServerScheduler {
+    /**
+     * Key registered in scheduler.
+     */
+    schedulerType: string;
+    /**
+     * Argument that pass into this scheduler.
+     */
+    argument: any;
+}
+
+export interface IServerFunctionUnit {
+    /**
+     * Executing function of Agent Class.
+     * e.g. LiveFaces
+     */
+    funcName: string;
+
+    /**
+     * Unique key of function request.
+     */
+    requestKey: string;
+
+    /**
+     * Argument that pass into this function.
+     */
+    argument: any;
+
+    scheduler?: IServerScheduler;
+
+    filter?: JSONata;
+
+    outputEvent?: EventList;
+}
+
+export interface IFunctionRemoteInfo {
+    requestKey: string;
+    scheduler?: IServerScheduler;
+    filter?: JSONata;
+    outputEvent?: EventList;
 }

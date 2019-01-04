@@ -1,10 +1,15 @@
 import { Subject, Observable, Observer } from "rxjs";
 
 import { ActionParam } from 'helpers/cgi-helpers/core';
-import { IAgentSocketDescriptor, IAgentRequest, IAgentResponse, IRemoteAgent, EnumAgentResponseStatus } from './core';
+import { IAgentSocketDescriptor, IAgentRequest, IAgentResponse, IRemoteAgent, EnumAgentResponseStatus, IFunctionRemoteInfo } from './core';
 import * as shortid from './shortid';
 import { Errors } from "core/errors.gen";
 import { ServerTask } from "./server-task";
+import { Base, getAgentDescriptorByName } from "./declarations";
+import { Log } from "helpers/utility";
+
+/// ImServer
+const LogTitle: string = "ImServer";
 
 export let agentSocketDescriptors: {
     [objectId: string]: IAgentSocketDescriptor;
@@ -23,9 +28,33 @@ export class Job {
         return Job.sharedIns || (Job.sharedIns = new Job());
     }
 
+    private managedAgentTasks: { [objectId: string]: Base<any> } = {};
+    private universeServerTask(descriptor: IAgentSocketDescriptor, task: ServerTask);
+    private universeServerTask(descriptor: IAgentSocketDescriptor, task: ServerTask[]);
+    private universeServerTask(descriptor: IAgentSocketDescriptor, serverTasks: ServerTask | ServerTask[]) {
+        if (serverTasks instanceof ServerTask) serverTasks = [serverTasks];
+        let { user, socket } = descriptor;
+        for (let serverTask of serverTasks) {
+            let { agent, agentClass, initArgument, objectKey, tasks } = serverTask.attributes;
+            /// 1) constructor
+            let taskInstance: Base<any> = new (getAgentDescriptorByName(agentClass).classObject)(initArgument, { agent, name: objectKey, syncDB: true });
+            taskInstance.Start().toPromise();
+            Log.Info(LogTitle, `Created <${agentClass}> for <${agent.id}>.`);
+            /// 2) call tasks
+            /// todo: handle outputEvent, 
+            for (let task of tasks) {
+                // taskInstance[task.funcName](task.argument, task).toPromise();
+                taskInstance[task.funcName](task.argument, task)
+                    .subscribe( (data) => {
+                        console.log('111', data);
+                    })
+            }
+        }
+    }
+
     checkIn(data: ActionParam<any>) {
         /// todo: socket replacement
-        let detail = {
+        let detail: IAgentSocketDescriptor = {
             user: data.user,
             socket: data.socket
         };
@@ -37,7 +66,7 @@ export class Job {
 
         (async () => {
             let tasks = await ServerTask.getAll(detail.user);
-            console.log('tasks', tasks)
+            this.universeServerTask(detail, tasks);
         })();
 
         agentSocketDescriptors[data.user.id] = detail;
@@ -50,10 +79,11 @@ export class Job {
      * @param arg Function arg.
      * @param remote Remote info.
      */
-    relay<T>(agentType: string, funcName: string, data: any, remote: IRemoteAgent): Observable<T> {
+    relay<T>(agentType: string, funcName: string, data: any, remote: IRemoteAgent, info?: IFunctionRemoteInfo): Observable<T> {
         return Observable.create( (observer: Observer<any>) => {
+            let { requestKey, filter, scheduler } = info || {} as any;
+            if (!requestKey) requestKey = shortid.generate();
             let objectKey = remote.name;
-            let requestKey = shortid.generate();
             let sjMe = messages[requestKey] = new Subject<IAgentResponse>();
 
             let trySend = (agent: IAgentSocketDescriptor, data) => {
@@ -62,7 +92,9 @@ export class Job {
                     objectKey,
                     requestKey,
                     funcName,
-                    data
+                    data,
+                    filter,
+                    scheduler,
                 }));
             }
 

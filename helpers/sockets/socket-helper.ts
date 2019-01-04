@@ -41,6 +41,15 @@ export class Socket {
         this.io = socket;
     }
 
+    sendPromise(data: any): Promise<void> {
+        return new Promise( (resolve, reject) => {
+            this.send(data, (err) => {
+                if (!err) return resolve();
+                reject(err);
+            });
+        });
+    }
+
     send(data: any, cb?: (err: Error) => void): void;
     send(data: any, options: { mask?: boolean; binary?: boolean }, cb?: (err: Error) => void): void;
     send(data: any, arg2: any, arg3?: any) {

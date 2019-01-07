@@ -56,7 +56,7 @@ export class RegistrationDelegator {
     public static getAgentTaskDescriptorByClassObject(classObject: any): IAgentTaskDescriptor {
         return Object.keys(this.agentMap).reduce<IAgentTaskDescriptor>( (final, key) => {
             let ins = this.agentMap[key];
-            return ins.classObject === classObject ? ins : final;
+            return ins.classObject === classObject || classObject.isPrototypeOf(ins.classObject) ? ins : final;
         }, null);
     }
     public static getAgentTaskDescriptorByInstance(instance: any): IAgentTaskDescriptor {

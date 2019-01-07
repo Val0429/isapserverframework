@@ -3,6 +3,7 @@ import { Observable, Observer } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
 import { idGenerate } from "../id-generator";
+export * from './registration-delegator';
 
 const SigNotImpl: string = "Not implemented.";
 
@@ -37,6 +38,7 @@ export function Register(config: IAgentTaskRegisterConfig) {
             }
         } as any;
         RegistrationDelegator.Register(config, newClass);
+        return newClass;
     }
 }
 
@@ -45,14 +47,20 @@ export function Register(config: IAgentTaskRegisterConfig) {
  * @param config pass Function type with inputType, and description to describe this function.
  */
 export function Function(config?: IAgentTaskFunction) {
-    return (target: any, funcName: string, descriptor: PropertyDescriptor) {
+    return (target: any, funcName: string, descriptor: PropertyDescriptor) => {
+        let classObject = target.constructor;
+        let baseFunction: boolean = classObject === Base;
+        RegistrationDelegator.Function(funcName, classObject, config, baseFunction);
+
         let oldMethod = descriptor.value;
+        let agentType;
         descriptor.value = function(this: Base<any>, args, info?: ITaskFunctionRemote) {
             let remote = (this as any).remote as IRemoteAgentTask;
             if (!remote) return oldMethod.call(this, args);
             /// handle remote
             if (!info) info = { requestKey: idGenerate() };
-            let agentType = RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
+            /// initialize agentType
+            agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
             // /// save into db
             // let funcInfo = {
             //     argument: args,

@@ -1,18 +1,16 @@
 import { Socket } from 'helpers/sockets/socket-helper';
 import { EventList } from 'core/events.gen';
 
-export interface IRemoteAgent {
-    agent: Parse.User;
-    name?: string;
-    syncDB?: boolean;
-}
+/// Streaming Request / Response /////////////////////////////////
+export type JSONata = string;
 
-export interface IAgentSocketDescriptor {
-    user: Parse.User;
-    socket: Socket;
+export enum EAgentRequestType {
+    Request,
+    Response
 }
 
 export interface IAgentRequest {
+    type: EAgentRequestType.Request;
     /// e.g. FRSAgent
     agentType: string;
     /// unique key of Agent Class object.
@@ -24,18 +22,19 @@ export interface IAgentRequest {
     /// argument of Function.
     data: any;
 
-    scheduler?: IServerScheduler;
+    scheduler?: any;
     filter?: JSONata;
+    dataKeeping?: any;
 }
 
 export enum EnumAgentResponseStatus {
-    Start,
     Data,
     Error,
     Complete
 }
 
 export interface IAgentResponse {
+    type: EAgentRequestType.Response;
     /// e.g. FRSAgent
     agentType: string;
     /// unique key of Agent Class object.
@@ -50,47 +49,54 @@ export interface IAgentResponse {
     status: EnumAgentResponseStatus;
 }
 
+export type IAgentStreaming = IAgentRequest | IAgentResponse;
+//////////////////////////////////////////////////////////////////
 
-export type JSONata = string;
-
-export interface IServerScheduler {
-    /**
-     * Key registered in scheduler.
-     */
-    schedulerType: string;
-    /**
-     * Argument that pass into this scheduler.
-     */
-    argument: any;
+/// Constructor signature of Remote //////////////////////////////
+export interface IRemoteAgentTask {
+    user: Parse.User;
+    objectKey?: string;
+    syncDB?: boolean;
 }
+//////////////////////////////////////////////////////////////////
 
-export interface IServerFunctionUnit {
-    /**
-     * Executing function of Agent Class.
-     * e.g. LiveFaces
-     */
-    funcName: string;
-
-    /**
-     * Unique key of function request.
-     */
+/// Function info of Remote //////////////////////////////////////
+export interface ITaskFunctionRemote {
     requestKey: string;
-
-    /**
-     * Argument that pass into this function.
-     */
-    argument: any;
-
-    scheduler?: IServerScheduler;
-
+    scheduler?: any;
     filter?: JSONata;
-
+    /// default to no keep
+    dataKeeping?: any;
+    /// default to none
     outputEvent?: EventList;
 }
+//////////////////////////////////////////////////////////////////
 
-export interface IFunctionRemoteInfo {
-    requestKey: string;
-    scheduler?: IServerScheduler;
-    filter?: JSONata;
-    outputEvent?: EventList;
+/// Agent Tasks Registration /////////////////////////////////////
+export interface IAgentTaskDescriptor {
+    name?: string;
+    description?: string;
+    classObject?: any;
+    functions: { [name: string]: IAgentTaskFunction };
 }
+
+export interface IAgentTaskRegisterConfig {
+    /**
+     * Human recognizible name. e.g. FRS Agent Task.
+     */
+    name: string;
+    /**
+     * type of constructor argument.
+     */
+    initialize: IAgentTaskFunction;
+    /**
+     * Human readable detail to describe this Agent Task.
+     */
+    description?: string;
+}
+
+export interface IAgentTaskFunction {
+    inputType?: string;
+    description?: string;
+}
+//////////////////////////////////////////////////////////////////

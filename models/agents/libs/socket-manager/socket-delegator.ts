@@ -10,8 +10,8 @@ export interface ISocketDelegatorRequest {
 
 export class SocketDelegator {
     private socket: Socket;
-    private requestPair: { [requestKey: string]: Subject<IAgentResponse> } = {};
-    private responsePair: { [requestKey: string]: Subject<IAgentResponse> } = {};
+    private requestPair: Map<string, Subject<IAgentResponse>> = new Map();
+    private responsePair: Map<string, Subject<IAgentResponse>> = new Map();
     public sjRequest: Subject<ISocketDelegatorRequest> = new Subject<ISocketDelegatorRequest>();
     public sjClose: Subject<void> = new Subject<void>();
 
@@ -23,45 +23,56 @@ export class SocketDelegator {
                 let err = `Socket ${message}.`;
                 for (let key in this.requestPair)
                     this.requestPair[key].error(err);
-                for (let key in this.responsePair)
+                for (let key in this.responsePair) {
                     this.responsePair[key].error(err);
+                }
                 /// clean up and close
-                this.requestPair = {};
-                this.responsePair = {};
+                this.requestPair.clear();
+                this.responsePair.clear();
                 this.sjClose.next();
             }
         }
         socket.io.on("close", closer("close"));
         socket.io.on("error", closer("error"));
         socket.io.on("message", (data: IAgentStreaming) => {
+            /// do deserialize
+            data = JSON.parse(data as any);
             /// handle data response
             if (data.type === EAgentRequestType.Response) {
                 let key = data.requestKey;
                 let sj = this.requestPair[key];
                 /// ignore inconnect requestKey for now.
+                let raw = data.data;
+                /// convert back timestamp
+                raw.timestamp && (raw.timestamp = new Date(raw.timestamp));
                 if (!sj) return;
                 switch (data.status) {
                     case EnumAgentResponseStatus.Data:
-                        sj.next(data); break;
+                        sj.next(raw); break;
                     case EnumAgentResponseStatus.Error:
-                        sj.error(data); break;
+                        sj.error(raw); break;
                     case EnumAgentResponseStatus.Complete:
                         sj.complete();
-                        this.requestPair[key] = undefined;
+                        this.requestPair.delete(key);
                         break;
                 }
             } else {
             /// handle data request
-                let key = data.requestKey;
+                let { requestKey, agentType, funcName, objectKey } = data;
                 let sj = new Subject<IAgentResponse>();
-                this.responsePair[key] = sj;
+                this.responsePair[requestKey] = sj;
+                let respBase = { type: EAgentRequestType.Response, agentType, funcName, requestKey, objectKey, data: null };
+                /// inject timestamp
+                let injectTimestamp = (data = undefined) => ({ data: { ...data, timestamp: new Date().toISOString() } });
                 sj.subscribe( (data) => {
-                    this.socket.send(data);
+                    this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Data });
                 }, (err) => {
-                    this.socket.send(err);
+                    this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Error });
                 }, () => {
-                    this.responsePair[key] = undefined;
-                })
+                    this.socket.send({ ...respBase, ...injectTimestamp(), status: EnumAgentResponseStatus.Complete });
+                    this.responsePair.delete(requestKey);
+                });
+                /// do unserialize
                 this.sjRequest.next({
                     request: data,
                     response: sj

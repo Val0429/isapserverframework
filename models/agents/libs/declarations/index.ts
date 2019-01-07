@@ -101,7 +101,8 @@ export class Base<T> {
             SocketManager.sharedInstance().getSocketDelegator(remote.user).request({
                 type: EAgentRequestType.Request,
                 agentType, funcName: "Initialize", data: config, objectKey: remote.objectKey, requestKey
-            }).toPromise();
+            }).toPromise()
+              .catch( e => null );
         }
     }
 

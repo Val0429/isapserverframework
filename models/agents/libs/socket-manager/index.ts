@@ -21,6 +21,7 @@ export class SocketManager {
     }
 
     private idxAgentSocketDescriptor: { [objectId: string]: IAgentSocketDescriptor } = {};
+    public sjCheckedIn: Subject<Parse.User> = new Subject<Parse.User>();
     public checkIn(data: ActionParam<any>) {
         let { user, socket } = data;
         let id = user.id;
@@ -31,6 +32,7 @@ export class SocketManager {
         delegator.sjClose.subscribe( () => {
             this.idxAgentSocketDescriptor[id] = undefined;
         });
+        this.sjCheckedIn.next(user);
         /// todo: Server receive request
         //delegator.request
     }

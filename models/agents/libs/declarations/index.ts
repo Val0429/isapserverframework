@@ -74,6 +74,7 @@ export function Function(config?: IAgentTaskFunction) {
                 agentType, funcName, data: args, objectKey: remote.objectKey, ...info
             }).share();
         }
+        return descriptor;
     }
 }
 

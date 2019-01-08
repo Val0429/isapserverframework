@@ -48,11 +48,11 @@ class AgentGenerator {
         Log.Info(LogTitle, "Agent Server connected.");
 
         /// handle message
-        /// todo: handle request error
+        /// todo: handle request error. maybe no need
         this.socketDelegator.sjRequest.subscribe( (data) => {
-            console.log('got request...', data);
+            Log.Info(LogTitle, `Receive request: ${data.request}`);
             this.requestHandler(data);
-        }, (err) => {}, () => {});
+        }, e => null);
         this.socketDelegator.sjClose.subscribe( () => {
             Log.Info(LogTitle, "Agent Server connetion closed. Try reconnect...");
             this.tryConnect();

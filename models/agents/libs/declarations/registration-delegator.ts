@@ -8,9 +8,9 @@ export class RegistrationDelegator {
     private static delayApply: [string, any, IAgentTaskFunction][] = [];
 
     public static Register(config: IAgentTaskRegisterConfig, classObject: any) {
-        let { name, initialize, description } = config;
+        let { name, initialize, description, objective } = config;
         this.agentMap[name] = {
-            name, description, classObject, functions: { Initialize: initialize, ...this.agentBase.functions }
+            name, initialize, description, objective, classObject, functions: { Initialize: initialize, ...this.agentBase.functions }
         }
         this.DelayApplyFunction();
     }

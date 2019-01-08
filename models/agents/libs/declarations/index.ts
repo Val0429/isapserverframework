@@ -1,4 +1,4 @@
-import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType } from "../core";
+import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser } from "../core";
 import { Observable, Observer } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
@@ -12,7 +12,8 @@ const SigNotImpl: string = "Not implemented.";
  * @param config pass constructor info with initialize, and description to describe this Agent Class.
  */
 export function Register(config: IAgentTaskRegisterConfig) {
-    let { name, initialize, description } = config;
+    /// normalize config
+    !config.objective && (config.objective = Objective.Server);
     return (classObject) => {
         let CO: typeof Base = classObject;
         /// overwrite class
@@ -77,11 +78,18 @@ export class Base<T> {
         /// initial remote objectKey
         if (remote) {
             if (!remote.objectKey) remote.objectKey = idGenerate();
+            let { user, objectKey } = remote;
             let requestKey = idGenerate();
-            let agentType = RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
-            SocketManager.sharedInstance().getSocketDelegator(remote.user).request({
+            let taskDescriptor = RegistrationDelegator.getAgentTaskDescriptorByInstance(this);
+            let { name: agentType, objective } = taskDescriptor;
+            
+            /// check objective is valid
+            if ( user instanceof MeUser && (objective & Objective.Agent) === 0 ) throw `<${agentType}> cannot be initialize on Agent.`;
+            if ( !(user instanceof MeUser) && (objective & Objective.Server) === 0 ) throw `<${agentType}> cannot be initialize on Server.`;
+
+            SocketManager.sharedInstance().getSocketDelegator(user).request({
                 type: EAgentRequestType.Request,
-                agentType, funcName: "Initialize", data: config, objectKey: remote.objectKey, requestKey
+                agentType, funcName: "Initialize", data: config, objectKey, requestKey
             }).toPromise()
               .catch( e => null );
         }

@@ -75,9 +75,16 @@ export interface ITaskFunctionRemote {
 /// Agent Tasks Registration /////////////////////////////////////
 export interface IAgentTaskDescriptor {
     name?: string;
+    initialize?: IAgentTaskFunction;
     description?: string;
+    objective?: Objective;
     classObject?: any;
     functions: { [name: string]: IAgentTaskFunction };
+}
+
+export enum Objective {
+    Server = 0x0001,
+    Agent = 0x0002
 }
 
 export interface IAgentTaskRegisterConfig {
@@ -93,10 +100,18 @@ export interface IAgentTaskRegisterConfig {
      * Human readable detail to describe this Agent Task.
      */
     description?: string;
+    /**
+     * Target to send this task. default to Server
+     */
+    objective?: Objective;
 }
 
 export interface IAgentTaskFunction {
     inputType?: string;
     description?: string;
 }
+//////////////////////////////////////////////////////////////////
+
+/// For SocketDelegator to recognize Me //////////////////////////
+export class MeUser extends Parse.User {}
 //////////////////////////////////////////////////////////////////

@@ -1,7 +1,9 @@
 import { Restful } from "helpers/cgi-helpers/core";
-import { SocketDelegator, ISocketDelegatorRequest } from "../socket-manager/socket-delegator";
 import { Log } from "helpers/utility/log";
 import { RegistrationDelegator } from "../declarations";
+import { SocketManager, SocketDelegator, ISocketDelegatorRequest } from "../socket-manager";
+import { AgentConnectionAgent } from "../agents/agent-connection-agent";
+import { MeUser } from "../core";
 
 const LogTitle: string = "ImAgent";
 
@@ -46,11 +48,15 @@ class AgentGenerator {
             return;
         }
         Log.Info(LogTitle, "Agent Server connected.");
+        SocketManager.sharedInstance().registerMe(this.socketDelegator);
+
+        /// everytime connected, send request to server
+        this.initialRequestToServer();
 
         /// handle message
         /// todo: handle request error. maybe no need
         this.socketDelegator.sjRequest.subscribe( (data) => {
-            Log.Info(LogTitle, `Receive request: ${data.request}`);
+            Log.Info(LogTitle, `Receive request: ${JSON.stringify(data.request)}`);
             this.requestHandler(data);
         }, e => null);
         this.socketDelegator.sjClose.subscribe( () => {
@@ -63,7 +69,7 @@ class AgentGenerator {
     private requestHandler(req: ISocketDelegatorRequest) {
         let { request, response } = req;
         let { agentType, funcName, data, objectKey, requestKey } = request;
-        if (request.funcName === 'Initialize') {
+        if (funcName === 'Initialize') {
             let obj = this.objects[objectKey] = (
                 this.objects[objectKey] ||
                 new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data)
@@ -78,6 +84,15 @@ class AgentGenerator {
                     () => response.complete()
                 );
         }
+    }
+
+    /// client send request
+    private async initialRequestToServer() {
+        let test = new AgentConnectionAgent(null, {
+            user: new MeUser()
+        });
+        await test.Start().toPromise();
+        /// todo: send request to get back running tasks
     }
 }
 

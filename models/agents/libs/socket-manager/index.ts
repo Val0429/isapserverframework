@@ -20,7 +20,8 @@ export class SocketManager {
         return SocketManager.instance || (SocketManager.instance = new SocketManager());
     }
 
-    private idxAgentSocketDescriptor: { [objectId: string]: IAgentSocketDescriptor } = {};
+    private idxAgentSocketDescriptor = new Map<string, IAgentSocketDescriptor>();
+    //private idxAgentSocketDescriptor: { [objectId: string]: IAgentSocketDescriptor } = {};
     public sjCheckedIn: Subject<Parse.User> = new Subject<Parse.User>();
     public checkIn(data: ActionParam<any>) {
         let { user, socket } = data;
@@ -30,7 +31,7 @@ export class SocketManager {
         this.idxAgentSocketDescriptor[id] = { user, delegator };
         /// hook event on it
         delegator.sjClose.subscribe( () => {
-            this.idxAgentSocketDescriptor[id] = undefined;
+            this.idxAgentSocketDescriptor.delete(id);
         });
         this.sjCheckedIn.next(user);
         /// todo: Server receive request

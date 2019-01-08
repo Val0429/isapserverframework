@@ -17,23 +17,11 @@ export function Register(config: IAgentTaskRegisterConfig) {
         let CO: typeof Base = classObject;
         /// overwrite class
         let newClass = class extends CO<any> {
-            // dbInstance: ServerTask;
             constructor(config, remote: IRemoteAgentTask) {
                 super(config, remote);
-                /// handle syncDB here.
-                // if (remote.syncDB) {
-                //     this.dbInstance = ServerTask.sync({
-                //         agent: remote.agent,
-                //         agentClass: name,
-                //         objectKey: remote.name,
-                //         initArgument: config,
-                //         tasks: []
-                //     });
-                // }
             }
 
             Dispose(): Observable<void> {
-                // this.dbInstance && this.dbInstance.revoke();
                 return super.Dispose();
             }
         } as any;
@@ -61,13 +49,6 @@ export function Function(config?: IAgentTaskFunction) {
             if (!info || !info.requestKey) info = { ...info, requestKey: idGenerate() };
             /// initialize agentType
             agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
-            // /// save into db
-            // let funcInfo = {
-            //     argument: args,
-            //     funcName,
-            //     ...info
-            // }
-            // !baseFunction && ((this as any).dbInstance as ServerTask).syncFunction(funcInfo);
             /// todo: outputEvent
             return SocketManager.sharedInstance().getSocketDelegator(remote.user).request({
                 type: EAgentRequestType.Request,

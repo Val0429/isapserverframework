@@ -47,7 +47,7 @@ export function Register(config: IAgentTaskRegisterConfig) {
  * @param config pass Function type with inputType, and description to describe this function.
  */
 export function Function(config?: IAgentTaskFunction) {
-    return (target: any, funcName: string, descriptor: PropertyDescriptor) => {
+    return <T extends object>(target: any, funcName: string, descriptor: TypedPropertyDescriptor<(config?: T) => Observable<any>>) => {
         let classObject = target.constructor;
         let baseFunction: boolean = classObject === Base;
         RegistrationDelegator.Function(funcName, classObject, config, baseFunction);
@@ -58,7 +58,7 @@ export function Function(config?: IAgentTaskFunction) {
             let remote = (this as any).remote as IRemoteAgentTask;
             if (!remote) return oldMethod.call(this, args);
             /// handle remote
-            if (!info) info = { requestKey: idGenerate() };
+            if (!info || !info.requestKey) info = { ...info, requestKey: idGenerate() };
             /// initialize agentType
             agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
             // /// save into db

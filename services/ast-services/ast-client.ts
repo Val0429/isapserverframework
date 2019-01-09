@@ -26,6 +26,7 @@ export class AstClient {
         /// try convert back
         try {
             var result = AstConverter.fromDateEntity(data) ||
+                        AstConverter.fromBufferEntity(data) ||
                         (await AstConverter.fromParseObjectEntity(data)) ||
                         (await AstConverter.fromParseFileEntity(data))
                         ;
@@ -192,6 +193,11 @@ namespace AstConverter {
     export function fromDateEntity(input: ConverterEntity): Date {
         if (input.__type__ !== "Date") return;
         return new Date(input.data);
+    }
+
+    export function fromBufferEntity(input: ConverterEntity): Buffer {
+        if (input.__type__ !== "Buffer") return;
+        return Buffer.from(input.data, 'base64');
     }
 
     export async function fromParseObjectEntity(input: ConverterEntity): Promise<ParseObject<any>> {

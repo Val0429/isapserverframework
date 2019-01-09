@@ -96,11 +96,11 @@ export class SocketDelegator {
     }
 
     /// send request to socket
-    public request(data: IAgentRequest): Observable<IAgentResponse> {
-        return new Observable<IAgentResponse>( (observer) => {
+    public request<T = any>(data: IAgentRequest): Observable<T> {
+        return new Observable<T>( (observer) => {
             if (!data.objectKey) data.objectKey = idGenerate();
             if (!data.requestKey) data.requestKey = idGenerate();
-            let sj = new Subject<IAgentResponse>();
+            let sj = new Subject<T>();
             this.requestPair[data.requestKey] = sj;
             this.socket.send(data);
             sj.subscribe(observer);

@@ -295,6 +295,7 @@ namespace AstParser {
          * 13) Union
          * 14) Generic
          * 15) Any
+         * 16) Buffer
          * X) Other Class X
          */
 
@@ -323,6 +324,11 @@ namespace AstParser {
             /// 4) Date
             debug && console.log(`${showname} is Date, obj ${typeof obj}`);
             return AstConverter.toDateEntity(obj, showname, isArray);
+
+        } else if (type.getText() === 'Buffer') {
+            /// 16) Buffer
+            debug && console.log(`${showname} is Buffer, obj ${typeof obj}`);
+            return AstConverter.toBufferEntity(obj, showname, isArray);
 
         } else if (type.isEnumLiteral()) {
             /// 5) Enum
@@ -537,6 +543,14 @@ namespace AstConverter {
         return {
             __type__: "Date",
             data: new Date(input).toISOString()
+        }
+    }
+
+    export function toBufferEntity(input: string, name: string, isArray: boolean = false): ConverterEntity {
+        if (typeof input !== 'string') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid base64 string of Buffer${isArray?'[]':''}.`]);
+        return {
+            __type__: "Buffer",
+            data: input
         }
     }
 

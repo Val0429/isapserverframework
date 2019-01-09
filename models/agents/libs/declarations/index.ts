@@ -40,7 +40,7 @@ export function Register(config: IAgentTaskRegisterConfig) {
 export function Function(config?: IAgentTaskFunction) {
     let callerPath = caller();
 
-    return <T extends object>(target: any, funcName: string, descriptor: TypedPropertyDescriptor<(config?: T) => Observable<any>>) => {
+    return <T extends object, U>(target: any, funcName: string, descriptor: TypedPropertyDescriptor<(config?: T) => Observable<U>>) => {
         let classObject = target.constructor;
         let baseFunction: boolean = classObject === Base;
         RegistrationDelegator.Function(funcName, classObject, config, baseFunction);
@@ -56,11 +56,19 @@ export function Function(config?: IAgentTaskFunction) {
             /// initialize agentType
             agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
             /// todo: outputEvent
-            let remoteOb = SocketManager.sharedInstance().getSocketDelegator(remote.user).request({
+            let remoteOb = SocketManager.sharedInstance().getSocketDelegator(remote.user).request<U>({
                 type: EAgentRequestType.Request, action: EAgentRequestAction.Start,
                 agentType, funcName, data: args, objectKey: remote.objectKey, ...info, requestKey
             });
-            if (config.outputType) remoteOb = remoteOb.flatMap( data => ast.requestValidation({ type: config.outputType, path: callerPath }, data) );
+            /// request outputType validation
+            if (config.outputType) remoteOb = remoteOb.flatMap( (data) => {
+                return new Promise( (resolve, reject) => {
+                    ast.requestValidation({ type: config.outputType, path: callerPath }, data)
+                        /// merge back timestamp
+                        .then( (result) => resolve({ ...result, timestamp: (data as any).timestamp }) )
+                        .catch(reject);
+                });
+            });
             // remoteOb = remoteOb.do( (data) => console.log("after validate...", data))
             // remoteOb = remoteOb.finally( () => console.log("===___==="))
             return remoteOb.share();

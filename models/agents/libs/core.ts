@@ -69,6 +69,8 @@ export interface ITaskFunctionRemote {
     dataKeeping?: any;
     /// default to none
     outputEvent?: EventList;
+    /// to hint for observable stop
+    isStopped?: () => boolean;
 }
 //////////////////////////////////////////////////////////////////
 

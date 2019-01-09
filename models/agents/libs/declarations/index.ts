@@ -126,4 +126,11 @@ export class Base<T> {
     }
     protected doDispose() { return this.Stop().toPromise(); }
 
+    protected makeObservable<T>(args, callback: (observer: Observer<T>, isStopped: () => boolean) => void): Observable<T> {
+        let info = args[1];
+        let isStopped = info && info.isStopped ? info.isStopped : () => false;
+        return new Observable( (observer: Observer<T>) => {
+            callback(observer, isStopped);
+        });
+    }
 }

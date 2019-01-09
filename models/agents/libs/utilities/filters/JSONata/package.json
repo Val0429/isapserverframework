@@ -1,0 +1,13 @@
+{
+  "name": "isap-filter-jsonata",
+  "version": "0.01.00",
+  "config": {
+    "displayname": "iSap Filter JSONata"
+  },
+  "description": "iSap Filter JSONata v0.01.00",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsonata": "^1.6.3"
+  }
+}

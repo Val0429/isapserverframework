@@ -62,7 +62,7 @@ export interface IRemoteAgentTask {
 
 /// Function info of Remote //////////////////////////////////////
 export interface ITaskFunctionRemote {
-    requestKey: string;
+    requestKey?: string;
     scheduler?: any;
     filter?: JSONata;
     /// default to no keep

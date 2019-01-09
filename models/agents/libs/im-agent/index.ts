@@ -3,7 +3,8 @@ import { Log } from "helpers/utility/log";
 import { RegistrationDelegator } from "../declarations";
 import { SocketManager, SocketDelegator, ISocketDelegatorRequest } from "../socket-manager";
 import { AgentConnectionAgent } from "../agents/agent-connection-agent";
-import { MeUser } from "../core";
+import { MeUser, IAgentRequest } from "../core";
+import * as Utilities from './../utilities';
 
 const LogTitle: string = "ImAgent";
 
@@ -65,10 +66,12 @@ class AgentGenerator {
         });
     }
 
+    /// Automatic Object Generator
     private objects: Map<string, any> = new Map();
     private requestHandler(req: ISocketDelegatorRequest) {
         let { request, response } = req;
         let { agentType, funcName, data, objectKey, requestKey } = request;
+
         if (funcName === 'Initialize') {
             let obj = this.objects[objectKey] = (
                 this.objects[objectKey] ||
@@ -77,13 +80,24 @@ class AgentGenerator {
         } else {
             let obj = this.objects[objectKey];
             if (!obj) throw `<${agentType}> with ID <${objectKey}> not exists.`;
-            obj[funcName](data)
-                .subscribe(
+            let filter = this.getFilter(request);
+            let o = obj[funcName](data);
+            if (filter) o = o.pipe( filter );
+            let subscription = o.subscribe(
                     (data) => response.next(data),
                     (err) => response.error(err),
                     () => response.complete()
                 );
+            /// stop / unsubscribe function when error / disconnected / complete
+            response.subscribe( d => null, e => subscription.unsubscribe(), () => subscription.unsubscribe() );
         }
+    }
+
+    private getFilter(request: IAgentRequest) {
+        let filter = request.filter;
+        if (!filter) return;
+        let o = new (Utilities.Filters.Get((filter as any).type).classObject)((filter as any).data);
+        return o.get.bind(o);
     }
 
     /// client send request

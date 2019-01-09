@@ -48,12 +48,13 @@ export function Function(config?: IAgentTaskFunction) {
             if (!remote) return oldMethod.call(this, args);
             /// handle remote
             if (!info || !info.requestKey) info = { ...info, requestKey: idGenerate() };
+            let requestKey = info.requestKey;
             /// initialize agentType
             agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
             /// todo: outputEvent
             return SocketManager.sharedInstance().getSocketDelegator(remote.user).request({
                 type: EAgentRequestType.Request,
-                agentType, funcName, data: args, objectKey: remote.objectKey, ...info
+                agentType, funcName, data: args, objectKey: remote.objectKey, ...info, requestKey
             }).share();
         }
         return descriptor;

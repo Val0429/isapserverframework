@@ -81,6 +81,7 @@ export class SocketDelegator {
         });
     }
 
+    /// send request to socket
     public request(data: IAgentRequest): Observable<IAgentResponse> {
         if (!data.objectKey) data.objectKey = idGenerate();
         if (!data.requestKey) data.requestKey = idGenerate();

@@ -8,6 +8,9 @@ export interface ISocketDelegatorRequest {
     response: Subject<IAgentResponse>;
 }
 
+/**
+ * General class that encapsulate Socket, into request / response model.
+ */
 export class SocketDelegator {
     private socket: Socket;
     private requestPair: Map<string, Subject<IAgentResponse>> = new Map();

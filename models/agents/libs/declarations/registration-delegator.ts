@@ -2,6 +2,10 @@ import { IAgentTaskRegisterConfig, IAgentTaskDescriptor, IAgentTaskFunction } fr
 
 type AgentTaskMapType = { [name: string]: IAgentTaskDescriptor };
 
+/**
+ * Registration of Agent Tasks / Task Functions.
+ * Also getter of TaskDescriptors.
+ */
 export class RegistrationDelegator {
     private static agentMap: AgentTaskMapType = {};
     private static agentBase: IAgentTaskDescriptor = {functions:{}};

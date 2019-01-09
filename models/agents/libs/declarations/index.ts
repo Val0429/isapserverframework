@@ -126,6 +126,9 @@ export class Base<T> {
     }
     protected doDispose() { return this.Stop().toPromise(); }
 
+    /**
+     * Helper of Observable.create. Provide functionality to get Stopped state.
+     */
     protected makeObservable<T>(args, callback: (observer: Observer<T>, isStopped: () => boolean) => void): Observable<T> {
         let info = args[1];
         let isStopped = info && info.isStopped ? info.isStopped : () => false;

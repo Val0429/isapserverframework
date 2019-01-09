@@ -77,16 +77,14 @@ class AgentGenerator {
                 this.objects[objectKey] ||
                 new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data)
                 );
+            response.complete();
         } else {
             /// prepare object
             let obj = this.objects[objectKey];
             if (!obj) throw `<${agentType}> with ID <${objectKey}> not exists.`;
-            /// prepare stop
-            let stopped = false, isStopped = () => stopped;
-            let handleStop = () => { subscription.unsubscribe(); stopped = true; }
             /// prepare filter
             let filter = this.getFilter(request);
-            let o = obj[funcName](data, { isStopped });
+            let o = obj[funcName](data);
             if (filter) o = o.pipe( filter );
             let subscription = o.subscribe(
                     (data) => response.next(data),
@@ -94,6 +92,7 @@ class AgentGenerator {
                     () => response.complete()
                 );
             /// stop / unsubscribe function when error / disconnected / complete
+            let handleStop = () => { subscription.unsubscribe(); }
             response.subscribe({ error: () => handleStop(), complete: () => handleStop() });
         }
     }

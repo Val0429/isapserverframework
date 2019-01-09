@@ -1,6 +1,6 @@
-import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus } from "../core";
+import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, EAgentRequestAction } from "../core";
 import { Subject, Observable } from "rxjs";
-import { Socket, ActionParam } from "helpers/cgi-helpers/core";
+import { Socket, ActionParam, ParseObject } from "helpers/cgi-helpers/core";
 import { idGenerate } from "../id-generator";
 
 export interface ISocketDelegatorRequest {
@@ -61,13 +61,24 @@ export class SocketDelegator {
                 }
             } else {
             /// handle data request
-                let { requestKey, agentType, funcName, objectKey } = data;
+                let { requestKey, agentType, funcName, objectKey, action } = data;
+                /// if stop, try complete
+                if (action === EAgentRequestAction.Stop) {
+                    let res = this.responsePair[requestKey];
+                    if (!res) return;
+                    res.complete();
+                    this.responsePair.delete(requestKey);
+                    return;
+                }
+                /// otherwise start
                 let sj = new Subject<IAgentResponse>();
                 this.responsePair[requestKey] = sj;
                 let respBase = { type: EAgentRequestType.Response, agentType, funcName, requestKey, objectKey, data: null };
                 /// inject timestamp
                 let injectTimestamp = (data = undefined) => ({ data: { ...data, timestamp: new Date().toISOString() } });
                 sj.subscribe( (data) => {
+                    /// regularize data
+                    data = ParseObject.toOutputJSON(data);
                     this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Data });
                 }, (err) => {
                     this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Error });
@@ -86,11 +97,24 @@ export class SocketDelegator {
 
     /// send request to socket
     public request(data: IAgentRequest): Observable<IAgentResponse> {
-        if (!data.objectKey) data.objectKey = idGenerate();
-        if (!data.requestKey) data.requestKey = idGenerate();
-        let sj = new Subject<IAgentResponse>();
-        this.requestPair[data.requestKey] = sj;
-        this.socket.send(data);
-        return sj.asObservable();
+        return new Observable<IAgentResponse>( (observer) => {
+            if (!data.objectKey) data.objectKey = idGenerate();
+            if (!data.requestKey) data.requestKey = idGenerate();
+            let sj = new Subject<IAgentResponse>();
+            this.requestPair[data.requestKey] = sj;
+            this.socket.send(data);
+            sj.subscribe(observer);
+        })
+        .finally( () => {
+            // console.log('send stop', {...data, action: EAgentRequestAction.Stop})
+            this.socket.send({...data, action: EAgentRequestAction.Stop});
+        });
+
+        // if (!data.objectKey) data.objectKey = idGenerate();
+        // if (!data.requestKey) data.requestKey = idGenerate();
+        // let sj = new Subject<IAgentResponse>();
+        // this.requestPair[data.requestKey] = sj;
+        // this.socket.send(data);
+        // return sj.asObservable();
     }
 }

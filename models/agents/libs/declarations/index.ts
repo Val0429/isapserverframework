@@ -1,9 +1,11 @@
-import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser } from "../core";
+import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser, EAgentRequestAction } from "../core";
 import { Observable, Observer } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
 import { idGenerate } from "../id-generator";
 export * from './registration-delegator';
+import ast from 'services/ast-services/ast-client';
+const caller = require('caller');
 
 const SigNotImpl: string = "Not implemented.";
 
@@ -36,6 +38,8 @@ export function Register(config: IAgentTaskRegisterConfig) {
  * @param config pass Function type with inputType, and description to describe this function.
  */
 export function Function(config?: IAgentTaskFunction) {
+    let callerPath = caller();
+
     return <T extends object>(target: any, funcName: string, descriptor: TypedPropertyDescriptor<(config?: T) => Observable<any>>) => {
         let classObject = target.constructor;
         let baseFunction: boolean = classObject === Base;
@@ -52,10 +56,14 @@ export function Function(config?: IAgentTaskFunction) {
             /// initialize agentType
             agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
             /// todo: outputEvent
-            return SocketManager.sharedInstance().getSocketDelegator(remote.user).request({
-                type: EAgentRequestType.Request,
+            let remoteOb = SocketManager.sharedInstance().getSocketDelegator(remote.user).request({
+                type: EAgentRequestType.Request, action: EAgentRequestAction.Start,
                 agentType, funcName, data: args, objectKey: remote.objectKey, ...info, requestKey
-            }).share();
+            });
+            if (config.outputType) remoteOb = remoteOb.flatMap( data => ast.requestValidation({ type: config.outputType, path: callerPath }, data) );
+            // remoteOb = remoteOb.do( (data) => console.log("after validate...", data))
+            // remoteOb = remoteOb.finally( () => console.log("===___==="))
+            return remoteOb.share();
         }
         return descriptor;
     }
@@ -89,7 +97,7 @@ export class Base<T> {
             if ( !(user instanceof MeUser) && (objective & Objective.Server) === 0 ) throw `<${agentType}> cannot be initialize on Server.`;
 
             SocketManager.sharedInstance().getSocketDelegator(user).request({
-                type: EAgentRequestType.Request,
+                type: EAgentRequestType.Request, action: EAgentRequestAction.Start,
                 agentType, funcName: "Initialize", data: config, objectKey, requestKey
             }).toPromise()
               .catch( e => null );
@@ -129,10 +137,9 @@ export class Base<T> {
     /**
      * Helper of Observable.create. Provide functionality to get Stopped state.
      */
-    protected makeObservable<T>(args, callback: (observer: Observer<T>, isStopped: () => boolean) => void): Observable<T> {
-        let info = args[1];
-        let isStopped = info && info.isStopped ? info.isStopped : () => false;
+    protected makeObservable<T>(callback: (observer: Observer<T>, isStopped: () => boolean) => void): Observable<T> {
         return new Observable( (observer: Observer<T>) => {
+            let isStopped = () => observer.closed;
             callback(observer, isStopped);
         });
     }

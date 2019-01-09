@@ -8,9 +8,15 @@ export enum EAgentRequestType {
     Request,
     Response
 }
+export enum EAgentRequestAction {
+    Start,
+    Stop
+}
 
 export interface IAgentRequest {
     type: EAgentRequestType.Request;
+    /// start or stop request
+    action: EAgentRequestAction;
     /// e.g. FRSAgent
     agentType: string;
     /// unique key of Agent Class object.
@@ -69,8 +75,6 @@ export interface ITaskFunctionRemote {
     dataKeeping?: any;
     /// default to none
     outputEvent?: EventList;
-    /// to hint for observable stop
-    isStopped?: () => boolean;
 }
 //////////////////////////////////////////////////////////////////
 
@@ -110,6 +114,7 @@ export interface IAgentTaskRegisterConfig {
 
 export interface IAgentTaskFunction {
     inputType?: string;
+    outputType?: string;
     description?: string;
 }
 //////////////////////////////////////////////////////////////////

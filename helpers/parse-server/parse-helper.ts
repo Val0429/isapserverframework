@@ -118,6 +118,7 @@ export class ParseObject<T> extends Parse.Object {
          * 8) Array --- Array
          * 10) Parse.File --- uri
          * 16) Parse.User
+         * 17) Buffer
          */
 
         var filterRules = {
@@ -151,6 +152,8 @@ export class ParseObject<T> extends Parse.Object {
                     ...NeutualizeType({objectId: data.id, ...data.attributes}, filter, newref)
                 });
             }
+            /// 17)
+            else if (data instanceof Buffer) return data.toString("base64");
             else if (type === 'object') {
                 var isArray = Array.isArray(data);
                 var result = isArray ? [] : {};

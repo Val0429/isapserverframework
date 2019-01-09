@@ -29,7 +29,7 @@ import CRUDMaker from 'shells/crud.shell';
 import ServerMaker from 'shells/server-maker.shell';
 import { O, _O } from 'helpers/utility/O';
 import { getEnumKeyArray } from 'helpers/utility/get-enum-key';
-var caller = require('caller');
+const caller = require('caller');
 
 /// private middlewares
 import { VBodyParserJson, VBodyParserRaw } from './private-middlewares/v-body-parser-json';

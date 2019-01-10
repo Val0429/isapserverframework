@@ -4,6 +4,7 @@ import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, Enum
 import { SocketDelegator, ISocketDelegatorRequest } from './socket-delegator';
 import { Log } from "helpers/utility/log";
 import { RegistrationDelegator } from "../declarations/registration-delegator";
+import { ObjectGenerator } from "../object-generator";
 export * from './socket-delegator';
 
 //const LogTitle: string = "Agent.SocketManager";
@@ -23,8 +24,10 @@ export class SocketManager {
         return SocketManager.instance || (SocketManager.instance = new SocketManager());
     }
 
+    /// Only called by Server.
     private idxAgentSocketDescriptor = new Map<string, IAgentSocketDescriptor>();
     public sjCheckedIn: Subject<Parse.User> = new Subject<Parse.User>();
+    private objectGenerator: ObjectGenerator = new ObjectGenerator();
     public checkIn(data: ActionParam<any>) {
         let { user, socket } = data;
         let id = user.id;
@@ -36,10 +39,10 @@ export class SocketManager {
             this.idxAgentSocketDescriptor.delete(id);
         });
         this.sjCheckedIn.next(user);
-        /// todo: Server receive request
+        /// Server receive request
         delegator.sjRequest.subscribe( (data) => {
             Log.Info(LogTitle, `Receive request: ${JSON.stringify(data.request)}`);
-            this.serverRequestHandler(data);
+            this.objectGenerator.next(data);
         }, e => null);
     }
 
@@ -52,30 +55,6 @@ export class SocketManager {
     public getSocketDelegator(user: Parse.User): SocketDelegator {
         if (user instanceof MeUser) return this.meDelegator;
         return (this.idxAgentSocketDescriptor[user.id] || {} as any).delegator;
-    }
-
-    /// private helper
-    /// Server handle request start from Agent
-    private objects: Map<string, any> = new Map();
-    private serverRequestHandler(req: ISocketDelegatorRequest) {
-        let { request, response } = req;
-        let { agentType, funcName, data, objectKey, requestKey } = request;
-        if (funcName === 'Initialize') {
-            let obj = this.objects[objectKey] = (
-                this.objects[objectKey] ||
-                new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data)
-                );
-            response.complete();
-        } else {
-            let obj = this.objects[objectKey];
-            if (!obj) throw `<${agentType}> with ID <${objectKey}> not exists.`;
-            obj[funcName](data)
-                .subscribe(
-                    (data) => response.next(data),
-                    (err) => response.error(err),
-                    () => response.complete()
-                );
-        }
     }
 }
 

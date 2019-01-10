@@ -1,4 +1,4 @@
-import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus } from "../core";
+import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, IRemoteAgentTask } from "../core";
 import { Subject, Observable } from "rxjs";
 import { Socket, ActionParam, ParseObject } from "helpers/cgi-helpers/core";
 import { idGenerate } from "../id-generator";
@@ -10,6 +10,7 @@ export interface ISocketDelegatorRequest {
 
 /**
  * General class that encapsulate Socket, into request / response model.
+ * Socket will only been sent from this class.
  */
 export class SocketDelegator {
     private socket: Socket;
@@ -97,7 +98,7 @@ export class SocketDelegator {
 
     /// send request to socket
     public request<T = any>(data: IAgentRequest): Observable<T> {
-        return new Observable<T>( (observer) => {
+        let observable = new Observable<T>( (observer) => {
             if (!data.objectKey) data.objectKey = idGenerate();
             if (!data.requestKey) data.requestKey = idGenerate();
             let sj = new Subject<T>();
@@ -108,12 +109,7 @@ export class SocketDelegator {
         .finally( () => {
             this.socket.send({...data, funcName: `~${data.funcName}`});
         });
-
-        // if (!data.objectKey) data.objectKey = idGenerate();
-        // if (!data.requestKey) data.requestKey = idGenerate();
-        // let sj = new Subject<IAgentResponse>();
-        // this.requestPair[data.requestKey] = sj;
-        // this.socket.send(data);
-        // return sj.asObservable();
+        return observable;
     }
 }
+

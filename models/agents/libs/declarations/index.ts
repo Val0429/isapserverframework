@@ -17,19 +17,21 @@ export function Register(config: IAgentTaskRegisterConfig) {
     /// normalize config
     !config.objective && (config.objective = Objective.Server);
     return (classObject) => {
-        let CO: typeof Base = classObject;
-        /// overwrite class
-        let newClass = class extends CO<any> {
-            constructor(config, remote: IRemoteAgentTask) {
-                super(config, remote);
-            }
+        // let CO: typeof Base = classObject;
+        // /// overwrite class
+        // let newClass = class extends CO<any> {
+        //     constructor(config, remote: IRemoteAgentTask) {
+        //         super(config, remote);
+        //     }
 
-            Dispose(): Observable<void> {
-                return super.Dispose();
-            }
-        } as any;
-        RegistrationDelegator.Register(config, newClass);
-        return newClass;
+        //     Dispose(): Observable<void> {
+        //         return super.Dispose();
+        //     }
+        // } as any;
+        // RegistrationDelegator.Register(config, newClass);
+        // return newClass;
+        RegistrationDelegator.Register(config, classObject);
+        return classObject;
     }
 }
 
@@ -69,8 +71,6 @@ export function Function(config?: IAgentTaskFunction) {
                         .catch(reject);
                 });
             });
-            // remoteOb = remoteOb.do( (data) => console.log("after validate...", data))
-            // remoteOb = remoteOb.finally( () => console.log("===___==="))
             return remoteOb.share();
         }
         return descriptor;

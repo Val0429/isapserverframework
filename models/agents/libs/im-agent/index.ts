@@ -4,7 +4,7 @@ import { RegistrationDelegator } from "../declarations";
 import { SocketManager, SocketDelegator, ISocketDelegatorRequest } from "../socket-manager";
 import { AgentConnectionAgent } from "../agents/agent-connection-agent";
 import { MeUser, IAgentRequest } from "../core";
-import * as Utilities from './../utilities';
+import { ObjectGenerator } from "../object-generator";
 
 const LogTitle: string = "ImAgent";
 
@@ -30,6 +30,7 @@ class AgentGenerator {
     private config: IServerConfig;
     private server: iSAPBasicServer;
     private socketDelegator: SocketDelegator;
+    private objectGenerator: ObjectGenerator = new ObjectGenerator();
     constructor(config: IServerConfig) {
         this.config = config;
         this.server = new iSAPBasicServer(config);
@@ -58,50 +59,12 @@ class AgentGenerator {
         /// todo: handle request error. maybe no need
         this.socketDelegator.sjRequest.subscribe( (data) => {
             Log.Info(LogTitle, `Receive request: ${JSON.stringify(data.request)}`);
-            this.requestHandler(data);
+            this.objectGenerator.next(data);
         }, e => null);
         this.socketDelegator.sjClose.subscribe( () => {
             Log.Info(LogTitle, "Agent Server connetion closed. Try reconnect...");
             this.tryConnect();
         });
-    }
-
-    /// Automatic Object Generator
-    private objects: Map<string, any> = new Map();
-    private requestHandler(req: ISocketDelegatorRequest) {
-        let { request, response } = req;
-        let { agentType, funcName, data, objectKey, requestKey } = request;
-
-        if (funcName === 'Initialize') {
-            let obj = this.objects[objectKey] = (
-                this.objects[objectKey] ||
-                new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data)
-                );
-            response.complete();
-        } else {
-            /// prepare object
-            let obj = this.objects[objectKey];
-            if (!obj) throw `<${agentType}> with ID <${objectKey}> not exists.`;
-            /// prepare filter
-            let filter = this.getFilter(request);
-            let o = obj[funcName](data);
-            if (filter) o = o.pipe( filter );
-            let subscription = o.subscribe(
-                    (data) => response.next(data),
-                    (err) => response.error(err),
-                    () => response.complete()
-                );
-            /// stop / unsubscribe function when error / disconnected / complete
-            let handleStop = () => { subscription.unsubscribe(); }
-            response.subscribe({ error: () => handleStop(), complete: () => handleStop() });
-        }
-    }
-
-    private getFilter(request: IAgentRequest) {
-        let filter = request.filter;
-        if (!filter) return;
-        let o = new (Utilities.Filters.Get((filter as any).type).classObject)((filter as any).data);
-        return o.get.bind(o);
     }
 
     /// client send request

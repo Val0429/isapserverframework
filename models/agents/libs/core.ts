@@ -1,6 +1,7 @@
 import { Socket } from 'helpers/sockets/socket-helper';
 import { EventList } from 'core/events.gen';
 import { IAgentTaskFilterMapping } from './utilities/filters';
+import { IAgentTaskSchedulerMapping } from './utilities/schedulers';
 
 /// Streaming Request / Response /////////////////////////////////
 export type JSONata = string;
@@ -9,15 +10,9 @@ export enum EAgentRequestType {
     Request,
     Response
 }
-export enum EAgentRequestAction {
-    Start,
-    Stop
-}
 
 export interface IAgentRequest {
     type: EAgentRequestType.Request;
-    /// start or stop request
-    action: EAgentRequestAction;
     /// e.g. FRSAgent
     agentType: string;
     /// unique key of Agent Class object.
@@ -29,7 +24,7 @@ export interface IAgentRequest {
     /// argument of Function.
     data: any;
 
-    scheduler?: any;
+    scheduler?: ITaskFunctionScheduler;
     filter?: ITaskFunctionFilter;
     dataKeeping?: any;
 }
@@ -72,15 +67,23 @@ interface ITaskFunctionFilterSignature<T extends keyof IAgentTaskFilterMapping> 
     type: T;
     data: IAgentTaskFilterMapping[T];
 }
-// export type ITaskFunctionFilter = ITaskFunctionFilterSignature<keyof IAgentTaskFilterMapping>;
-type MakeDistributed<T> = T extends keyof IAgentTaskFilterMapping ? ITaskFunctionFilterSignature<T> : never;
-export type ITaskFunctionFilter = MakeDistributed<keyof IAgentTaskFilterMapping>;
+type FSMakeDistributed<T> = T extends keyof IAgentTaskFilterMapping ? ITaskFunctionFilterSignature<T> : never;
+export type ITaskFunctionFilter = FSMakeDistributed<keyof IAgentTaskFilterMapping>;
+//////////////////////////////////////////////////////////////////
+
+/// Scheduler Signature //////////////////////////////////////////
+interface ITaskFunctionSchedulerSignature<T extends keyof IAgentTaskSchedulerMapping> {
+    type: T;
+    data: IAgentTaskSchedulerMapping[T];
+}
+type SSMakeDistributed<T> = T extends keyof IAgentTaskSchedulerMapping ? ITaskFunctionSchedulerSignature<T> : never;
+export type ITaskFunctionScheduler = SSMakeDistributed<keyof IAgentTaskSchedulerMapping>;
 //////////////////////////////////////////////////////////////////
 
 /// Function info of Remote //////////////////////////////////////
 export interface ITaskFunctionRemote {
     requestKey?: string;
-    scheduler?: any;
+    scheduler?: ITaskFunctionScheduler;
     filter?: ITaskFunctionFilter;
     /// default to no keep
     dataKeeping?: any;

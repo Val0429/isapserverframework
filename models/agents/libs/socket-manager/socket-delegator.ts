@@ -1,4 +1,4 @@
-import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, EAgentRequestAction } from "../core";
+import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus } from "../core";
 import { Subject, Observable } from "rxjs";
 import { Socket, ActionParam, ParseObject } from "helpers/cgi-helpers/core";
 import { idGenerate } from "../id-generator";
@@ -61,9 +61,9 @@ export class SocketDelegator {
                 }
             } else {
             /// handle data request
-                let { requestKey, agentType, funcName, objectKey, action } = data;
-                /// if stop, try complete
-                if (action === EAgentRequestAction.Stop) {
+                let { requestKey, agentType, funcName, objectKey } = data;
+                /// if stop with destructor, try complete
+                if (/^~/.test(funcName)) {
                     let res = this.responsePair[requestKey];
                     if (!res) return;
                     res.complete();
@@ -106,8 +106,7 @@ export class SocketDelegator {
             sj.subscribe(observer);
         })
         .finally( () => {
-            // console.log('send stop', {...data, action: EAgentRequestAction.Stop})
-            this.socket.send({...data, action: EAgentRequestAction.Stop});
+            this.socket.send({...data, funcName: `~${data.funcName}`});
         });
 
         // if (!data.objectKey) data.objectKey = idGenerate();

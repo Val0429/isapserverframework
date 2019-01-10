@@ -1,4 +1,4 @@
-import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser, EAgentRequestAction } from "../core";
+import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser } from "../core";
 import { Observable, Observer } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
@@ -57,7 +57,7 @@ export function Function(config?: IAgentTaskFunction) {
             agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
             /// todo: outputEvent
             let remoteOb = SocketManager.sharedInstance().getSocketDelegator(remote.user).request<U>({
-                type: EAgentRequestType.Request, action: EAgentRequestAction.Start,
+                type: EAgentRequestType.Request,
                 agentType, funcName, data: args, objectKey: remote.objectKey, ...info, requestKey
             });
             /// request outputType validation
@@ -105,7 +105,7 @@ export class Base<T> {
             if ( !(user instanceof MeUser) && (objective & Objective.Server) === 0 ) throw `<${agentType}> cannot be initialize on Server.`;
 
             SocketManager.sharedInstance().getSocketDelegator(user).request({
-                type: EAgentRequestType.Request, action: EAgentRequestAction.Start,
+                type: EAgentRequestType.Request,
                 agentType, funcName: "Initialize", data: config, objectKey, requestKey
             }).toPromise()
               .catch( e => null );

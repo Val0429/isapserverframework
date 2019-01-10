@@ -65,6 +65,7 @@ export class SocketManager {
                 this.objects[objectKey] ||
                 new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data)
                 );
+            response.complete();
         } else {
             let obj = this.objects[objectKey];
             if (!obj) throw `<${agentType}> with ID <${objectKey}> not exists.`;

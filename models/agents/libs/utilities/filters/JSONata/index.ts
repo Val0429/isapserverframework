@@ -1,6 +1,5 @@
 import { Observable } from "rxjs";
-import { Base } from "../core";
-import { Register } from './../core';
+import { Register, Base } from './../core';
 const jsonata = require('jsonata');
 
 interface IFilterJSONata {
@@ -10,15 +9,15 @@ interface IFilterJSONata {
 @Register({
     name: "FilterJSONata",
     description: "Filter object with JSONata.",
-    inputType: "string"
+    inputType: "IFilterJSONata"
 })
-export class FilterJSONata extends Base<IFilterJSONata, string, any> {
+export class FilterJSONata extends Base<IFilterJSONata> {
     private expression;
     constructor(config) {
         super(config);
         this.expression = jsonata(config.ata);
     }
-    public get(source: Observable<string>): Observable<any> {
+    public get(source: Observable<any>): Observable<any> {
         return new Observable<any>(observer => {
             let count = 0;
             return source.subscribe( (data) => {
@@ -35,4 +34,10 @@ export class FilterJSONata extends Base<IFilterJSONata, string, any> {
             }, e => observer.error(e), () => observer.complete());
           });
     }
+}
+
+declare module "models/agents/libs/utilities/filters/core" {
+    export interface IAgentTaskFilterMapping {
+        FilterJSONata: IFilterJSONata;
+    }    
 }

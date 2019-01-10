@@ -26,10 +26,14 @@ export function Get(name: string): IAgentTaskFilterMap {
     return filterMap[name];
 }
 
-export class Base<T, I, O> {
+export class Base<T, I = any, O = any> {
     protected config: T;
     constructor(config: T) {
         this.config = config;
     }
     public get(source: Observable<I>): Observable<O> { throw "Filter.get should be implemented."; }
+}
+
+export interface IAgentTaskFilterMapping {
+    
 }

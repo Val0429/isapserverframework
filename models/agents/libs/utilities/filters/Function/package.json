@@ -1,0 +1,12 @@
+{
+  "name": "isap-filter-function",
+  "version": "0.01.00",
+  "config": {
+    "displayname": "iSap Filter Function"
+  },
+  "description": "iSap Filter Function v0.01.00",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
+}

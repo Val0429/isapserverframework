@@ -81,7 +81,7 @@ export class SocketDelegator {
                     data = ParseObject.toOutputJSON(data);
                     this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Data });
                 }, (err) => {
-                    this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Error });
+                    this.socket.send({ ...respBase, ...injectTimestamp({error: err.toString()}), status: EnumAgentResponseStatus.Error });
                 }, () => {
                     this.socket.send({ ...respBase, ...injectTimestamp(), status: EnumAgentResponseStatus.Complete });
                     this.responsePair.delete(requestKey);

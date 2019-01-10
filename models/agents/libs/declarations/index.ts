@@ -1,10 +1,12 @@
-import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser } from "../core";
+import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser, IAgentRequest, EnumAgentResponseStatus } from "../core";
 import { Observable, Observer } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
 import { idGenerate } from "../id-generator";
 export * from './registration-delegator';
 import ast from 'services/ast-services/ast-client';
+import { ServerDBTasks } from "../database/server-db-task";
+import { Mutex } from "helpers/utility";
 const caller = require('caller');
 
 const SigNotImpl: string = "Not implemented.";
@@ -55,14 +57,23 @@ export function Function(config?: IAgentTaskFunction) {
             /// handle remote
             if (!info || !info.requestKey) info = { ...info, requestKey: idGenerate() };
             let requestKey = info.requestKey;
+            let { user, objectKey } = remote;
+
             /// initialize agentType
             agentType = agentType || RegistrationDelegator.getAgentTaskDescriptorByInstance(this).name;
+
             /// todo: outputEvent
-            let remoteOb = SocketManager.sharedInstance().getSocketDelegator(remote.user).request<U>({
+
+            /// make packet
+            let packet: IAgentRequest = {
                 type: EAgentRequestType.Request,
-                agentType, funcName, data: args, objectKey: remote.objectKey, ...info, requestKey
-            });
-            /// request outputType validation
+                agentType, funcName, data: args, objectKey, ...info, requestKey
+            }
+
+            /// send delegation request
+            let remoteOb = SocketManager.sharedInstance().getSocketDelegator(user).request<U>(packet);
+
+            /// AST: request outputType validation
             if (config.outputType) remoteOb = remoteOb.flatMap( (data) => {
                 return new Promise( (resolve, reject) => {
                     ast.requestValidation({ type: config.outputType, path: callerPath }, data)
@@ -71,7 +82,25 @@ export function Function(config?: IAgentTaskFunction) {
                         .catch(reject);
                 });
             });
-            return remoteOb.share();
+
+            /// share same remote streaming
+            let mainOb = remoteOb = remoteOb.share();
+
+            /// observe created, complete status (only if syncDB)
+            if (remote.syncDB) {
+                remoteOb = Observable.defer( () => {
+                    /// on observable create, save into Server DB
+                    serverSyncTask(user, packet);
+                    /// on observable complete (not error), save into Server DB
+                    mainOb.subscribe({
+                        complete: () => serverSyncTask(user, {...packet, type: EAgentRequestType.Response, status: EnumAgentResponseStatus.Complete})
+                    })
+                    return mainOb;
+                }).share();
+            }
+
+            /// return
+            return remoteOb;
         }
         return descriptor;
     }
@@ -104,12 +133,21 @@ export class Base<T> {
             if ( user instanceof MeUser && (objective & Objective.Agent) === 0 ) throw `<${agentType}> cannot be initialize on Agent.`;
             if ( !(user instanceof MeUser) && (objective & Objective.Server) === 0 ) throw `<${agentType}> cannot be initialize on Server.`;
 
-            SocketManager.sharedInstance().getSocketDelegator(user).request({
+            /// make request packet
+            let packet: IAgentRequest = {
                 type: EAgentRequestType.Request,
                 agentType, funcName: "Initialize", data: config, objectKey, requestKey
-            }).toPromise()
+            }
+
+            /// save into Server DB
+            if (remote.syncDB) serverSyncTask(user, packet);
+
+            /// send delegation request
+            SocketManager.sharedInstance().getSocketDelegator(user).request(packet).toPromise()
               .catch( e => null );
         }
+        /// todo: handle client
+
     }
 
     @Function({
@@ -151,4 +189,10 @@ export class Base<T> {
             callback(observer, isStopped);
         });
     }
+}
+
+/// private utility
+async function serverSyncTask(user: Parse.User, packet) {
+    let dbtask = await ServerDBTasks.getInstance(user);
+    dbtask.sync(packet);
 }

@@ -2,63 +2,45 @@ import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, Enum
 import { ParseObject, registerSubclass } from "helpers/cgi-helpers/core";
 import { Mutex } from "helpers/utility";
 
-export interface IServerDBTask {
-    user: Parse.User;
+export interface IAgentDBTask {
     objectKey: string;
     agentType: string;
     initArgument: any;
     tasks: IAgentRequest[];
 }
-@registerSubclass() class ServerDBTask extends ParseObject<IServerDBTask> {
+@registerSubclass() class AgentDBTask extends ParseObject<IAgentDBTask> {
 }
 
-type UserObjectID = string;
 type ObjectKey = string;
-type UserTasks = Map<ObjectKey, ServerDBTask>;
-type AllUserTasks = Map<UserObjectID, UserTasks>;
-type InstanceCache = Map<UserObjectID, ServerDBTasks>;
+type UserTasks = Map<ObjectKey, AgentDBTask>;
+type InstanceCache = AgentDBTasks;
 
-/// by User
-export class ServerDBTasks {
+export class AgentDBTasks {
     private mtx: Mutex = new Mutex();
-    private user: Parse.User;
-    private tasks: Map<string, ServerDBTask>;
+    private tasks: UserTasks;
 
-    private static userTasks: AllUserTasks;
     private constructor() {}
+    private static userTasks: UserTasks;
 
-    private static async initAllUserTasks() {
+    private static async initUserTasks() {
         if (this.userTasks) return;
-        let userTasks = this.userTasks = new Map();
-        let tasks = await new Parse.Query(ServerDBTask).find();
-        tasks.forEach( (task) => {
-            let userId = task.getValue("user").id;
-            let objectKey = task.getValue("objectKey");
-            let obj: UserTasks = userTasks[userId] = (userTasks[userId] || new Map());
-            obj[objectKey] = task;
-        });
+        let tasks = await new Parse.Query(AgentDBTask).find();
+        this.userTasks = new Map(
+            tasks.map<[string, AgentDBTask]>( (task) => [task.getValue("objectKey") as string, task] )
+        );
     }
 
-    private static instanceCache: InstanceCache = new Map();
-    private static mtxGetInstance: Mutex = new Mutex();
-    public static async getInstance(user: Parse.User): Promise<ServerDBTasks> {
-        await this.mtxGetInstance.acquire();
+    private static instanceCache: InstanceCache;
+    public static async getInstance(user: Parse.User): Promise<AgentDBTasks> {
         /// preload all tasks
-        await this.initAllUserTasks()
-        
-        let result: ServerDBTasks;
-        do {
-            /// check cache
-            let cache = this.instanceCache[user.id];
-            if (cache) { result = cache; break; }
-            /// create new
-            result = new ServerDBTasks();
-            this.instanceCache[user.id] = result;
-            result.user = user;
-            result.tasks = this.userTasks[user.id] = (this.userTasks[user.id] || new Map());
-        } while(0);
-
-        this.mtxGetInstance.release();
+        await this.initUserTasks();
+        /// check cache
+        let cache = this.instanceCache;
+        if (cache) return cache;
+        /// create new
+        let result = new AgentDBTasks();
+        this.instanceCache = result;
+        result.tasks = this.userTasks;
         return result;
     }
 
@@ -68,26 +50,22 @@ export class ServerDBTasks {
             case EAgentRequestType.Request: {
                 let input = data as IAgentRequest;
                 let { funcName, objectKey, agentType, data: initArgument, requestKey } = input;
-
-                /// 0) don't handle Start / Stop
-                if (funcName === 'Start' || funcName === 'Stop') break;
-
-                let obj: ServerDBTask = this.tasks[objectKey];
-                /// 1) If funcName = Initialize, create / initial ServerDBTask
+                let obj: AgentDBTask = this.tasks[objectKey];
+                /// 1) If funcName = Initialize, create / initial AgentDBTask
                 if (funcName === "Initialize") {
-                    if (!obj) obj = this.tasks[objectKey] = new ServerDBTask({ user: this.user, objectKey, tasks: [] });
+                    if (!obj) obj = this.tasks[objectKey] = new AgentDBTask({ objectKey, tasks: [] });
                     obj.setValue("agentType", agentType);
                     obj.setValue("initArgument", initArgument);
                     await obj.save();
                 }
-                /// 2) If funcName = Dispose, delete ServerDBTask
+                /// 2) If funcName = Dispose, delete AgentDBTask
                 else if(funcName === "Dispose") {
                     if (obj) {
                         await obj.destroy();
                         this.tasks.delete(objectKey);
                     }
                 }
-                /// 3) If funcName = ^~, delete ServerDBTask.tasks
+                /// 3) If funcName = ^~, delete AgentDBTask.tasks
                 else if(/^~/.test(funcName)) {
                     funcName = funcName.replace(/^~/, "");
                     let tasks = obj.getValue("tasks");
@@ -97,7 +75,7 @@ export class ServerDBTasks {
                         await obj.save();
                     }
                 }
-                /// 4) Otherwise, create ServerDBTask.tasks
+                /// 4) Otherwise, create AgentDBTask.tasks
                 else {
                     let tasks = obj.getValue("tasks");
                     let idx = tasks.findIndex((task) => task.requestKey === requestKey);
@@ -109,14 +87,10 @@ export class ServerDBTasks {
             case EAgentRequestType.Response: {
                 let input = data as IAgentResponse;
                 let { funcName, objectKey, agentType, data: argument, requestKey, status } = input;
-
-                /// 0) don't handle Start / Stop
-                if (funcName === 'Start' || funcName === 'Stop') break;
-
-                let obj: ServerDBTask = this.tasks[objectKey];
+                let obj: AgentDBTask = this.tasks[objectKey];
                 /// 0) status === Data, break;
                 if (status === EnumAgentResponseStatus.Data) break;
-                /// 1) If funcName != Initialize | Dispose, and status === Error | Complete, delete ServerDBTask.tasks
+                /// 1) If funcName != Initialize | Dispose, and status === Error | Complete, delete AgentDBTask.tasks
                 if (
                     (status === EnumAgentResponseStatus.Complete || status === EnumAgentResponseStatus.Error) &&
                     (!(funcName === "Initialize" || funcName === "Dispose"))

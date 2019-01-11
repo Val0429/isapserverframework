@@ -124,7 +124,7 @@ export interface IAgentTaskRegisterConfig {
     /**
      * type of constructor argument.
      */
-    initialize: IAgentTaskFunction;
+    initialize?: IAgentTaskFunction;
     /**
      * Human readable detail to describe this Agent Task.
      */

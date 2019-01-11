@@ -12,10 +12,10 @@ type IAgentTaskFilterMap = IAgentTaskFilterConfig & {
 const filterMap: Map<string, IAgentTaskFilterMap> = new Map();
 export function Register(config: IAgentTaskFilterConfig) {
     return (classObject) => {
-        filterMap[config.name] = {
+        filterMap.set(config.name, {
             ...config,
             classObject
-        }
+        });
     }
 }
 export function All() {
@@ -23,7 +23,7 @@ export function All() {
 }
 
 export function Get(name: string): IAgentTaskFilterMap {
-    return filterMap[name];
+    return filterMap.get(name);
 }
 
 export class Base<T, I = any, O = any> {

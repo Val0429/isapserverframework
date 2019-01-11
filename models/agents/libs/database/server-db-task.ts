@@ -1,6 +1,6 @@
 import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus } from "../core";
 import { ParseObject, registerSubclass } from "helpers/cgi-helpers/core";
-import { Mutex } from "helpers/utility";
+import { Mutex, jsMapAssign } from "helpers/utility";
 
 export interface IServerDBTask {
     user: Parse.User;
@@ -22,7 +22,7 @@ type InstanceCache = Map<UserObjectID, ServerDBTasks>;
 export class ServerDBTasks {
     private mtx: Mutex = new Mutex();
     private user: Parse.User;
-    private tasks: Map<string, ServerDBTask>;
+    private tasks: UserTasks;
 
     private static userTasks: AllUserTasks;
     private constructor() {}
@@ -34,8 +34,8 @@ export class ServerDBTasks {
         tasks.forEach( (task) => {
             let userId = task.getValue("user").id;
             let objectKey = task.getValue("objectKey");
-            let obj: UserTasks = userTasks[userId] = (userTasks[userId] || new Map());
-            obj[objectKey] = task;
+            let obj: UserTasks = jsMapAssign(userTasks, userId);
+            obj.set(objectKey, task);
         });
     }
 
@@ -49,17 +49,21 @@ export class ServerDBTasks {
         let result: ServerDBTasks;
         do {
             /// check cache
-            let cache = this.instanceCache[user.id];
+            let cache = this.instanceCache.get(user.id);
             if (cache) { result = cache; break; }
             /// create new
             result = new ServerDBTasks();
-            this.instanceCache[user.id] = result;
+            this.instanceCache.set(user.id, result);
             result.user = user;
-            result.tasks = this.userTasks[user.id] = (this.userTasks[user.id] || new Map());
+            result.tasks = jsMapAssign(this.userTasks, user.id);
         } while(0);
 
         this.mtxGetInstance.release();
         return result;
+    }
+
+    getTasks(): UserTasks {
+        return this.tasks;
     }
 
     async sync(data: IAgentStreaming) {
@@ -72,10 +76,10 @@ export class ServerDBTasks {
                 /// 0) don't handle Start / Stop
                 if (funcName === 'Start' || funcName === 'Stop') break;
 
-                let obj: ServerDBTask = this.tasks[objectKey];
+                let obj: ServerDBTask = this.tasks.get(objectKey);
                 /// 1) If funcName = Initialize, create / initial ServerDBTask
                 if (funcName === "Initialize") {
-                    if (!obj) obj = this.tasks[objectKey] = new ServerDBTask({ user: this.user, objectKey, tasks: [] });
+                    if (!obj) obj = jsMapAssign(this.tasks, objectKey, () => new ServerDBTask({ user: this.user, objectKey, tasks: [] }));
                     obj.setValue("agentType", agentType);
                     obj.setValue("initArgument", initArgument);
                     await obj.save();
@@ -113,7 +117,7 @@ export class ServerDBTasks {
                 /// 0) don't handle Start / Stop
                 if (funcName === 'Start' || funcName === 'Stop') break;
 
-                let obj: ServerDBTask = this.tasks[objectKey];
+                let obj: ServerDBTask = this.tasks.get(objectKey);
                 /// 0) status === Data, break;
                 if (status === EnumAgentResponseStatus.Data) break;
                 /// 1) If funcName != Initialize | Dispose, and status === Error | Complete, delete ServerDBTask.tasks

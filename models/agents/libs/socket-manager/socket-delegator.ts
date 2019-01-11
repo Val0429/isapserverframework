@@ -25,11 +25,8 @@ export class SocketDelegator {
             return () => {
                 /// throw errors on all Subjects
                 let err = `Socket ${message}.`;
-                for (let key in this.requestPair)
-                    this.requestPair[key].error(err);
-                for (let key in this.responsePair) {
-                    this.responsePair[key].error(err);
-                }
+                [...this.requestPair.values()].forEach( (value) => value.error(err) );
+                [...this.responsePair.values()].forEach( (value) => value.error(err) );
                 /// clean up and close
                 this.requestPair.clear();
                 this.responsePair.clear();
@@ -44,7 +41,7 @@ export class SocketDelegator {
             /// handle data response
             if (data.type === EAgentRequestType.Response) {
                 let key = data.requestKey;
-                let sj = this.requestPair[key];
+                let sj = this.requestPair.get(key);
                 /// ignore inconnect requestKey for now.
                 let raw = data.data;
                 /// convert back timestamp
@@ -65,7 +62,7 @@ export class SocketDelegator {
                 let { requestKey, agentType, funcName, objectKey } = data;
                 /// if stop with destructor, try complete
                 if (/^~/.test(funcName)) {
-                    let res = this.responsePair[requestKey];
+                    let res = this.responsePair.get(requestKey);
                     if (!res) return;
                     res.complete();
                     this.responsePair.delete(requestKey);
@@ -73,7 +70,7 @@ export class SocketDelegator {
                 }
                 /// otherwise start
                 let sj = new Subject<IAgentResponse>();
-                this.responsePair[requestKey] = sj;
+                this.responsePair.set(requestKey, sj);
                 let respBase = { type: EAgentRequestType.Response, agentType, funcName, requestKey, objectKey, data: null };
                 /// inject timestamp
                 let injectTimestamp = (data = undefined) => ({ data: { ...data, timestamp: new Date().toISOString() } });
@@ -102,7 +99,7 @@ export class SocketDelegator {
             if (!data.objectKey) data.objectKey = idGenerate();
             if (!data.requestKey) data.requestKey = idGenerate();
             let sj = new Subject<T>();
-            this.requestPair[data.requestKey] = sj;
+            this.requestPair.set(data.requestKey, sj as any);
             this.socket.send(data);
             sj.subscribe(observer);
         })

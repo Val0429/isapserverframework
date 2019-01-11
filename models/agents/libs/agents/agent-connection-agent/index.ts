@@ -2,33 +2,46 @@ import { IFRSServiceConfig, RecognizedUser, UnRecognizedUser } from 'workspace/c
 import { Subject, Observable, Observer } from 'rxjs';
 import { Log } from 'helpers/utility';
 import { Objective } from '../../core';
-import { Register, Base } from '../../declarations';
+import * as Agent from '../../declarations';
+import { IServerDBTask, ServerDBTasks } from '../../database/server-db-task';
 
-@Register({
+type IOutputAssignedJobsUnit = IServerDBTask & {
+    user: undefined;
+}
+type IOutputAssignedJobs = IOutputAssignedJobsUnit[];
+
+@Agent.Register({
     name: "Agent Connection Agent",
     description: "Used when agent first initialize, sync information back from server.",
-    initialize: {
-        inputType: "any"
-    },
     objective: Objective.Agent
 })
-export class AgentConnectionAgent extends Base<any> {
-    protected doStart() {
-        console.log('triggered')
-    }
+export class AgentConnectionAgent extends Agent.Base<any> {
+    protected doStart() {}
     protected doStop() {}
 
-    // @Agent.Function({
-    //     inputType: "any",
-    //     description: "Free memory."
-    // })    
-    // public FreeMemory(): Observable<any> {
-    //     return Observable.create( (observer: Observer<any>) => {
-    //         setInterval( () => {
-    //             observer.next({
-    //                 value: os.freemem()
-    //             });
-    //         }, 1000);
-    //     });
-    // }
+    @Agent.Function({
+        description: "Agent ask Server for all assign jobs.",
+        inputType: "IInputAssignedJobs",
+        outputType: "IOutputAssignedJobs"
+    })
+    public AssignedJobs(input: IInputAssignedJobs): Observable<IOutputAssignedJobs> {
+        return this.makeObservable( async (observer, isStopped) => {
+            let { sessionId } = input;
+            /// get session instance
+            let session = await new Parse.Query("_Session")
+                .include("user")
+                .first({sessionToken: sessionId}) as Parse.Session;
+            if (!session) return observer.error("Session not exists.");
+
+            /// make query
+            let server = await ServerDBTasks.getInstance(session.get("user"));
+            let value: IOutputAssignedJobs = Array.from(server.getTasks().values()).map( (task) => ({ ...task.attributes, user: undefined }) );
+            observer.next(value);
+            observer.complete();
+        });
+    }
+}
+
+interface IInputAssignedJobs {
+    sessionId: string;
 }

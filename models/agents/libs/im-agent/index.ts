@@ -74,6 +74,10 @@ class AgentGenerator {
         });
         await test.Start().toPromise();
         /// todo: send request to get back running tasks
+        test.AssignedJobs({ sessionId: this.server.getSessionId() })
+            .subscribe( (data) => {
+                console.log('client get results...', data);
+            })
     }
 }
 

@@ -8,3 +8,4 @@ export * from './O';
 export * from './log';
 export * from './pad-left';
 export * from './retry';
+export * from './jsmap-assign';

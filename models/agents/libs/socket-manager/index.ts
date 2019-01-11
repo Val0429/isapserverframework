@@ -33,7 +33,7 @@ export class SocketManager {
         let id = user.id;
         let delegator = new SocketDelegator(socket);
         /// indexing login user
-        this.idxAgentSocketDescriptor[id] = { user, delegator };
+        this.idxAgentSocketDescriptor.set(id, { user, delegator });
         /// hook event on it
         delegator.sjClose.subscribe( () => {
             this.idxAgentSocketDescriptor.delete(id);
@@ -54,7 +54,7 @@ export class SocketManager {
 
     public getSocketDelegator(user: Parse.User): SocketDelegator {
         if (user instanceof MeUser) return this.meDelegator;
-        return (this.idxAgentSocketDescriptor[user.id] || {} as any).delegator;
+        return (this.idxAgentSocketDescriptor.get(user.id) || {} as any).delegator;
     }
 }
 

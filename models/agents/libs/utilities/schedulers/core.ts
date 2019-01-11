@@ -12,10 +12,10 @@ type IAgentTaskSchedulerMap = IAgentTaskSchedulerConfig & {
 const schedulerMap: Map<string, IAgentTaskSchedulerMap> = new Map();
 export function Register(config: IAgentTaskSchedulerConfig) {
     return (classObject) => {
-        schedulerMap[config.name] = {
+        schedulerMap.set(config.name, {
             ...config,
             classObject
-        }
+        })
     }
 }
 export function All() {
@@ -23,7 +23,7 @@ export function All() {
 }
 
 export function Get(name: string): IAgentTaskSchedulerMap {
-    return schedulerMap[name];
+    return schedulerMap.get(name);
 }
 
 export class Base<T, I = any> {

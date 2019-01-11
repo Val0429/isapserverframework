@@ -1,6 +1,6 @@
 import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus } from "../core";
 import { ParseObject, registerSubclass } from "helpers/cgi-helpers/core";
-import { Mutex } from "helpers/utility";
+import { Mutex, jsMapAssign } from "helpers/utility";
 
 export interface IAgentDBTask {
     objectKey: string;
@@ -50,10 +50,10 @@ export class AgentDBTasks {
             case EAgentRequestType.Request: {
                 let input = data as IAgentRequest;
                 let { funcName, objectKey, agentType, data: initArgument, requestKey } = input;
-                let obj: AgentDBTask = this.tasks[objectKey];
+                let obj: AgentDBTask = this.tasks.get(objectKey);
                 /// 1) If funcName = Initialize, create / initial AgentDBTask
                 if (funcName === "Initialize") {
-                    if (!obj) obj = this.tasks[objectKey] = new AgentDBTask({ objectKey, tasks: [] });
+                    if (!obj) obj = jsMapAssign(this.tasks, objectKey, () => new AgentDBTask({ objectKey, tasks: [] }));
                     obj.setValue("agentType", agentType);
                     obj.setValue("initArgument", initArgument);
                     await obj.save();
@@ -87,7 +87,7 @@ export class AgentDBTasks {
             case EAgentRequestType.Response: {
                 let input = data as IAgentResponse;
                 let { funcName, objectKey, agentType, data: argument, requestKey, status } = input;
-                let obj: AgentDBTask = this.tasks[objectKey];
+                let obj: AgentDBTask = this.tasks.get(objectKey);
                 /// 0) status === Data, break;
                 if (status === EnumAgentResponseStatus.Data) break;
                 /// 1) If funcName != Initialize | Dispose, and status === Error | Complete, delete AgentDBTask.tasks

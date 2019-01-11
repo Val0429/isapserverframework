@@ -2,6 +2,7 @@ import { ISocketDelegatorRequest } from "../socket-manager";
 import { RegistrationDelegator } from "../declarations";
 import { IAgentRequest } from "../core";
 import * as Utilities from './../utilities';
+import { jsMapAssign } from "helpers/utility/jsmap-assign";
 
 export class ObjectGenerator {
     private objects: Map<string, any> = new Map();
@@ -10,14 +11,11 @@ export class ObjectGenerator {
         let { agentType, funcName, data, objectKey, requestKey } = request;
 
         if (funcName === 'Initialize') {
-            let obj = this.objects[objectKey] = (
-                this.objects[objectKey] ||
-                new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data)
-                );
+            let obj = jsMapAssign(this.objects, objectKey, () => new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data));
             response.complete();
         } else {
             /// prepare object
-            let obj = this.objects[objectKey];
+            let obj = this.objects.get(objectKey);
             if (!obj) throw `<${agentType}> with ID <${objectKey}> not exists.`;
             let o, originalFunction;
             o = originalFunction = obj[funcName](data);

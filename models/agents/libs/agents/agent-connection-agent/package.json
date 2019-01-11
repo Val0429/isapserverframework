@@ -1,0 +1,13 @@
+{
+  "name": "isap-agent-connection-agent",
+  "version": "0.01.00",
+  "config": {
+    "displayname": "iSap Agent Connection Agent"
+  },
+  "description": "iSap Agent Connection Agent v0.01.00",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "screenshot-desktop": "^1.5.4"
+  }
+}

@@ -79,7 +79,7 @@ export function Function(config?: IAgentTaskFunction) {
                     ast.requestValidation({ type: config.outputType, path: callerPath }, data)
                         /// merge back timestamp
                         .then( (result) => resolve({ ...result, timestamp: (data as any).timestamp }) )
-                        .catch(reject);
+                        .catch( e => reject(e.resolve()) );
                 });
             });
 
@@ -93,6 +93,7 @@ export function Function(config?: IAgentTaskFunction) {
                     serverSyncTask(user, packet);
                     /// on observable complete (not error), save into Server DB
                     mainOb.subscribe({
+                        error: e => null,
                         complete: () => serverSyncTask(user, {...packet, type: EAgentRequestType.Response, status: EnumAgentResponseStatus.Complete})
                     })
                     return mainOb;

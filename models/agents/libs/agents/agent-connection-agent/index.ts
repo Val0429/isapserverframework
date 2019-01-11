@@ -8,7 +8,9 @@ import { IServerDBTask, ServerDBTasks } from '../../database/server-db-task';
 type IOutputAssignedJobsUnit = IServerDBTask & {
     user: undefined;
 }
-type IOutputAssignedJobs = IOutputAssignedJobsUnit[];
+interface IOutputAssignedJobs {
+    data: IOutputAssignedJobsUnit[];
+}
 
 @Agent.Register({
     name: "Agent Connection Agent",
@@ -35,8 +37,8 @@ export class AgentConnectionAgent extends Agent.Base<any> {
 
             /// make query
             let server = await ServerDBTasks.getInstance(session.get("user"));
-            let value: IOutputAssignedJobs = Array.from(server.getTasks().values()).map( (task) => ({ ...task.attributes, user: undefined }) );
-            observer.next(value);
+            let data: IOutputAssignedJobsUnit[] = Array.from(server.getTasks().values()).map( (task) => ({ ...task.attributes, user: undefined }) );
+            observer.next({data});
             observer.complete();
         });
     }

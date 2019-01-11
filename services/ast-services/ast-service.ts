@@ -5,7 +5,7 @@ import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
 import { O } from 'helpers/utility/O';
-import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature } from 'ts-simple-ast';
+import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature, EnumMember } from 'ts-simple-ast';
 
 var reflector: Project = this.reflector = new Project({
     tsConfigFilePath: "./tsconfig.json",
@@ -562,7 +562,8 @@ namespace AstConverter {
         /// enum literal
         if (types.length === 0) {
             var tname = type.getSymbol().getName();
-            if (tname === input) return input;
+            var tvalue = (type.getSymbol().getValueDeclaration() as EnumMember).getValue();
+            if (tname === input || tvalue === input) return input;
             throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be value <${tname}>.`])
         }
 

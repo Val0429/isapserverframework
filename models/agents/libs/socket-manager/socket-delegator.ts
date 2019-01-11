@@ -77,6 +77,7 @@ export class SocketDelegator {
                 sj.subscribe( (data) => {
                     /// regularize data
                     data = ParseObject.toOutputJSON(data);
+                    console.log('going to send...', JSON.stringify(data));
                     this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Data });
                 }, (err) => {
                     this.socket.send({ ...respBase, ...injectTimestamp({error: err.toString()}), status: EnumAgentResponseStatus.Error });

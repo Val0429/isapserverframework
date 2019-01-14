@@ -1,3 +1,5 @@
+import * as Parse from 'parse/node';
+
 function isObject(item) {
     return (item && typeof item === 'object' && !isArray(item));
 }

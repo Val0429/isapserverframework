@@ -117,6 +117,8 @@ ${or.join("\r\n")}
 }
 
 var ast = new AstService();
+/// workaround! hint for string & array can be empty or not.
+let canBeEmpty = false;
 
 process.on('message', (data: Request) => {
     /// receive data
@@ -130,10 +132,11 @@ process.on('message', (data: Request) => {
             var rtnormal = getRequestType(data.action, data);
             var rtn: any;
             try {
+                canBeEmpty = false;
                 rtn = ast.validate(rtnormal);
             } catch (reason) {
                 if (!(reason instanceof Errors)) {
-                    console.log(`ASTError: ${reason}`);
+                    console.log(`ASTError: ${reason}`, reason);
                     return;
                 }
                 rtn = reason;
@@ -144,7 +147,27 @@ process.on('message', (data: Request) => {
                 data: rtn
             } as ResponseNormal);
             break;
-        
+
+        case EnumRequestType.normalSimple:
+            var rtnormal = getRequestType(data.action, data);
+            var rtn: any;
+            try {
+                canBeEmpty = true;
+                rtn = ast.validate(rtnormal);
+            } catch (reason) {
+                if (!(reason instanceof Errors)) {
+                    console.log(`ASTError: ${reason}`, reason);
+                    return;
+                }
+                rtn = reason;
+            }
+            process.send({
+                action: rtnormal.action,
+                sessionId: rtnormal.sessionId,
+                data: rtn
+            } as ResponseNormal);
+            break;
+            
         case EnumRequestType.requestType:
             var rtrequest = getRequestType(data.action, data);
             var rtn: any;

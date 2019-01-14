@@ -76,7 +76,7 @@ export function Function(config?: IAgentTaskFunction) {
             /// AST: request outputType validation
             if (config.outputType) remoteOb = remoteOb.flatMap( (data) => {
                 return new Promise( (resolve, reject) => {
-                    ast.requestValidation({ type: config.outputType, path: callerPath }, data)
+                    ast.requestSimpleValidation({ type: config.outputType, path: callerPath }, data)
                         /// merge back timestamp
                         .then( (result) => resolve({ ...result, timestamp: (data as any).timestamp }) )
                         .catch( e => reject(e.resolve()) );

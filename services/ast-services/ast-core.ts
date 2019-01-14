@@ -6,19 +6,22 @@ export enum EnumRequestType {
     init = 0,
     normal = 1,
     requestType = 2,
+    normalSimple = 3,
 }
 
-export type Request = RequestInit | RequestNormal | RequestReportType;
-export type Response = ResponseNormal;
+export type Request = RequestInit | RequestNormal | RequestReportType | RequestNormalSimple;
+export type Response = ResponseNormal | ResponseNormalSimple;
 
 export type RequestType<T> =
     T extends EnumRequestType.init ? RequestInit :
     T extends EnumRequestType.normal ? RequestNormal :
     T extends EnumRequestType.requestType ? RequestReportType :
+    T extends EnumRequestType.normalSimple ? RequestNormal :
     never;
 
 export type ResponseType<T> =
     T extends EnumRequestType.normal ? ResponseNormal :
+    T extends EnumRequestType.normalSimple ? ResponseNormal :
     never;
 
 export function getRequestType<T extends EnumRequestType>(type: T, data: Request): RequestType<T> {
@@ -57,6 +60,17 @@ export interface RequestReportType extends RequestBase {
 export interface ResponseReportType extends RequestBase {
     action: EnumRequestType.requestType;
     data: string;
+}
+
+export interface RequestNormalSimple extends RequestBase {
+    action: EnumRequestType.normalSimple;
+    type: TypesFromAction;
+    data: any;
+}
+
+export interface ResponseNormalSimple extends RequestBase {
+    action: EnumRequestType.normalSimple;
+    data: any;
 }
 
 export interface TypesFromAction {

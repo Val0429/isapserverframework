@@ -1,5 +1,5 @@
 const { fork } = require('child_process');
-import { RequestInit, RequestNormal, RequestBase, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile, RequestReportType } from './ast-core';
+import { RequestInit, RequestNormal, RequestBase, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile, RequestReportType, RequestNormalSimple } from './ast-core';
 import { Errors } from 'core/errors.gen';
 import { actions } from 'helpers/routers/router-loader';
 import { serverReady } from 'core/pending-tasks';
@@ -96,6 +96,22 @@ export class AstClient {
         /// perform
         var send: RequestNormal = {
             action: EnumRequestType.normal,
+            type,
+            data
+        };
+        return this.request(send);
+    }
+
+    requestSimpleValidation(nameOfType: string, data: any): Promise<any>;
+    requestSimpleValidation(type: TypesFromAction, data: any): Promise<any>;
+    requestSimpleValidation(type: string | TypesFromAction, data: any): Promise<any> {
+        /// turn string into TypesFromAction
+        if (typeof(type) === 'string') {
+            type = { path: caller(), type: type as string };
+        }
+        /// perform
+        var send: RequestNormalSimple = {
+            action: EnumRequestType.normalSimple,
             type,
             data
         };

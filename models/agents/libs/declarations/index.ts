@@ -71,7 +71,9 @@ export function Function(config?: IAgentTaskFunction) {
             }
 
             /// send delegation request
-            let remoteOb = SocketManager.sharedInstance().getSocketDelegator(user).request<U>(packet);
+            let delegator = SocketManager.sharedInstance().getSocketDelegator(user);
+            if (!delegator) return Observable.throw(`User <${user.id}> SocketDelegator not found.`);
+            let remoteOb = delegator.request<U>(packet);
 
             /// AST: request outputType validation
             if (config.outputType) remoteOb = remoteOb.flatMap( (data) => {

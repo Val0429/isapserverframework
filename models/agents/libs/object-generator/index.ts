@@ -3,6 +3,10 @@ import { RegistrationDelegator } from "../declarations";
 import { IAgentRequest } from "../core";
 import * as Utilities from './../utilities';
 import { jsMapAssign } from "helpers/utility/jsmap-assign";
+import { ServerDBTask } from "../database/server-db-task";
+import { Log } from "helpers/utility";
+
+const LogTitle = "Agent.ObjectGenerator";
 
 export class ObjectGenerator {
     /// Map<ObjectKey, object> pair
@@ -35,7 +39,28 @@ export class ObjectGenerator {
             /// stop / unsubscribe function when error / disconnected / complete
             let handleStop = () => { subscription.unsubscribe(); }
             response.subscribe({ error: () => handleStop(), complete: () => handleStop() });
-        }        
+        }
+    }
+
+    /// request remote call
+    public applyDBTasks(tasks: ServerDBTask[])  {
+        tasks.forEach( (task) => {
+            let { user, agentType, initArgument, tasks, objectKey } = task.attributes;
+            /// initialize main object
+            let obj = jsMapAssign(this.objects, objectKey, () => {
+                return new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(initArgument, {
+                    user, objectKey, syncDB: true
+                });
+            });
+            /// initialize functions
+            tasks.forEach( (task) => {
+                let { funcName, requestKey, data, filter, scheduler, dataKeeping, outputEvent } = task;
+                obj[funcName](data, { requestKey, filter, scheduler, dataKeeping, outputEvent })
+                    .subscribe( (result) => console.log('got result: ', result), (e) => {
+                        Log.Error(LogTitle, `Send request to User <${user.id}> with "${agentType}".${funcName} failed, ${e}`);
+                    } );
+            });
+        });
     }
 
     public Dispose() {

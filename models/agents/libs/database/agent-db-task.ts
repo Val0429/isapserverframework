@@ -1,12 +1,26 @@
-import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus } from "../core";
+import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, ITaskFunctionScheduler, ITaskFunctionFilter } from "../core";
 import { ParseObject, registerSubclass } from "helpers/cgi-helpers/core";
 import { Mutex, jsMapAssign } from "helpers/utility";
+import { EventList } from "core/events.gen";
 
+export interface IAgentDBRequest {
+    /// unique key of Function request.
+    requestKey: string;
+    /// e.g. LiveFaces
+    funcName: string;
+    /// argument of Function.
+    data: any;
+
+    scheduler?: ITaskFunctionScheduler;
+    filter?: ITaskFunctionFilter;
+    dataKeeping?: any;
+    outputEvent?: EventList;
+}
 export interface IAgentDBTask {
     objectKey: string;
     agentType: string;
     initArgument: any;
-    tasks: IAgentRequest[];
+    tasks: IAgentDBRequest[];
 }
 @registerSubclass() class AgentDBTask extends ParseObject<IAgentDBTask> {
 }

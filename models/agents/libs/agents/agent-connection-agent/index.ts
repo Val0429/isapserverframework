@@ -4,6 +4,7 @@ import { Log } from 'helpers/utility';
 import { Objective, IAgentRequest } from '../../core';
 import * as Agent from '../../declarations';
 import { IServerDBTask, ServerDBTasks } from '../../database/server-db-task';
+import { SocketManager } from '../../socket-manager';
 
 // type IOutputAssignedJobsUnit = IServerDBTask & {
 //     user: undefined;
@@ -42,8 +43,14 @@ export class AgentConnectionAgent extends Agent.Base<any> {
             if (!session) return observer.error("Session not exists.");
 
             /// make query
-            let server = await ServerDBTasks.getInstance(session.get("user"));
-            let data: IOutputAssignedJobsUnit[] = Array.from(server.getTasks().values()).map( (task) => ({ ...task.attributes, user: undefined }) );
+            let user = session.get("user");
+            let server = await ServerDBTasks.getInstance(user);
+            let dbtasks = Array.from(server.getTasks().values());
+            
+            /// apply db tasks
+            if (input.sendRequest) SocketManager.sharedInstance().applyDBTasks(user);
+
+            let data: IOutputAssignedJobsUnit[] = dbtasks.map( (task) => ({ ...task.attributes, user: undefined }) );
             observer.next({data});
             observer.complete();
         });

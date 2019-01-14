@@ -9,7 +9,7 @@ export interface IServerDBTask {
     initArgument: any;
     tasks: IAgentRequest[];
 }
-@registerSubclass() class ServerDBTask extends ParseObject<IServerDBTask> {
+@registerSubclass() export class ServerDBTask extends ParseObject<IServerDBTask> {
 }
 
 type UserObjectID = string;

@@ -27,6 +27,7 @@ export interface IAgentRequest {
     scheduler?: ITaskFunctionScheduler;
     filter?: ITaskFunctionFilter;
     dataKeeping?: any;
+    outputEvent?: EventList;
 }
 
 export enum EnumAgentResponseStatus {

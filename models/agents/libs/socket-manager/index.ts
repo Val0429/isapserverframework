@@ -5,6 +5,7 @@ import { SocketDelegator, ISocketDelegatorRequest } from './socket-delegator';
 import { Log } from "helpers/utility/log";
 import { RegistrationDelegator } from "../declarations/registration-delegator";
 import { ObjectGenerator } from "../object-generator";
+import { ServerDBTask, ServerDBTasks } from "../database/server-db-task";
 export * from './socket-delegator';
 
 //const LogTitle: string = "Agent.SocketManager";
@@ -50,6 +51,12 @@ export class SocketManager {
             Log.Info(LogTitle, `Receive request: ${JSON.stringify(data.request)}`);
             myGenerator.next(data);
         }, e => null);
+    }
+
+    public async applyDBTasks(user: Parse.User) {
+        let myGenerator = this.objectGenerators.get(user.id);
+        if (!myGenerator) return;
+        myGenerator.applyDBTasks( Array.from( (await ServerDBTasks.getInstance(user)).getTasks().values() ) );
     }
 
     /// for Agent client to register itself

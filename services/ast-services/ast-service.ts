@@ -5,7 +5,7 @@ import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
 import { O } from 'helpers/utility/O';
-import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature, EnumMember } from 'ts-simple-ast';
+import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature, EnumMember, createWrappedNode, TypeReferenceNode } from 'ts-simple-ast';
 
 var reflector: Project = this.reflector = new Project({
     tsConfigFilePath: "./tsconfig.json",
@@ -319,6 +319,8 @@ namespace AstParser {
          * 14) Generic
          * 15) Any
          * 16) Buffer
+         * 17) Key Mapped Type
+         * 99) any
          * X) Other Class X
          */
 
@@ -416,6 +418,7 @@ namespace AstParser {
             }
 
         } else if (type.isTypeParameter() && !type.isString()) {
+            /// 14) Generic too
             debug && console.log(`${showname} is Generic Type, obj ${typeof obj}`);
             var ntype = params[type.getText()];
             if (!ntype) throw Errors.throw(Errors.Custom, [`Internal Error: failed to handle type ${type.getText()}`]);
@@ -427,8 +430,24 @@ namespace AstParser {
         } else if (type.getText() === "any") {
             /// 99) Any
             return obj;
+
+        } else {
+            if ( /\[[^\]]+\]$/.test(type.getText()) ) {
+                /// * 17) Key Mapped Type
+                debug && console.log(`${showname} is Key-Mapped Type, obj ${typeof obj}`);
+
+                let typeChecker = reflector.getTypeChecker();
+                let argType = (params[Object.keys(params)[0]] as any)._compilerType.value;
+                let targetType = (<any>type).compilerType.objectType.members.get(argType).valueDeclaration;
+                let cSourceFile = targetType.getSourceFile();
+                let typeName = targetType.type.typeName.escapedText;
+                let resolvedType = getType({ path: cSourceFile.fileName, type: typeName });
+
+                return validateType(resolvedType, data, prefix, isArray, params);
+            }
+
         }
-        
+
         throw Errors.throw(Errors.Custom, [`Internal Error: cannot handle type ${type.getText()}.`]);
     }
 
@@ -547,7 +566,7 @@ namespace AstConverter {
 
     export function toString(input: string, name: string, isArray: boolean = false): string {
         if (typeof input !== 'string') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be string${isArray?'[]':''}.`]);
-        if (input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty string.`]);
+        if (!canBeEmpty && input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty string.`]);
         return input;
     }
 
@@ -624,7 +643,7 @@ namespace AstConverter {
 
     export function toArray(type: Type<ts.Type>, input: Array<any>, name: string): Array<any> {
         if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
-        if (input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty array.`]);
+        if (!canBeEmpty && input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty array.`]);
         var tType = type.getTypeArguments()[0];
         for (var key in input) input[key] = AstParser.validateType(tType, input[key], name, true);
         return input;
@@ -641,6 +660,7 @@ namespace AstConverter {
 
     export function ToLiteral(type: Type<ts.Type>, input: boolean | string | number, name: string, isArray: boolean = false): boolean | string | number {
         var tc = (<any>type.compilerType);
+        if (!tc.freshType) return input;
         var value = type.isBooleanLiteral() ? type.getText() === 'true' :
             tc.freshType.value;
         if (value !== input) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be ${typeof value} of ${value}.`]);

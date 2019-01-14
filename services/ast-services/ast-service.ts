@@ -660,9 +660,7 @@ namespace AstConverter {
 
     export function ToLiteral(type: Type<ts.Type>, input: boolean | string | number, name: string, isArray: boolean = false): boolean | string | number {
         var tc = (<any>type.compilerType);
-        if (!tc.freshType) return input;
-        var value = type.isBooleanLiteral() ? type.getText() === 'true' :
-            tc.freshType.value;
+        let value = type.isBooleanLiteral() ? type.getText() === 'true' : tc.value;
         if (value !== input) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be ${typeof value} of ${value}.`]);
         return input;
     }

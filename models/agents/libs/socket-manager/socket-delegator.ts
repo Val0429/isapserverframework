@@ -42,7 +42,7 @@ export class SocketDelegator {
             if (data.type === EAgentRequestType.Response) {
                 let key = data.requestKey;
                 let sj = this.requestPair.get(key);
-                /// ignore inconnect requestKey for now.
+                /// ignore incorrect requestKey for now.
                 let raw = data.data;
                 /// convert back timestamp
                 raw.timestamp && (raw.timestamp = new Date(raw.timestamp));

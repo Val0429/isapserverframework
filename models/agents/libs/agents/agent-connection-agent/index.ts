@@ -1,12 +1,18 @@
 import { IFRSServiceConfig, RecognizedUser, UnRecognizedUser } from 'workspace/custom/services/frs-service/libs/core';
 import { Subject, Observable, Observer } from 'rxjs';
 import { Log } from 'helpers/utility';
-import { Objective } from '../../core';
+import { Objective, IAgentRequest } from '../../core';
 import * as Agent from '../../declarations';
 import { IServerDBTask, ServerDBTasks } from '../../database/server-db-task';
 
-type IOutputAssignedJobsUnit = IServerDBTask & {
-    user: undefined;
+// type IOutputAssignedJobsUnit = IServerDBTask & {
+//     user: undefined;
+// }
+interface IOutputAssignedJobsUnit {
+    objectKey: string;
+    agentType: string;
+    initArgument: any;
+    tasks: IAgentRequest[];
 }
 interface IOutputAssignedJobs {
     data: IOutputAssignedJobsUnit[];
@@ -46,4 +52,5 @@ export class AgentConnectionAgent extends Agent.Base<any> {
 
 interface IInputAssignedJobs {
     sessionId: string;
+    sendRequest?: boolean;
 }

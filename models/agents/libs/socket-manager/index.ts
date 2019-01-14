@@ -15,6 +15,8 @@ interface IAgentSocketDescriptor {
     delegator: SocketDelegator;
 }
 
+type UserId = string;
+
 /// ImServer.
 /// This class handle all incoming socket / socket send receive delegation.
 export class SocketManager {
@@ -24,25 +26,29 @@ export class SocketManager {
         return SocketManager.instance || (SocketManager.instance = new SocketManager());
     }
 
-    /// Only called by Server.
     private idxAgentSocketDescriptor = new Map<string, IAgentSocketDescriptor>();
     public sjCheckedIn: Subject<Parse.User> = new Subject<Parse.User>();
-    private objectGenerator: ObjectGenerator = new ObjectGenerator();
+    private objectGenerators: Map<UserId, ObjectGenerator> = new Map();
+    /// Only called by Server.
     public checkIn(data: ActionParam<any>) {
         let { user, socket } = data;
         let id = user.id;
+        let myGenerator = new ObjectGenerator();
         let delegator = new SocketDelegator(socket);
         /// indexing login user
         this.idxAgentSocketDescriptor.set(id, { user, delegator });
+        this.objectGenerators.set(id, myGenerator);
         /// hook event on it
         delegator.sjClose.subscribe( () => {
             this.idxAgentSocketDescriptor.delete(id);
+            myGenerator.Dispose();
+            this.objectGenerators.delete(id);
         });
         this.sjCheckedIn.next(user);
         /// Server receive request
         delegator.sjRequest.subscribe( (data) => {
             Log.Info(LogTitle, `Receive request: ${JSON.stringify(data.request)}`);
-            this.objectGenerator.next(data);
+            myGenerator.next(data);
         }, e => null);
     }
 

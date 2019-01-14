@@ -5,8 +5,9 @@ import * as Utilities from './../utilities';
 import { jsMapAssign } from "helpers/utility/jsmap-assign";
 
 export class ObjectGenerator {
+    /// Map<ObjectKey, object> pair
     private objects: Map<string, any> = new Map();
-    next(req: ISocketDelegatorRequest) {
+    public next(req: ISocketDelegatorRequest) {
         let { request, response } = req;
         let { agentType, funcName, data, objectKey, requestKey } = request;
 
@@ -37,6 +38,13 @@ export class ObjectGenerator {
         }        
     }
 
+    public Dispose() {
+        [...this.objects.values()].forEach( (obj) => {
+            obj.Stop();
+            obj.Dispose();
+        });
+        this.objects.clear();
+    }
 
     private getFilter(request: IAgentRequest) {
         let filter = request.filter;

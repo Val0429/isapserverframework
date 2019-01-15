@@ -4,6 +4,12 @@ import { IAgentRequest } from "../core";
 import * as Utilities from './../utilities';
 import { DataKeeper } from "../data-keeper";
 
+interface IObjectHolderFunction {
+    requestKey: string;
+    request: ISocketDelegatorRequest;
+    dataKeeper?: DataKeeper;
+}
+
 export class ObjectHolder {
     private objectKey: string;
     constructor(objectKey: string) {
@@ -17,6 +23,7 @@ export class ObjectHolder {
     }
 
     private instance;
+    private functionMap: Map<string, IObjectHolderFunction> = new Map();
     next(req: ISocketDelegatorRequest) {
         let { request, response } = req;
         let { agentType, funcName, data, objectKey, requestKey, dataKeeping } = request;
@@ -25,6 +32,11 @@ export class ObjectHolder {
             if (!this.instance) this.instance = new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data);
             response.complete();
         } else {
+            let keepedFunction = this.functionMap.get(requestKey);
+            if (keepedFunction) {
+                keepedFunction.dataKeeper.replace(req);
+                return;
+            }
             /// prepare object
             let obj = this.instance;
             if (!obj) throw `<${agentType}> with ID <${objectKey}> not exists.`;
@@ -37,12 +49,9 @@ export class ObjectHolder {
             let filter = this.getFilter(request);
             if (filter) o = o.pipe( filter );
             /// prepare datakeeping
-            let dataKeeper = dataKeeping ?
-                new DataKeeper({ request: req, rule: dataKeeping, requestKey }) : {
-                    next: (data) => response.next(data),
-                    error: (err) => response.error(err),
-                    complete: () => response.complete()
-                }
+            let dataKeeper = new DataKeeper({ request: req, rule: dataKeeping, requestKey });
+            /// when finished, remove function.
+            dataKeeper.sjCompleted.filter(v=>v).first().subscribe( () => this.functionMap.delete(requestKey) );
             /// execute
             let subscription = o.subscribe(dataKeeper);
             /// stop / unsubscribe function when error / disconnected / complete
@@ -51,6 +60,12 @@ export class ObjectHolder {
             if (!dataKeeping) {
                 response.subscribe({ error: () => handleStop(), complete: () => handleStop() });
             }
+            /// keep function
+            this.functionMap.set(requestKey, {
+                requestKey,
+                request: req,
+                dataKeeper
+            });
         }        
     }
 

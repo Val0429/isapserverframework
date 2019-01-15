@@ -6,7 +6,7 @@ import { DataStorage, collection } from "./data-storage";
 import { createIndex } from "helpers/parse-server/parse-helper";
 
 export interface IDataKeeperConfig {
-    rule: ITaskFunctionDataKeeping;
+    rule?: ITaskFunctionDataKeeping;
     requestKey: string;
     request: ISocketDelegatorRequest;
 }
@@ -15,10 +15,13 @@ export interface IDataKeeperConfig {
 export class DataKeeper {
     private config: IDataKeeperConfig;
     private sjDataKeepingReceive: Subject<IDataKeeperStorage> = new Subject<IDataKeeperStorage>();
+    public sjReplaced: Subject<ISocketDelegatorRequest> = new Subject();
+    public sjCompleted: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     private dataSet: IDataKeeperStorage[] = [];
     private static indexCreated: boolean = false;
     constructor(config: IDataKeeperConfig) {
         this.config = config;
+        if (!config.rule) return;
         if (!DataKeeper.indexCreated) {
             /// create index
             createIndex(collection, "expiresTTL",
@@ -38,14 +41,23 @@ export class DataKeeper {
     }
 
     private sjDisposed: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    Dispose() {
+    public Dispose() {
         this.sjDisposed.next(true);
         this.dataSet = null;
+    }
+
+    public replace(req: ISocketDelegatorRequest) {
+        this.config.request = req;
+        this.sjReplaced.next(req);
     }
 
     /// private helpers
     private async poll() {
         let { response, waiter } = this.config.request;
+        let doReplace = () => {
+            response = this.config.request.response;
+            waiter = this.config.request.waiter;
+        }
         let result;
         do {
             let data: IDataKeeperStorage;
@@ -73,16 +85,31 @@ export class DataKeeper {
             let value = data.data;
             switch (data.type) {
                 case EnumAgentResponseStatus.Data:
-                    response.next(value);
-                    await waiter.wait(value);
+                    do {
+                        response.next(value);
+                        console.log('hold here?');
+                        let result = await Promise.race([waiter.wait(value), this.sjReplaced.first().mapTo(false).toPromise()]);
+                        console.log('hold here pass', result)
+                        if (result !== false) break;
+                        doReplace();
+                    } while(1);
                     break;
                 case EnumAgentResponseStatus.Error:
-                    response.error(value);
-                    await waiter.wait(value);
+                    do {
+                        response.error(value);
+                        let result = await Promise.race([waiter.wait(value), this.sjReplaced.first().mapTo(false).toPromise()]);
+                        if (result !== false) break;
+                        doReplace();
+                    } while(1);
                     break;
                 case EnumAgentResponseStatus.Complete:
-                    response.complete();
-                    await waiter.wait();
+                    do {
+                        response.complete();
+                        let result = await Promise.race([waiter.wait(), this.sjReplaced.first().mapTo(false).toPromise()]);
+                        if (result !== false) break;
+                        doReplace();
+                    } while(1);
+                    this.sjCompleted.next(true);
                     break;
                 default: throw "<DataKeeper> should not happen.";
             }
@@ -122,18 +149,21 @@ export class DataKeeper {
     }
 
     private next(value) {
+        if (!this.config.rule) return this.config.request.response.next(value);
         this.sjDataKeepingReceive.next(
             this.packIDataKeeperStorage(EnumAgentResponseStatus.Data, value)
         );
     }
 
     private error(error) {
+        if (!this.config.rule) return this.config.request.response.error(error);
         this.sjDataKeepingReceive.next(
             this.packIDataKeeperStorage(EnumAgentResponseStatus.Error, error)
         );
     }
 
     private complete() {
+        if (!this.config.rule) return this.config.request.response.complete();
         this.sjDataKeepingReceive.next(
             this.packIDataKeeperStorage(EnumAgentResponseStatus.Complete)
         );

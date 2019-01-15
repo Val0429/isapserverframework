@@ -16,13 +16,17 @@ export class DataKeeper {
     private config: IDataKeeperConfig;
     private sjDataKeepingReceive: Subject<IDataKeeperStorage> = new Subject<IDataKeeperStorage>();
     private dataSet: IDataKeeperStorage[] = [];
+    private static indexCreated: boolean = false;
     constructor(config: IDataKeeperConfig) {
         this.config = config;
-        /// create index
-        createIndex(collection, "expiresTTL",
-            { expiresAt: -1 },
-            { expireAfterSeconds: 0 }
-        );
+        if (!DataKeeper.indexCreated) {
+            /// create index
+            createIndex(collection, "expiresTTL",
+                { expiresAt: -1 },
+                { expireAfterSeconds: 0 }
+            );
+            DataKeeper.indexCreated = true;
+        }
         /// keep pushing until disposed
         this.sjDataKeepingReceive.takeUntil(this.sjDisposed.filter(v=>v)).subscribe( (data) => {
             /// push data to resolve

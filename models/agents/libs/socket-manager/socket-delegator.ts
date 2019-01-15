@@ -59,7 +59,7 @@ export class SocketDelegator {
                 }
             } else {
             /// handle data request
-                let { requestKey, agentType, funcName, objectKey } = data;
+                let { requestKey, agentType, funcName, objectKey, dataKeeping } = data;
                 /// if stop with destructor, try complete
                 if (/^~/.test(funcName)) {
                     let res = this.responsePair.get(requestKey);
@@ -78,11 +78,11 @@ export class SocketDelegator {
                     /// regularize data
                     data = ParseObject.toOutputJSON(data);
                     console.log('going to send...', JSON.stringify(data));
-                    this.socket.send({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Data });
+                    this.socket.sendPromise({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Data });
                 }, (err) => {
-                    this.socket.send({ ...respBase, ...injectTimestamp({error: err.toString()}), status: EnumAgentResponseStatus.Error });
+                    this.socket.sendPromise({ ...respBase, ...injectTimestamp({error: err.toString()}), status: EnumAgentResponseStatus.Error });
                 }, () => {
-                    this.socket.send({ ...respBase, ...injectTimestamp(), status: EnumAgentResponseStatus.Complete });
+                    this.socket.sendPromise({ ...respBase, ...injectTimestamp(), status: EnumAgentResponseStatus.Complete });
                     this.responsePair.delete(requestKey);
                 });
                 /// do unserialize

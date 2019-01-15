@@ -5,6 +5,7 @@ import * as Utilities from './../utilities';
 import { jsMapAssign } from "helpers/utility/jsmap-assign";
 import { ServerDBTask } from "../database/server-db-task";
 import { Log } from "helpers/utility";
+import { DataKeeper } from "../data-keeper";
 
 const LogTitle = "Agent.ObjectGenerator";
 
@@ -13,7 +14,7 @@ export class ObjectGenerator {
     private objects: Map<string, any> = new Map();
     public next(req: ISocketDelegatorRequest) {
         let { request, response } = req;
-        let { agentType, funcName, data, objectKey, requestKey } = request;
+        let { agentType, funcName, data, objectKey, requestKey, dataKeeping } = request;
 
         if (funcName === 'Initialize') {
             let obj = jsMapAssign(this.objects, objectKey, () => new (RegistrationDelegator.getAgentTaskDescriptorByName(agentType).classObject)(data));
@@ -30,15 +31,21 @@ export class ObjectGenerator {
             /// prepare filter
             let filter = this.getFilter(request);
             if (filter) o = o.pipe( filter );
+            /// prepare datakeeping
+            let dataKeeper = dataKeeping ?
+                new DataKeeper({ request: req, rule: dataKeeping, requestKey }) : {
+                    next: (data) => response.next(data),
+                    error: (err) => response.error(err),
+                    complete: () => response.complete()
+                }
             /// execute
-            let subscription = o.subscribe(
-                    (data) => response.next(data),
-                    (err) => response.error(err),
-                    () => response.complete()
-                );
+            let subscription = o.subscribe(dataKeeper);
             /// stop / unsubscribe function when error / disconnected / complete
             let handleStop = () => { subscription.unsubscribe(); }
-            response.subscribe({ error: () => handleStop(), complete: () => handleStop() });
+            /// should not stop with datakeeping rule
+            if (!dataKeeping) {
+                response.subscribe({ error: () => handleStop(), complete: () => handleStop() });
+            }
         }
     }
 

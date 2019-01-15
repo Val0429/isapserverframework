@@ -5,7 +5,7 @@ import { ScheduleControllerBase } from './../controllers/core';
 import { ScheduleActionEmail } from './../actions/email';
 import { ScheduleTemplateEmail_PreRegistrationExample } from './../templates/email';
 
-import pinCode from 'services/pin-code/pin-code';
+import pinCode from 'services/pin-code';
 
 
 /// just an example

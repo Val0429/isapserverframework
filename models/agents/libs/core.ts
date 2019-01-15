@@ -26,7 +26,7 @@ export interface IAgentRequest {
 
     scheduler?: ITaskFunctionScheduler;
     filter?: ITaskFunctionFilter;
-    dataKeeping?: any;
+    dataKeeping?: ITaskFunctionDataKeeping;
     outputEvent?: EventList;
 }
 
@@ -81,13 +81,27 @@ type SSMakeDistributed<T> = T extends keyof IAgentTaskSchedulerMapping ? ITaskFu
 export type ITaskFunctionScheduler = SSMakeDistributed<keyof IAgentTaskSchedulerMapping>;
 //////////////////////////////////////////////////////////////////
 
+/// DataKeeping Signature ////////////////////////////////////////
+export interface ITaskFunctionDataKeeping {
+    durationSeconds: number;
+}
+export type EDataKeeperDataType = EnumAgentResponseStatus;
+export interface IDataKeeperStorage {
+    storageId: string;
+    requestKey: string;
+    type: EDataKeeperDataType;
+    data: any;
+    expiresAt: Date;
+}
+//////////////////////////////////////////////////////////////////
+
 /// Function info of Remote //////////////////////////////////////
 export interface ITaskFunctionRemote {
     requestKey?: string;
     scheduler?: ITaskFunctionScheduler;
     filter?: ITaskFunctionFilter;
     /// default to no keep
-    dataKeeping?: any;
+    dataKeeping?: ITaskFunctionDataKeeping;
     /// default to none
     outputEvent?: EventList;
 }

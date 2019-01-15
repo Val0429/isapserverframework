@@ -2,10 +2,12 @@ import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, Enum
 import { Subject, Observable } from "rxjs";
 import { Socket, ActionParam, ParseObject } from "helpers/cgi-helpers/core";
 import { idGenerate } from "../id-generator";
+import { SocketResolver } from "./socket-resolver";
 
 export interface ISocketDelegatorRequest {
     request: IAgentRequest;
     response: Subject<IAgentResponse>;
+    waiter: SocketResolver;
 }
 
 /**
@@ -73,22 +75,45 @@ export class SocketDelegator {
                 this.responsePair.set(requestKey, sj);
                 let respBase = { type: EAgentRequestType.Response, agentType, funcName, requestKey, objectKey, data: null };
                 /// inject timestamp
-                let injectTimestamp = (data = undefined) => ({ data: { ...data, timestamp: new Date().toISOString() } });
-                sj.subscribe( (data) => {
+                let injectTimestamp = (data = undefined) => {
+                    let timestamp = (data && data.timestamp && data.timestamp instanceof Date ? data.timestamp : new Date()).toISOString();
+                    return { ...data, timestamp };
+                }
+                /// inject error timestamp
+                let injectErrorTimestamp = (data = undefined) => {
+                    let timestamp = (data && data.timestamp && data.timestamp instanceof Date ? data.timestamp : new Date()).toISOString();
+                    return { error: data, timestamp };
+                }
+                /// add resolver
+                let waiter = new SocketResolver();
+                sj.subscribe( async (data) => {
                     /// regularize data
-                    data = ParseObject.toOutputJSON(data);
+                    let value = ParseObject.toOutputJSON(data);
                     console.log('going to send...', JSON.stringify(data));
-                    this.socket.sendPromise({ ...respBase, ...injectTimestamp(data), status: EnumAgentResponseStatus.Data });
-                }, (err) => {
-                    this.socket.sendPromise({ ...respBase, ...injectTimestamp({error: err.toString()}), status: EnumAgentResponseStatus.Error });
-                }, () => {
-                    this.socket.sendPromise({ ...respBase, ...injectTimestamp(), status: EnumAgentResponseStatus.Complete });
+                    try {
+                        await this.socket.sendPromise({ ...respBase, data: injectTimestamp(value), status: EnumAgentResponseStatus.Data });
+                    } catch(e) { return; }
+                    waiter.resolve(data);
+
+                }, async (error) => {
+                    try {
+                        await this.socket.sendPromise({ ...respBase, data: injectErrorTimestamp(error), status: EnumAgentResponseStatus.Error });
+                    } catch(e) { return; }
+                    waiter.resolve(error);
+
+                }, async () => {
+                    try {
+                        await this.socket.sendPromise({ ...respBase, data: injectTimestamp(), status: EnumAgentResponseStatus.Complete });
+                    } catch(e) { return; }
                     this.responsePair.delete(requestKey);
+                    waiter.resolve();
+
                 });
                 /// do unserialize
                 this.sjRequest.next({
                     request: data,
-                    response: sj
+                    response: sj,
+                    waiter
                 });
             }
         });

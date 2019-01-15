@@ -55,6 +55,7 @@ export class DataKeeper {
                 let now = new Date();
                 while (this.dataSet.length > 0) {
                     if (this.dataSet[0].expiresAt.valueOf() <= now.valueOf()) this.dataSet.shift();
+                    else break;
                 }
                 /// take data
                 if (this.dataSet.length === 0) continue;

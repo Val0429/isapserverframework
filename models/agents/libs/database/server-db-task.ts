@@ -44,7 +44,7 @@ export class ServerDBTasks {
     public static async getInstance(user: Parse.User): Promise<ServerDBTasks> {
         await this.mtxGetInstance.acquire();
         /// preload all tasks
-        await this.initAllUserTasks()
+        await this.initAllUserTasks();
         
         let result: ServerDBTasks;
         do {
@@ -118,9 +118,11 @@ export class ServerDBTasks {
                 if (funcName === 'Start' || funcName === 'Stop') break;
 
                 let obj: ServerDBTask = this.tasks.get(objectKey);
-                /// 0) status === Data, break;
+                /// 0.1) manually call dispose case
+                if (!obj) return;
+                /// 1) status === Data, break;
                 if (status === EnumAgentResponseStatus.Data) break;
-                /// 1) If funcName != Initialize | Dispose, and status === Error | Complete, delete ServerDBTask.tasks
+                /// 2) If funcName != Initialize | Dispose, and status === Error | Complete, delete ServerDBTask.tasks
                 if (
                     (status === EnumAgentResponseStatus.Complete || status === EnumAgentResponseStatus.Error) &&
                     (!(funcName === "Initialize" || funcName === "Dispose"))

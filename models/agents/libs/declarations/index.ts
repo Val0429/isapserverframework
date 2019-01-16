@@ -1,5 +1,5 @@
 import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser, IAgentRequest, EnumAgentResponseStatus } from "../core";
-import { Observable, Observer } from "rxjs";
+import { Observable, Observer, BehaviorSubject } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
 import { idGenerate } from "../id-generator";
@@ -7,6 +7,7 @@ export * from './registration-delegator';
 import ast from 'services/ast-services/ast-client';
 import { ServerDBTasks } from "../database/server-db-task";
 import { Mutex } from "helpers/utility";
+import { AgentDBTasks } from "../database/agent-db-task";
 const caller = require('caller');
 
 const SigNotImpl: string = "Not implemented.";
@@ -19,19 +20,6 @@ export function Register(config: IAgentTaskRegisterConfig) {
     /// normalize config
     !config.objective && (config.objective = Objective.Server);
     return (classObject) => {
-        // let CO: typeof Base = classObject;
-        // /// overwrite class
-        // let newClass = class extends CO<any> {
-        //     constructor(config, remote: IRemoteAgentTask) {
-        //         super(config, remote);
-        //     }
-
-        //     Dispose(): Observable<void> {
-        //         return super.Dispose();
-        //     }
-        // } as any;
-        // RegistrationDelegator.Register(config, newClass);
-        // return newClass;
         RegistrationDelegator.Register(config, classObject);
         return classObject;
     }
@@ -44,7 +32,7 @@ export function Register(config: IAgentTaskRegisterConfig) {
 export function Function(config?: IAgentTaskFunction) {
     let callerPath = caller();
 
-    return <T extends object, U>(target: any, funcName: string, descriptor: TypedPropertyDescriptor<(config?: T) => Observable<U>>) => {
+    return <T extends object, U extends object | void>(target: any, funcName: string, descriptor: TypedPropertyDescriptor<(config?: T) => Observable<U>>) => {
         let classObject = target.constructor;
         let baseFunction: boolean = classObject === Base;
         RegistrationDelegator.Function(funcName, classObject, config, baseFunction);
@@ -70,6 +58,9 @@ export function Function(config?: IAgentTaskFunction) {
                 agentType, funcName, data: args, objectKey, ...info, requestKey
             }
 
+            /// save into Server DB
+            if (remote.syncDB) serverSyncTask(user, packet);
+
             /// send delegation request
             let delegator = SocketManager.sharedInstance().getSocketDelegator(user);
             if (!delegator) return Observable.throw(`User <${user.id}> SocketDelegator not found.`);
@@ -91,8 +82,8 @@ export function Function(config?: IAgentTaskFunction) {
             /// observe created, complete status (only if syncDB)
             if (remote.syncDB) {
                 remoteOb = Observable.defer( () => {
-                    /// on observable create, save into Server DB
-                    serverSyncTask(user, packet);
+                    // /// on observable create, save into Server DB
+                    // serverSyncTask(user, packet);
                     /// on observable complete (not error), save into Server DB
                     mainOb.subscribe({
                         error: e => null,
@@ -121,6 +112,7 @@ export function Function(config?: IAgentTaskFunction) {
 export class Base<T> {
     private config: T;
     private remote: IRemoteAgentTask;
+    private sjStarted: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     constructor(config: T, remote?: IRemoteAgentTask) {
         this.config = config;
         this.remote = remote;
@@ -146,10 +138,11 @@ export class Base<T> {
             if (remote.syncDB) serverSyncTask(user, packet);
 
             /// send delegation request
-            SocketManager.sharedInstance().getSocketDelegator(user).request(packet).toPromise()
+            let smanager = SocketManager.sharedInstance().getSocketDelegator(user);
+            /// if user not online yet, don't do
+            smanager && smanager.request(packet).toPromise()
               .catch( e => null );
         }
-        /// todo: handle client
 
     }
 
@@ -157,8 +150,10 @@ export class Base<T> {
         description: "Start this agent task."
     })
     public Start(): Observable<void> {
+        if (this.sjStarted.getValue() === true) return Observable.empty();
         return Observable.create( async (observer: Observer<void>) => {
             await this.doStart();
+            this.sjStarted.next(true);
             observer.complete();
         });
     }
@@ -168,13 +163,18 @@ export class Base<T> {
         description: "Stop this agent task."
     })
     public Stop(): Observable<void> {
+        if (this.sjStarted.getValue() === false) return Observable.empty();
         return Observable.create( async (observer: Observer<void>) => {
             await this.doStop();
+            this.sjStarted.next(false);
             observer.complete();
         });
     }
     protected doStop() { throw SigNotImpl }
 
+    @Function({
+        description: "Dispose this agent task."
+    })
     public Dispose(): Observable<void> {
         return Observable.create( async (observer: Observer<void>) => {
             await this.doDispose();
@@ -197,5 +197,10 @@ export class Base<T> {
 /// private utility
 async function serverSyncTask(user: Parse.User, packet) {
     let dbtask = await ServerDBTasks.getInstance(user);
+    dbtask.sync(packet);
+}
+
+async function agentSyncTask(packet) {
+    let dbtask = await AgentDBTasks.getInstance();
     dbtask.sync(packet);
 }

@@ -22,7 +22,7 @@ export interface IAgentDBTask {
     initArgument: any;
     tasks: IAgentDBRequest[];
 }
-@registerSubclass() class AgentDBTask extends ParseObject<IAgentDBTask> {
+@registerSubclass() export class AgentDBTask extends ParseObject<IAgentDBTask> {
 }
 
 type ObjectKey = string;
@@ -45,16 +45,24 @@ export class AgentDBTasks {
     }
 
     private static instanceCache: InstanceCache;
-    public static async getInstance(user: Parse.User): Promise<AgentDBTasks> {
+    private static mtxGetInstance: Mutex = new Mutex();
+    public static async getInstance(): Promise<AgentDBTasks> {
+        await this.mtxGetInstance.acquire();
         /// preload all tasks
         await this.initUserTasks();
-        /// check cache
-        let cache = this.instanceCache;
-        if (cache) return cache;
-        /// create new
-        let result = new AgentDBTasks();
-        this.instanceCache = result;
-        result.tasks = this.userTasks;
+ 
+        let result: AgentDBTasks;
+        do {
+            /// check cache
+            let cache = this.instanceCache;
+            if (cache) { result = cache; break; }
+            /// create new
+            result = new AgentDBTasks();
+            this.instanceCache = result;
+            result.tasks = this.userTasks;
+        } while(0);
+
+        this.mtxGetInstance.release();
         return result;
     }
 
@@ -64,6 +72,10 @@ export class AgentDBTasks {
             case EAgentRequestType.Request: {
                 let input = data as IAgentRequest;
                 let { funcName, objectKey, agentType, data: initArgument, requestKey } = input;
+
+                /// 0) don't handle Start / Stop
+                if (funcName === 'Start' || funcName === 'Stop') break;
+
                 let obj: AgentDBTask = this.tasks.get(objectKey);
                 /// 1) If funcName = Initialize, create / initial AgentDBTask
                 if (funcName === "Initialize") {

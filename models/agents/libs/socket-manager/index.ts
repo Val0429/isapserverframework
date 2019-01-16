@@ -56,7 +56,7 @@ export class SocketManager {
     public async applyDBTasks(user: Parse.User) {
         let myGenerator = this.objectGenerators.get(user.id);
         if (!myGenerator) return;
-        myGenerator.applyDBTasks( Array.from( (await ServerDBTasks.getInstance(user)).getTasks().values() ) );
+        myGenerator.applyServerDBTasks( Array.from( (await ServerDBTasks.getInstance(user)).getTasks().values() ) );
     }
 
     /// for Agent client to register itself

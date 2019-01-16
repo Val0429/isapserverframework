@@ -5,6 +5,7 @@ import { SocketManager, SocketDelegator, ISocketDelegatorRequest } from "../sock
 import { AgentConnectionAgent } from "../agents/agent-connection-agent";
 import { MeUser, IAgentRequest } from "../core";
 import { ObjectGenerator } from "../object-generator";
+import { AgentDBTasks } from "../database/agent-db-task";
 
 const LogTitle: string = "ImAgent";
 
@@ -59,6 +60,14 @@ class AgentGenerator {
         /// todo: handle request error. maybe no need
         this.socketDelegator.sjRequest.subscribe( (data) => {
             Log.Info(LogTitle, `Receive request: ${JSON.stringify(data.request)}`);
+
+            /// sync to Agent DB
+            (async () => {
+                let dbtasks = await AgentDBTasks.getInstance();
+                dbtasks.sync(data.request);
+            })();
+
+            /// pass to Object Generator
             this.objectGenerator.next(data);
         }, e => null);
         this.socketDelegator.sjClose.subscribe( () => {
@@ -69,12 +78,12 @@ class AgentGenerator {
 
     /// client send request
     private async initialRequestToServer() {
-        let test = new AgentConnectionAgent(null, {
+        let ac = new AgentConnectionAgent(null, {
             user: new MeUser()
         });
-        await test.Start().toPromise();
+        await ac.Start().toPromise();
         /// todo: send request to get back running tasks
-        test.AssignedJobs({ sessionId: this.server.getSessionId(), sendRequest: true })
+        ac.AssignedJobs({ sessionId: this.server.getSessionId(), sendRequest: true })
             .subscribe( (data) => {
                 //console.log('client get results...', data);
             })

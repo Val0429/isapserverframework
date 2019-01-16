@@ -45,6 +45,8 @@ export class ObjectHolder {
             /// prepare scheduler
             let scheduler = this.getScheduler(request);
             if (scheduler) o = scheduler().mergeMap( () => originalFunction );
+            /// until stopped
+            o = o.takeUntil(obj.sjStarted.filter(v=>!v).first());
             /// prepare filter
             let filter = this.getFilter(request);
             if (filter) o = o.pipe( filter );

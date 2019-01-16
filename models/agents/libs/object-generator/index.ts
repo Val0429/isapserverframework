@@ -6,6 +6,7 @@ import { ServerDBTask } from "../database/server-db-task";
 import { Log } from "helpers/utility";
 import { DataKeeper } from "../data-keeper";
 import { ObjectHolder } from "./object-holder";
+import { AgentDBTask } from "../database/agent-db-task";
 
 const LogTitle = "Agent.ObjectGenerator";
 
@@ -18,9 +19,21 @@ export class ObjectGenerator {
         obj.next(req);
     }
 
-    /// request remote call
     private localObjects: Map<string, any> = new Map();
-    public applyDBTasks(tasks: ServerDBTask[])  {
+    // /// initial local call
+    // public applyAgentDBTasks(tasks: AgentDBTask[]) {
+    //     tasks.forEach( (task) => {
+    //         let { agentType, initArgument, tasks, objectKey } = task.attributes;
+    //         /// initialize main object
+    //         let obj = jsMapAssign(this.localObjects, objectKey, () => {
+    //             /// transfer to ISocketDelegatorRequest
+                
+    //         });
+    //     });
+    // }
+
+    /// request remote call
+    public applyServerDBTasks(tasks: ServerDBTask[])  {
         tasks.forEach( (task) => {
             let { user, agentType, initArgument, tasks, objectKey } = task.attributes;
             /// initialize main object
@@ -34,7 +47,7 @@ export class ObjectGenerator {
                 let { funcName, requestKey, data, filter, scheduler, dataKeeping, outputEvent } = task;
                 obj[funcName](data, { requestKey, filter, scheduler, dataKeeping, outputEvent })
                     .subscribe( (result) => console.log('got result: ', result), (e) => {
-                        Log.Error(LogTitle, `Send request to User <${user.id}> with "${agentType}".${funcName} failed, ${e}`);
+                        Log.Error(LogTitle, `Send request to User <${user.id}> with "${agentType}".${funcName}() failed, ${e}`);
                     } );
             });
         });

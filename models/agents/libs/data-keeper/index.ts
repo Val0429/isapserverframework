@@ -87,9 +87,7 @@ export class DataKeeper {
                 case EnumAgentResponseStatus.Data:
                     do {
                         response.next(value);
-                        console.log('hold here?');
                         let result = await Promise.race([waiter.wait(value), this.sjReplaced.first().mapTo(false).toPromise()]);
-                        console.log('hold here pass', result)
                         if (result !== false) break;
                         doReplace();
                     } while(1);

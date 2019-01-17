@@ -1,4 +1,4 @@
-import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser, IAgentRequest, EnumAgentResponseStatus } from "../core";
+import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser, IAgentRequest, EnumAgentResponseStatus, TimestampToken } from "../core";
 import { Observable, Observer, BehaviorSubject } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
@@ -71,7 +71,7 @@ export function Function(config?: IAgentTaskFunction) {
                 return new Promise( (resolve, reject) => {
                     ast.requestSimpleValidation({ type: config.outputType, path: callerPath }, data)
                         /// merge back timestamp
-                        .then( (result) => resolve({ ...result, timestamp: (data as any).timestamp }) )
+                        .then( (result) => resolve({ ...result, [TimestampToken]: (data as any)[TimestampToken] }) )
                         .catch( e => reject(e.resolve()) );
                 });
             });
@@ -152,8 +152,8 @@ export class Base<T> {
     public Start(): Observable<void> {
         if (this.sjStarted.getValue() === true) return Observable.empty();
         return Observable.create( async (observer: Observer<void>) => {
-            await this.doStart();
             this.sjStarted.next(true);
+            await this.doStart();
             observer.complete();
         });
     }
@@ -165,8 +165,8 @@ export class Base<T> {
     public Stop(): Observable<void> {
         if (this.sjStarted.getValue() === false) return Observable.empty();
         return Observable.create( async (observer: Observer<void>) => {
-            await this.doStop();
             this.sjStarted.next(false);
+            await this.doStop();
             observer.complete();
         });
     }

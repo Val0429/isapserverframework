@@ -1,4 +1,4 @@
-import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, IRemoteAgentTask } from "../core";
+import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, IRemoteAgentTask, injectTimestamp, injectErrorTimestamp, injectCompleteTimestamp, TimestampToken } from "../core";
 import { Subject, Observable } from "rxjs";
 import { Socket, ActionParam, ParseObject } from "helpers/cgi-helpers/core";
 import { idGenerate } from "../id-generator";
@@ -47,7 +47,7 @@ export class SocketDelegator {
                 /// ignore incorrect requestKey for now.
                 let raw = data.data;
                 /// convert back timestamp
-                raw.timestamp && (raw.timestamp = new Date(raw.timestamp));
+                raw[TimestampToken] && (raw[TimestampToken] = new Date(raw[TimestampToken]));
                 if (!sj) return;
                 switch (data.status) {
                     case EnumAgentResponseStatus.Data:
@@ -74,19 +74,10 @@ export class SocketDelegator {
                 let sj = new Subject<IAgentResponse>();
                 this.responsePair.set(requestKey, sj);
                 let respBase = { type: EAgentRequestType.Response, agentType, funcName, requestKey, objectKey, data: null };
-                /// inject timestamp
-                let injectTimestamp = (data = undefined) => {
-                    let timestamp = (data && data.timestamp && data.timestamp instanceof Date ? data.timestamp : new Date()).toISOString();
-                    return { ...data, timestamp };
-                }
-                /// inject error timestamp
-                let injectErrorTimestamp = (data = undefined) => {
-                    let timestamp = (data && data.timestamp && data.timestamp instanceof Date ? data.timestamp : new Date()).toISOString();
-                    return { error: data, timestamp };
-                }
                 /// add resolver
                 let waiter = new SocketResolver();
                 sj.subscribe( async (data) => {
+                    console.log('going to send', data)
                     /// regularize data
                     let value = ParseObject.toOutputJSON(data);
                     console.log('going to send...', JSON.stringify(data));
@@ -103,7 +94,7 @@ export class SocketDelegator {
 
                 }, async () => {
                     try {
-                        await this.socket.sendPromise({ ...respBase, data: injectTimestamp(), status: EnumAgentResponseStatus.Complete });
+                        await this.socket.sendPromise({ ...respBase, data: injectCompleteTimestamp(), status: EnumAgentResponseStatus.Complete });
                     } catch(e) { return; }
                     this.responsePair.delete(requestKey);
                     waiter.resolve();
@@ -135,4 +126,3 @@ export class SocketDelegator {
         return observable;
     }
 }
-

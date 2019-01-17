@@ -160,3 +160,21 @@ export interface IAgentTaskFunction {
 /// For SocketDelegator to recognize Me //////////////////////////
 export class MeUser extends Parse.User {}
 //////////////////////////////////////////////////////////////////
+
+/// Timestamp injection //////////////////////////////////////////
+export const TimestampToken = "__timestamp__";
+/// inject timestamp
+export function injectTimestamp(data = undefined) {
+    if (data && data[TimestampToken]) return data;
+    return { ...data, [TimestampToken]: new Date().toISOString() };
+}
+/// inject error timestamp
+export function injectErrorTimestamp(data = undefined) {
+    if (data && data[TimestampToken]) return data;
+    return { error: data, [TimestampToken]: new Date().toISOString() };
+}
+/// inject complete timestamp
+export function injectCompleteTimestamp() {
+    return injectTimestamp();
+}
+//////////////////////////////////////////////////////////////////

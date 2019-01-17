@@ -1,4 +1,4 @@
-import { EnumAgentResponseStatus, ITaskFunctionDataKeeping, IDataKeeperStorage } from "../core";
+import { EnumAgentResponseStatus, ITaskFunctionDataKeeping, IDataKeeperStorage, TimestampToken } from "../core";
 import { ISocketDelegatorRequest } from "../socket-manager";
 import { BehaviorSubject, Subject } from "rxjs";
 import { idGenerate } from "../id-generator";
@@ -133,7 +133,7 @@ export class DataKeeper {
         
         /// add preset timestamp
         let now = new Date();
-        data.timestamp = now;
+        data[TimestampToken] = now;
         
         /// pack into IDataKeeperStorage
         let rtn: IDataKeeperStorage = {
@@ -148,8 +148,10 @@ export class DataKeeper {
 
     private next(value) {
         if (!this.config.rule) return this.config.request.response.next(value);
+        let val = this.packIDataKeeperStorage(EnumAgentResponseStatus.Data, value);
+        console.log('should set');
         this.sjDataKeepingReceive.next(
-            this.packIDataKeeperStorage(EnumAgentResponseStatus.Data, value)
+            val
         );
     }
 

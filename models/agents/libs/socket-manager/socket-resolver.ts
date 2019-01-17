@@ -5,7 +5,7 @@ type ISocketResolverWaitObject = [WaitData, Resolver];
 export class SocketResolver {
     private waitObjects: ISocketResolverWaitObject[] = [];
 
-    wait(data = undefined): Promise<any> {
+    wait(data = undefined): Promise<void> {
         return new Promise( (resolve) => {
             this.waitObjects.push([data, resolve]);
         });
@@ -16,5 +16,12 @@ export class SocketResolver {
         if (idx<0) return;
         let resolve = (this.waitObjects.splice(idx, 1)[0][1] as any);
         let obj = resolve();
+    }
+
+    static FreePass(): SocketResolver {
+        return {
+            wait: () => Promise.resolve(),
+            resolve: () => {}
+        } as SocketResolver;
     }
 }

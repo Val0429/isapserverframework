@@ -35,7 +35,14 @@ class AgentGenerator {
     constructor(config: IServerConfig) {
         this.config = config;
         this.server = new iSAPBasicServer(config);
-        this.tryConnect();
+
+        /// 1) initialize AgentDBTasks
+        /// 2) try connect to Server
+        (async () => {
+            let dbtasks = await AgentDBTasks.getInstance();
+            this.objectGenerator.applyAgentDBTasks( Array.from(dbtasks.tasks.values()) );
+            this.tryConnect();
+        })();
     }
 
     private async tryConnect() {

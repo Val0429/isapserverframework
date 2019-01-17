@@ -31,7 +31,7 @@ type InstanceCache = AgentDBTasks;
 
 export class AgentDBTasks {
     private mtx: Mutex = new Mutex();
-    private tasks: UserTasks;
+    public tasks: UserTasks;
 
     private constructor() {}
     private static userTasks: UserTasks;

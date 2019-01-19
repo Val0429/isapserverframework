@@ -1,5 +1,4 @@
 import { Socket } from 'helpers/sockets/socket-helper';
-import { EventList } from 'core/events.gen';
 import { IAgentTaskFilterMapping } from './utilities/filters';
 import { IAgentTaskSchedulerMapping } from './utilities/schedulers';
 
@@ -27,7 +26,7 @@ export interface IAgentRequest {
     scheduler?: ITaskFunctionScheduler;
     filter?: ITaskFunctionFilter;
     dataKeeping?: ITaskFunctionDataKeeping;
-    outputEvent?: EventList;
+    outputEvent?: boolean;
 }
 
 export enum EnumAgentResponseStatus {
@@ -103,7 +102,7 @@ export interface ITaskFunctionRemote {
     /// default to no keep
     dataKeeping?: ITaskFunctionDataKeeping;
     /// default to none
-    outputEvent?: EventList;
+    outputEvent?: boolean;
 }
 
 type ExtractFunctionOb<T> = T extends (config: infer U) => infer V ? V : never;
@@ -176,5 +175,18 @@ export function injectErrorTimestamp(data = undefined) {
 /// inject complete timestamp
 export function injectCompleteTimestamp() {
     return injectTimestamp();
+}
+//////////////////////////////////////////////////////////////////
+
+/// outputEvent DB format ////////////////////////////////////////
+export interface IOutputEvent<T = any> {
+    user: Parse.User;
+    data: T;
+    timestamp: Date;
+}
+export interface IOutputEventRaw<T = any> {
+    user: string;
+    data: T;
+    timestamp: Date;
 }
 //////////////////////////////////////////////////////////////////

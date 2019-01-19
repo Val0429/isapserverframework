@@ -13,6 +13,10 @@ import { SocketResolver } from "../socket-manager/socket-resolver";
 
 const LogTitle = "Agent.ObjectGenerator";
 
+/**
+ * Auto generate objects.
+ */
+
 export class ObjectGenerator {
     /// Map<ObjectKey, object> pair
     private objects: Map<string, ObjectHolder> = new Map();

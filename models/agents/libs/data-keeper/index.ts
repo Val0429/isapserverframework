@@ -11,12 +11,16 @@ export interface IDataKeeperConfig {
     request: ISocketDelegatorRequest;
 }
 
+/**
+ * Design for rule "dataKeeping"
+ */
 
 export class DataKeeper {
     private config: IDataKeeperConfig;
     private sjDataKeepingReceive: Subject<IDataKeeperStorage> = new Subject<IDataKeeperStorage>();
-    public sjReplaced: Subject<ISocketDelegatorRequest> = new Subject();
-    public sjCompleted: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    public sjReplaced: Subject<ISocketDelegatorRequest> = new Subject();                    /// socket being replaced
+    public sjCompleted: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);     /// subscription complete
+    public sjInitialized: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);   /// first time initialize
     private dataSet: IDataKeeperStorage[] = [];
     private static indexCreated: boolean = false;
     constructor(config: IDataKeeperConfig) {
@@ -30,8 +34,13 @@ export class DataKeeper {
             );
             DataKeeper.indexCreated = true;
         }
+
+        /// initialize data
+        this.initializeData(config.requestKey);
+
         /// keep pushing until disposed
-        this.sjDataKeepingReceive.takeUntil(this.sjDisposed.filter(v=>v)).subscribe( (data) => {
+        this.sjDataKeepingReceive.takeUntil(this.sjDisposed.filter(v=>v)).subscribe( async (data) => {
+            if (this.sjInitialized.getValue() ===false) await this.sjInitialized.filter(v=>v).first().toPromise();
             /// push data to resolve
             this.dataSet.push(data);
             /// save db
@@ -53,6 +62,9 @@ export class DataKeeper {
 
     /// private helpers
     private async poll() {
+        /// wait for initialize
+        await this.sjInitialized.filter(v=>v).first().toPromise();
+
         let { response, waiter } = this.config.request;
         let doReplace = () => {
             response = this.config.request.response;
@@ -117,11 +129,13 @@ export class DataKeeper {
         } while(1);
     }
 
-    private async loadData() {
-
+    private async initializeData(requestKey: string) {
+        let data: IDataKeeperStorage[] = await DataStorage.init(requestKey);
+        this.dataSet = [...data];
+        this.sjInitialized.next(true);
     }
 
-    private packIDataKeeperStorage(type: EnumAgentResponseStatus, value: any = undefined): IDataKeeperStorage {
+    private addTimeToken(type: EnumAgentResponseStatus, value: any = undefined, now?: Date) {
         let data = value;
         /// initial structure
         switch (type) {
@@ -132,8 +146,15 @@ export class DataKeeper {
         }
         
         /// add preset timestamp
-        let now = new Date();
+        now = now || new Date();
         data[TimestampToken] = now;
+
+        return data;
+    }
+
+    private packIDataKeeperStorage(type: EnumAgentResponseStatus, value: any = undefined): IDataKeeperStorage {
+        let now = new Date();
+        let data = this.addTimeToken(type, value, now);
         
         /// pack into IDataKeeperStorage
         let rtn: IDataKeeperStorage = {
@@ -147,16 +168,15 @@ export class DataKeeper {
     }
 
     private next(value) {
-        if (!this.config.rule) return this.config.request.response.next(value);
+        if (!this.config.rule) return this.config.request.response.next( this.addTimeToken(EnumAgentResponseStatus.Data, value) );
         let val = this.packIDataKeeperStorage(EnumAgentResponseStatus.Data, value);
-        console.log('should set');
         this.sjDataKeepingReceive.next(
             val
         );
     }
 
     private error(error) {
-        if (!this.config.rule) return this.config.request.response.error(error);
+        if (!this.config.rule) return this.config.request.response.error( this.addTimeToken(EnumAgentResponseStatus.Error, error) );
         this.sjDataKeepingReceive.next(
             this.packIDataKeeperStorage(EnumAgentResponseStatus.Error, error)
         );

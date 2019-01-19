@@ -19,6 +19,11 @@ interface IOutputAssignedJobs {
     data: IOutputAssignedJobsUnit[];
 }
 
+/**
+ * Support Agent to call Server for its AssignJobs.
+ * And also call SocketManager(ImServer) to apply DB tasks if flags "sendRequest".
+ */
+
 @Agent.Register({
     name: "Agent Connection Agent",
     description: "Used when agent first initialize, sync information back from server.",

@@ -1,7 +1,6 @@
 import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, ITaskFunctionScheduler, ITaskFunctionFilter } from "../core";
 import { ParseObject, registerSubclass } from "helpers/cgi-helpers/core";
 import { Mutex, jsMapAssign } from "helpers/utility";
-import { EventList } from "core/events.gen";
 
 export interface IAgentDBRequest {
     /// unique key of Function request.
@@ -14,7 +13,7 @@ export interface IAgentDBRequest {
     scheduler?: ITaskFunctionScheduler;
     filter?: ITaskFunctionFilter;
     dataKeeping?: any;
-    outputEvent?: EventList;
+    outputEvent?: boolean;
 }
 export interface IAgentDBTask {
     objectKey: string;
@@ -69,6 +68,7 @@ export class AgentDBTasks {
     async sync(data: IAgentStreaming) {
         await this.mtx.acquire();
         switch (data.type) {
+            /// Agent receive Request
             case EAgentRequestType.Request: {
                 let input = data as IAgentRequest;
                 let { funcName, objectKey, agentType, data: initArgument, requestKey } = input;
@@ -101,8 +101,8 @@ export class AgentDBTasks {
                         await obj.save();
                     }
                 }
-                /// 4) Otherwise, create AgentDBTask.tasks
-                else {
+                /// 4) Otherwise, create AgentDBTask.tasks. (only if dataKeeping exists)
+                else if (input.dataKeeping) {
                     let tasks = obj.getValue("tasks");
                     let idx = tasks.findIndex((task) => task.requestKey === requestKey);
                     if (idx >= 0) obj.setValue("tasks", [...tasks.slice(0, idx), input, ...tasks.slice(idx+1, tasks.length)]);
@@ -110,9 +110,15 @@ export class AgentDBTasks {
                     await obj.save();
                 }
             } break;
+
+            /// Agent send Response
             case EAgentRequestType.Response: {
                 let input = data as IAgentResponse;
                 let { funcName, objectKey, agentType, data: argument, requestKey, status } = input;
+
+                /// 0) don't handle Start / Stop
+                if (funcName === 'Start' || funcName === 'Stop') break;
+
                 let obj: AgentDBTask = this.tasks.get(objectKey);
                 /// 0) status === Data, break;
                 if (status === EnumAgentResponseStatus.Data) break;

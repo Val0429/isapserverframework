@@ -8,6 +8,7 @@ import ast from 'services/ast-services/ast-client';
 import { ServerDBTasks } from "../database/server-db-task";
 import { Mutex } from "helpers/utility";
 import { AgentDBTasks } from "../database/agent-db-task";
+import outputEventSaver from "../database/output-event-saver";
 const caller = require('caller');
 
 const SigNotImpl: string = "Not implemented.";
@@ -76,14 +77,19 @@ export function Function(config?: IAgentTaskFunction) {
                 });
             });
 
+            /// with outputEvent, save into DB
+            if (info.outputEvent) {
+                remoteOb = remoteOb.do( (data) => {
+                    outputEventSaver.save(user, packet, data);
+                });
+            }
+
             /// share same remote streaming
             let mainOb = remoteOb = remoteOb.share();
 
             /// observe created, complete status (only if syncDB)
             if (remote.syncDB) {
                 remoteOb = Observable.defer( () => {
-                    // /// on observable create, save into Server DB
-                    // serverSyncTask(user, packet);
                     /// on observable complete (not error), save into Server DB
                     mainOb.subscribe({
                         error: e => null,
@@ -197,10 +203,5 @@ export class Base<T> {
 /// private utility
 async function serverSyncTask(user: Parse.User, packet) {
     let dbtask = await ServerDBTasks.getInstance(user);
-    dbtask.sync(packet);
-}
-
-async function agentSyncTask(packet) {
-    let dbtask = await AgentDBTasks.getInstance();
     dbtask.sync(packet);
 }

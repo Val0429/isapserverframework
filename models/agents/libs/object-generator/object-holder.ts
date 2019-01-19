@@ -10,6 +10,10 @@ interface IObjectHolderFunction {
     dataKeeper?: DataKeeper;
 }
 
+/**
+ * Auto generate objects real place.
+ */
+
 export class ObjectHolder {
     private objectKey: string;
     constructor(objectKey: string) {

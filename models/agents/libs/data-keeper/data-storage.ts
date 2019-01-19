@@ -1,10 +1,17 @@
 import { IDataKeeperStorage } from "../core";
 import { Observable } from "rxjs";
-import { createMongoDB } from "helpers/cgi-helpers/core";
+import { createMongoDB, sharedMongoDB } from "helpers/cgi-helpers/core";
+import { Db, Collection } from "mongodb";
 
 export const collection: string = "AgentDataKeeping";
 const keeping: IDataKeeperStorage[] = [];
 const removing: string[] = [];
+
+/**
+ * Data Storage delegation class,
+ * to save into DB (next),
+ * and to giveup save into DB (redraw).
+ */
 
 export class DataStorage {
     /// schedule save into db.
@@ -21,6 +28,22 @@ export class DataStorage {
         } else {
             removing.push(value.storageId);
         }
+    }
+
+    static async init(requestKey: string): Promise<IDataKeeperStorage[]> {
+        let col = await this.initDBCollection();
+        return await col.find({ requestKey }).toArray();
+    }
+
+    /// individual db connection for DataKeeping init
+    private static db: Db;
+    private static col: Collection<any>;
+    private static async initDBCollection(): Promise<Collection<any>> {
+        if (this.col) return this.col;
+        const { db } = await createMongoDB();
+        this.db = db;
+        this.col = db.collection(collection);
+        return this.col;
     }
 }
 

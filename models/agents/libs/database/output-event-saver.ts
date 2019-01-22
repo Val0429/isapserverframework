@@ -1,7 +1,8 @@
 import { createMongoDB } from "helpers/cgi-helpers/core";
 import { Db } from "mongodb";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { IAgentRequest, IOutputEvent, IOutputEventRaw, TimestampToken } from "../core";
+import { jsMapAssign } from "helpers/utility";
 
 class OutputEventSaver {
     private db: Db;
@@ -12,14 +13,26 @@ class OutputEventSaver {
             this.db = data.db;
             this.sjDBReady.next(true);
         });
+
+        Observable.timer(1000, 1000)
+            .subscribe( () => {
+                /// apply insert many to all keys
+                Array.from(this.readyToSave.keys()).forEach( (collectionName) => {
+                    let obj = this.readyToSave.get(collectionName);
+                    if (obj.length === 0) return;
+                    let col = this.db.collection(collectionName);
+                    col.insertMany(obj);
+                    this.readyToSave.set(collectionName, []);
+                });
+            });
     }
 
+    private readyToSave: Map<string, any[]> = new Map<string, any[]>();
     async save(user: Parse.User, request: IAgentRequest, data: any) {
         if (!this.db) await this.sjDBReady.filter(v=>v).first().toPromise();
-        //this.db.collection()
         let collectionName = this.makeCollectionName(request);
-        let col = this.db.collection(collectionName);
-        col.save(this.makeEvent(user, request, data));
+        let obj = jsMapAssign(this.readyToSave, collectionName, () => ([]));
+        obj.push( this.makeEvent(user, request, data) );
     }
 
     private collectionNameCache: Map<string, string> = new Map<string, string>();

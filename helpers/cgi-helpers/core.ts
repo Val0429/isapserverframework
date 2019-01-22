@@ -348,7 +348,8 @@ export namespace Restful {
             totalPages = Math.ceil(total / pageSize);
             if (all) results = query;
             else results = query.slice( (page-1) * pageSize, page * pageSize );
-
+            if (tuner) results = await tuner(results);
+            results = results.map( (data) => ParseObject.toOutputJSON(data, filter) );
         }
 
         if (all) return { paging: {total}, results };

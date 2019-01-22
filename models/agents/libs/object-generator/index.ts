@@ -89,9 +89,12 @@ export class ObjectGenerator {
             tasks.forEach( (task) => {
                 let { funcName, requestKey, data, filter, scheduler, dataKeeping, outputEvent } = task;
                 obj[funcName](data, { requestKey, filter, scheduler, dataKeeping, outputEvent })
-                    .subscribe( (result) => {}, (e) => {
+                    .subscribe( (result) => { console.log('got result', count++) }, (e) => {
                         Log.Error(LogTitle, `Send request to User <${user.id}> with "${agentType}".${funcName}() failed, ${e}`);
                     } );
+                    // .subscribe( (result) => {}, (e) => {
+                    //     Log.Error(LogTitle, `Send request to User <${user.id}> with "${agentType}".${funcName}() failed, ${e}`);
+                    // } );
                     // .subscribe( (result) => { console.log('got result: ', JSON.stringify(result)) }, (e) => {
                     //     Log.Error(LogTitle, `Send request to User <${user.id}> with "${agentType}".${funcName}() failed, ${e}`);
                     // } );

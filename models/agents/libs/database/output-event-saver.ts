@@ -21,7 +21,7 @@ class OutputEventSaver {
                     let obj = this.readyToSave.get(collectionName);
                     if (obj.length === 0) return;
                     let col = this.db.collection(collectionName);
-                    col.insertMany(obj);
+                    col.insertMany(obj, () => obj.length = 0);
                     this.readyToSave.set(collectionName, []);
                 });
             });

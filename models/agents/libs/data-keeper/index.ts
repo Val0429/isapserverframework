@@ -4,6 +4,7 @@ import { BehaviorSubject, Subject } from "rxjs";
 import { idGenerate } from "../id-generator";
 import { DataStorage, collection } from "./data-storage";
 import { createIndex } from "helpers/parse-server/parse-helper";
+import { makeCancelablePromise } from "helpers/utility/make-cancelable-promise";
 
 export interface IDataKeeperConfig {
     rule?: ITaskFunctionDataKeeping;
@@ -65,7 +66,7 @@ export class DataKeeper {
         /// wait for initialize
         await this.sjInitialized.filter(v=>v).first().toPromise();
 
-        let { response, waiter } = this.config.request;
+        let { request, response, waiter } = this.config.request;
         let doReplace = () => {
             response = this.config.request.response;
             waiter = this.config.request.waiter;
@@ -85,11 +86,12 @@ export class DataKeeper {
                 if (this.dataSet.length === 0) continue;
                 data = this.dataSet.shift();
             } else {
+                let { promise, cancel } = makeCancelablePromise( this.sjDisposed.filter(v=>v).first().mapTo(1) );
                 let result = await Promise.race([
                     this.sjDataKeepingReceive.first().mapTo(0).toPromise(),
-                    this.sjDisposed.filter(v=>v).first().mapTo(1).toPromise()
+                    promise
                 ]);
-                if (result === 0) continue;
+                if (result === 0) { cancel(); continue; }
                 if (result === 1) return;
             }
 
@@ -99,24 +101,27 @@ export class DataKeeper {
                 case EnumAgentResponseStatus.Data:
                     do {
                         response.next(value);
-                        let result = await Promise.race([waiter.wait(value), this.sjReplaced.first().mapTo(false).toPromise()]);
-                        if (result !== false) break;
+                        let { promise, cancel } = makeCancelablePromise( this.sjReplaced.first().mapTo(false) );
+                        let result = await Promise.race([waiter.wait(value), promise]);
+                        if (result !== false) { cancel(); break; }
                         doReplace();
                     } while(1);
                     break;
                 case EnumAgentResponseStatus.Error:
                     do {
                         response.error(value);
-                        let result = await Promise.race([waiter.wait(value), this.sjReplaced.first().mapTo(false).toPromise()]);
-                        if (result !== false) break;
+                        let { promise, cancel } = makeCancelablePromise( this.sjReplaced.first().mapTo(false) );
+                        let result = await Promise.race([waiter.wait(value), promise]);
+                        if (result !== false) { cancel(); break; }
                         doReplace();
                     } while(1);
                     break;
                 case EnumAgentResponseStatus.Complete:
                     do {
                         response.complete();
-                        let result = await Promise.race([waiter.wait(), this.sjReplaced.first().mapTo(false).toPromise()]);
-                        if (result !== false) break;
+                        let { promise, cancel } = makeCancelablePromise( this.sjReplaced.first().mapTo(false) );
+                        let result = await Promise.race([waiter.wait(), promise]);
+                        if (result !== false) { cancel(); break; }
                         doReplace();
                     } while(1);
                     this.sjCompleted.next(true);
@@ -147,9 +152,9 @@ export class DataKeeper {
         
         /// add preset timestamp
         now = now || new Date();
-        data[TimestampToken] = now;
-
-        return data;
+        // data[TimestampToken] = now;
+        // return data;
+        return { ...data, [TimestampToken]: now };
     }
 
     private packIDataKeeperStorage(type: EnumAgentResponseStatus, value: any = undefined): IDataKeeperStorage {

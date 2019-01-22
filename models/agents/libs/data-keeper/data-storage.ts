@@ -1,4 +1,4 @@
-import { IDataKeeperStorage } from "../core";
+import { IDataKeeperStorage, TimestampToken } from "../core";
 import { Observable } from "rxjs";
 import { createMongoDB, sharedMongoDB } from "helpers/cgi-helpers/core";
 import { Db, Collection } from "mongodb";

@@ -8,6 +8,23 @@ import { FileHelper } from 'helpers/parse-server/file-helper';
 const uuidv1 = require('uuid/v1');
 const caller = require('caller');
 
+const bypass: boolean = true;
+
+class FakeAstService {
+    private callbacks = [];
+    on(type: string, callback) {
+        if (type === 'message') {
+            this.callbacks.push(callback);
+        }
+    }
+
+    send(data) {
+        this.callbacks.forEach((callback) => {
+            callback(data);
+        });
+    }
+}
+
 interface Client {
     promise: Promise<any>;
     resolve: any;
@@ -46,7 +63,8 @@ export class AstClient {
     }
 
     constructor() {
-        this.process = fork(`${__dirname}/ast-service.ts`);
+        if (!bypass) this.process = fork(`${__dirname}/ast-service.ts`);
+        else this.process = new FakeAstService();
 
         this.process.on('message', async (msg: Response) => {
             var client = this.clients[msg.sessionId];
@@ -89,6 +107,7 @@ export class AstClient {
     requestValidation(nameOfType: string, data: any): Promise<any>;
     requestValidation(type: TypesFromAction, data: any): Promise<any>;
     requestValidation(type: string | TypesFromAction, data: any): Promise<any> {
+        if (bypass) return Promise.resolve(data);
         /// turn string into TypesFromAction
         if (typeof(type) === 'string') {
             type = { path: caller(), type: type as string };
@@ -105,6 +124,7 @@ export class AstClient {
     requestSimpleValidation(nameOfType: string, data: any): Promise<any>;
     requestSimpleValidation(type: TypesFromAction, data: any): Promise<any>;
     requestSimpleValidation(type: string | TypesFromAction, data: any): Promise<any> {
+        if (bypass) return Promise.resolve(data);
         /// turn string into TypesFromAction
         if (typeof(type) === 'string') {
             type = { path: caller(), type: type as string };
@@ -256,3 +276,4 @@ namespace AstConverter {
         return await FileHelper.toParseFile(data, name, mime) as Parse.File;
     }
 }
+

@@ -77,10 +77,9 @@ export class SocketDelegator {
                 /// add resolver
                 let waiter = new SocketResolver();
                 sj.subscribe( async (data) => {
-                    console.log('going to send', data)
-                    /// regularize data
                     let value = ParseObject.toOutputJSON(data);
-                    console.log('going to send...', JSON.stringify(data));
+                    /// regularize data
+                    console.log('going to send...', JSON.stringify(value));
                     try {
                         await this.socket.sendPromise({ ...respBase, data: injectTimestamp(value), status: EnumAgentResponseStatus.Data });
                     } catch(e) { return; }

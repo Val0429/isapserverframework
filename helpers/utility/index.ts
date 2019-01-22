@@ -6,6 +6,7 @@ export * from './mutex';
 export * from './deep-merge';
 export * from './O';
 export * from './log';
+export * from './make-cancelable-promise';
 export * from './pad-left';
 export * from './retry';
 export * from './jsmap-assign';

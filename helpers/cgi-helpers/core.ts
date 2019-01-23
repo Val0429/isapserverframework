@@ -8,7 +8,6 @@ import { Router, NextFunction, RequestHandler } from 'express/lib/router/index';
 import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
 
 /// Parse & define
-import * as Parse from 'parse/node';
 import { RoleList, IRole } from 'core/userRoles.gen';
 //import * as Socket from 'ws';
 import { Socket } from 'helpers/sockets/socket-helper';

@@ -1,6 +1,8 @@
 /// <reference path="./typings/index.d.ts" />
 "use strict";
 
+import 'parse-server';
+
 import './core/alias';
 import './core/create-file-index';
 

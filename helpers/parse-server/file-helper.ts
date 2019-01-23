@@ -1,4 +1,3 @@
-import * as Parse from 'parse/node';
 import { Config } from 'core/config.gen';
 import * as mimeType from 'mime-types';
 

@@ -8,9 +8,7 @@ export { Response };
 import { Router } from 'express/lib/router/index';
 export { Router };
 
-/// Parse & define
-import * as Parse from 'parse/node';
-export { Parse };
+/// defines
 export * from './userRoles.gen';
 export * from './personRoles.gen';
 export * from './events.gen';

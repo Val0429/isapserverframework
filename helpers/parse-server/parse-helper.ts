@@ -1,4 +1,3 @@
-import * as Parse from 'parse/node';
 import { FileHelper } from './file-helper';
 import { EnumConverter } from './../utility/get-enum-key';
 import { RoleList } from 'core/userRoles.gen';
@@ -20,7 +19,7 @@ export function retrievePrimaryClass<T>(target: T): new () => (T extends string 
 var primaryKeyMap = {};
 export const registerPrimaryKey = (primaryKey: string) => {
     return <T>(target: new () => T) => {
-        var name = (new target).constructor.name;
+        var name = target.name;
         if (primaryKeyMap[name]) Log.Error("registerPrimaryKey", `conflicts with key "${name}`);
         primaryKeyMap[name] = primaryKey;
     }

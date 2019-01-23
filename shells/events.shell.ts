@@ -5,7 +5,6 @@ import { Config } from 'models/events/events.define';
 //     IEventLogin, IEventLogout
 // } from './events';
 var tHeader = `
-import * as Parse from 'parse/node';
 import { registerSubclass, ParseObject, Omit } from 'helpers/parse-server/parse-helper';
 import { Events, IEvents, IEvent } from 'models/events/events.base';
 export * from 'models/events/events.base';

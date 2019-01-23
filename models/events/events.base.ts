@@ -1,4 +1,3 @@
-import * as Parse from 'parse/node';
 import { Person } from 'models/userRoles/personRoles.base';
 import { ParseObject, registerSubclass, retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
 import { EventList, EventsType } from 'core/events.gen';

@@ -1,4 +1,3 @@
-import * as Parse from 'parse/node';
 import { serverReady } from './pending-tasks';
 import { DynamicLoader } from 'helpers/dynamic-loader/dynamic-loader';
 import { EventLogin, Events, IEvent } from './events.gen';

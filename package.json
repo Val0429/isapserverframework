@@ -55,7 +55,6 @@
     "node-csv-parse": "1.2.0",
     "nodemailer": "4.6.8",
     "nodemon": "1.17.5",
-    "parse": "1.11.0",
     "parse-dashboard": "1.2.0",
     "parse-server": "2.7.2",
     "request": "2.87.0",

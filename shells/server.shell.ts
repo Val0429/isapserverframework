@@ -7,6 +7,7 @@ var tHeader = `
 import 'shells/events.shell';
 
 import * as express from 'express';
+import * as parse from 'parse-server';
 import { expressWsRoutes } from 'helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
 import * as p from 'path';
@@ -14,7 +15,6 @@ import { noCache } from 'helpers/middlewares/no-cache';
 import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from 'helpers/routers/router-loader';
 import { makeServerReady } from 'core/pending-tasks';
-import * as parse from 'parse-server';
 import * as ParseDashboard from 'parse-dashboard';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { sharedMongoDB } from 'helpers/parse-server/parse-helper';

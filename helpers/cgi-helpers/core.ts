@@ -236,7 +236,7 @@ export class Action<T = any, U = any> {
                     socket.io.send(JSON.stringify({statusCode: 200}));
 
                     /// auto update session ///////////////////////
-                    if (Config.core.sessionExpireSeconds >= 0) {
+                    if (Config.core.sessionExpireSeconds >= 0 && request.session) {
                         let sessionId: string = request.session.id;
                         /// tick maximum to 30 minutes
                         let tick: number = Math.min(Config.core.sessionExpireSeconds*1000/2, 30*60*1000);

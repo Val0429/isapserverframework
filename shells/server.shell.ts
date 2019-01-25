@@ -22,6 +22,8 @@ import { Action } from 'helpers/cgi-helpers/core';
 import { Log } from 'helpers/utility';
 import { deployWeb } from 'helpers/deploy-web';
 import 'colors';
+import { InMemoriableMongoDBAdapter } from 'helpers/parse-server/database-adapter/inmemoriable-mongodb-adapter';
+import GridStoreAdapter from 'parse-server/lib/Adapters/Files/GridStoreAdapter';
 
 import { Config } from 'core/config.gen';
 
@@ -61,8 +63,11 @@ if (Config.mongodb.enable) {
     let serverURL = !Config.core.httpDisabled ?
         \`\${myServerUrl}\${Config.parseServer.serverPath}\` :
         \`\${myServerUrl}\${Config.parseServer.serverPath}\`;
+    let databaseURI = \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`; 
     var ParseServer = new parse.ParseServer({
-        databaseURI: \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`,
+        //databaseURI,
+        databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI}),
+        filesAdapter: new GridStoreAdapter(databaseURI),
         appId: Config.parseServer.appId,
         masterKey: Config.parseServer.masterKey,
         fileKey: Config.parseServer.fileKey,

@@ -1,6 +1,6 @@
 import {
     express, Request, Response, Router,
-    Parse, IRole, IUser, RoleList,
+    IRole, IUser, RoleList,
     Action, Errors,
     Restful, EventSubjects, ParseObject, getEnumKey, EventList
 } from 'core/cgi-package';

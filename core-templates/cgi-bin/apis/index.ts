@@ -1,6 +1,6 @@
 import {
     express, Request, Response, Router,
-    Parse, IRole, IUser, RoleList, IConfig, Config, IConfigSetup,
+    IRole, IUser, RoleList, IConfig, Config, IConfigSetup,
     Action, Errors, Floors,
     Restful, FileHelper, ParseObject
 } from 'core/cgi-package';

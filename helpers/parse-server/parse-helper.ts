@@ -4,16 +4,34 @@ import { RoleList } from 'core/userRoles.gen';
 
 /// decorators //////////////
 var primaryClassMap = {};
-export function registerSubclass(collectionName?: string) {
+interface IRegisterSubclassMeta {
+    memoryCache?: boolean;
+}
+var primaryClassMetaMap = {};
+export function registerSubclass(collectionNameOrMeta?: string | IRegisterSubclassMeta);
+export function registerSubclass(collectionName?: string, meta?: IRegisterSubclassMeta);
+export function registerSubclass(collectionNameOrMeta?: string | IRegisterSubclassMeta, meta?: IRegisterSubclassMeta) {
+    let collectionName;
+    if (typeof collectionNameOrMeta === 'string') {
+        collectionName = collectionNameOrMeta;
+    } else if (collectionNameOrMeta) {
+        meta = collectionNameOrMeta;
+    }
+
     return (targetClass) => {
         var name = collectionName || targetClass.name;
         Parse.Object.registerSubclass(name, targetClass);
         primaryClassMap[name] = targetClass;
+        primaryClassMetaMap[name] = meta;
     }
 }
 export function retrievePrimaryClass<T>(target: T): new () => (T extends string ? any : T) {
     var name: string = typeof target === 'string' ? target : target.constructor.name;
     return primaryClassMap[name];
+}
+export function retrievePrimaryClassMeta<T>(target: T): IRegisterSubclassMeta {
+    var name: string = typeof target === 'string' ? target : target.constructor.name;
+    return primaryClassMetaMap[name];
 }
 
 var primaryKeyMap = {};

@@ -146,9 +146,11 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
     private async makeCache(className: string) {
         let cache = this.cacheMap.get(className);
         if (cache) return null;
-        return new Promise( (resolve, reject) => {
+        return new Promise( async (resolve, reject) => {
+            let schema = await super.getClass(className);
             super.find(className,
-                { className, fields: {}, classLevelPermissions: {}, indexes: { _id_: { _id: 1 } } },
+                schema,
+                // { className, fields: {}, classLevelPermissions: {}, indexes: { _id_: { _id: 1 } } },
                 { _rperm: { '$in': [ null, '*' ] } },
                 { skip: undefined, limit: undefined, sort: {}, keys: undefined, readPreference: undefined }
             ).then( (result) => {
@@ -278,7 +280,7 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                     if (data === value) return true;
                 } else {
                     /// object types,
-                    let keys = Object.keys(value);
+                    let keys = value["__type"] ? ["__type"] : Object.keys(value);
                     for (let i=0; i<keys.length; ++i) {
                         let key = keys[i];
                         let val = value[key];
@@ -329,6 +331,10 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                                 // * for exists or doesNotExists
                                 // * e.g. { 'data.name': { '$exists': true } }
                                 if ( !(!val === (data === undefined || data === null)) ) break main;
+                                break;
+
+                            case '__type':
+                                if ( !(value.objectId === data.objectId) ) break main;
                                 break;
 
                             default:

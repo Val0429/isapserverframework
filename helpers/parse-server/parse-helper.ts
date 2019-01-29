@@ -6,8 +6,13 @@ import { RoleList } from 'core/userRoles.gen';
 var primaryClassMap = {};
 interface IRegisterSubclassMeta {
     memoryCache?: boolean;
+    /**
+     * required for Tree<T> structure.
+     * True means this Tree Structure is a container: Permission of parent grant permission of child.
+     * e.g. Your boss has permission of door doesn't mean you have too. So this User Tree is not a container.
+     */
+    container?: boolean;
 }
-var primaryClassMetaMap = {};
 export function registerSubclass(collectionNameOrMeta?: string | IRegisterSubclassMeta);
 export function registerSubclass(collectionName?: string, meta?: IRegisterSubclassMeta);
 export function registerSubclass(collectionNameOrMeta?: string | IRegisterSubclassMeta, meta?: IRegisterSubclassMeta) {
@@ -22,16 +27,20 @@ export function registerSubclass(collectionNameOrMeta?: string | IRegisterSubcla
         var name = collectionName || targetClass.name;
         Parse.Object.registerSubclass(name, targetClass);
         primaryClassMap[name] = targetClass;
-        primaryClassMetaMap[name] = meta;
+        /// save meta
+        if (meta) {
+            let metaObject = Meta.get(targetClass);
+            Object.keys(meta).forEach( (key) =>  metaObject[key] = meta[key] );
+        }
     }
 }
 export function retrievePrimaryClass<T>(target: T): new () => (T extends string ? any : T) {
     var name: string = typeof target === 'string' ? target : target.constructor.name;
     return primaryClassMap[name];
 }
-export function retrievePrimaryClassMeta<T>(target: T): IRegisterSubclassMeta {
-    var name: string = typeof target === 'string' ? target : target.constructor.name;
-    return primaryClassMetaMap[name];
+export function retrievePrimaryClassMeta<T extends ParseObject<any> | string>(target: T): IRegisterSubclassMeta {
+    let classType = typeof target === 'string' ? retrievePrimaryClass(target) : target;
+    return Meta.get(classType as any);
 }
 
 var primaryKeyMap = {};
@@ -217,6 +226,7 @@ export interface ParseObjectJSONRule {
 import { Config } from 'core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Log } from 'helpers/utility';
+import { Meta } from 'helpers/utility/meta';
 
 export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> {
     let { ip, port, collection } = Config.mongodb;

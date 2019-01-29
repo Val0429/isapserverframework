@@ -104,28 +104,39 @@ export namespace Permission {
                         return null;
                     }
 
-                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M): Promise<boolean> {
-                        let verifyOnce = () => {
-                            
+                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M): Promise<PermissionList[M]> {
+                        if (!Array.isArray(on)) on = [on];
+
+                        /// if data is Tree<T>, flattern into array of child/parent. if not, return array of data.
+                        let flattern = async (data /*: ParseObject<any> | Tree<any>*/) => {
+                            if (data instanceof Tree && Meta.get(data.constructor).container) {
+                                let leafs = await data.getParentLeafs();
+                                return [data, ...leafs];
+                            } else {
+                                return [data];
+                            }
                         }
 
-                        // /// flattern
-                        // let a, b, c, d;
-                        // if (!Array.isArray(on)) on = [on];
-                        // on.forEach( (one) => {
-                        //     if (one instanceof role1) a = one;
-                        //     else if (one instanceof role2) b = one;
-                        //     else if (one instanceof role3) c = one;
-                        //     else if (one instanceof role4) d = one;
-                        // });
-                        // /// climb once
-                        // let permissions = await this.list({ of });
-                        // /// match rules
-                        // for (let permission of permissions) {
-                        //     permission.getValue("")
-                        // }
+                        /// for loop each "of"
+                        let result = undefined;
+                        main: for (let eachOf of await flattern(of)) {
+                            /// for loop each "on"
+                            for (let eachOn of on) {
+                                /// for loop each "flatOn"
+                                for (let flatOn of await flattern(eachOn)) {
+                                    /// verify permission between eachOf -> flatOn
+                                    /// todo: may make it faster
+                                    let permissions = await this.list({ of: eachOf, on: flatOn });
+                                    if (permissions.length === 0) continue;
+                                    let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
+                                    let attr = attrs.access[key];
+                                    if (attr !== undefined) { result = attr; break main; }
+                                    continue;
+                                }
+                            }
+                        }
 
-                        return true;
+                        return result;
                     }
                     // static get<M>(this: this: new() => M, permissionOf: T, on: PermissionOn[]): PermissionList {
                     //     return null;

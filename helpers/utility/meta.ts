@@ -28,9 +28,9 @@ type IMeta = [Set<any> | object, object];
 const metaCache: IMeta[] = [];
 
 export namespace Meta {
-    export function get(onObject: Set<any> | object): object;
+    export function get(onObject: Set<any> | object): any;
     export function get<T>(onObject: Set<any> | object, key: string, def?: () => T): T;
-    export function get<T>(onObject: Set<any> | object, key?: string, def?: () => T): object | T {
+    export function get<T>(onObject: Set<any> | object, key?: string, def?: () => T): any | T {
         let idx = metaCache.findIndex( (cache) => {
             let key = cache[0];
             if (!(key instanceof Set)) {

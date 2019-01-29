@@ -1,6 +1,7 @@
 import { MongoStorageAdapter } from 'parse-server/lib/Adapters/Storage/Mongo/MongoStorageAdapter';
 import { retrievePrimaryClassMeta } from '../parse-helper';
 import { jsMapAssign } from 'helpers/utility';
+var caller = require('caller');
 
 type SchemaType = any;
 type QueryType = any;

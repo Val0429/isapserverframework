@@ -71,6 +71,7 @@ if (Config.mongodb.enable) {
         appId: Config.parseServer.appId,
         masterKey: Config.parseServer.masterKey,
         fileKey: Config.parseServer.fileKey,
+        enableSingleSchemaCache: true,
         serverURL,
         sessionLength: Config.core.sessionExpireSeconds
     });

@@ -13,6 +13,16 @@ interface ITreeCore {
 export type ITree<T extends Never<ITreeCore>> = ITreeCore & T;
 
 export class Tree<T> extends ParseObject<ITree<T>> {
+    constructor(data?: Partial<ITree<T>>) {
+        super(data);
+
+        /// get meta & check container
+        let meta: any = Meta.get(this.constructor);
+        if (meta.container === undefined || meta.container === null) {
+            throw `<${this.constructor.name}> of Tree<T> must have meta <container>.`
+        }
+    }
+
     private static getMutex(thisClass: any): Mutex {
         return Meta.get(thisClass, "mutex", () => new Mutex());
     }

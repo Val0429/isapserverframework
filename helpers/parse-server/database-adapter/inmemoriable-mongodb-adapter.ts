@@ -46,8 +46,8 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                                 let final = {objectId, ...rest, createdAt, updatedAt};
                                 this.pushCache(className, final);
                             });
-                            resolve(result);
                         }
+                        resolve(result);
                     }).catch( (e) => reject(e));
             } catch(e) { reject(e) }
         });

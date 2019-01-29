@@ -1,7 +1,9 @@
 import { ParseObject } from "helpers/parse-server/parse-helper";
 import { Meta } from "helpers/utility/meta";
-import { Mutex } from "helpers/utility";
+import { Mutex, Log } from "helpers/utility";
 import { Tree } from "./tree";
+
+const LogTitle = "Permission";
 
 export interface IPermission<PermissionList, PermissionOf, Role1, Role2, Role3, Role4> {
     of: PermissionOf;
@@ -70,6 +72,9 @@ export namespace Permission {
                     static async set<M extends keyof PermissionList>(of: T, on: PermissionOn, key: M, value: PermissionList[M]): Promise<void>;
                     static async set(of: T, on: PermissionOn, access: PermissionList): Promise<void>;
                     static async set<M extends keyof PermissionList>(of: T, on: PermissionOn, access: PermissionList | M, value?: PermissionList[M]): Promise<void> {
+                        if (!of) throw Log.Error(LogTitle, "<of> should not be null.");
+                        if (!on) throw Log.Error(LogTitle, "<on> should not be null.");
+
                         let mtx: Mutex = this.getMutex();
                         await mtx.acquire();
                         

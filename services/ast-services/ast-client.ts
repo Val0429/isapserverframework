@@ -8,7 +8,7 @@ import { FileHelper } from 'helpers/parse-server/file-helper';
 const uuidv1 = require('uuid/v1');
 const caller = require('caller');
 
-const bypass: boolean = true;
+const bypass: boolean = false;
 
 class FakeAstService {
     private callbacks = [];

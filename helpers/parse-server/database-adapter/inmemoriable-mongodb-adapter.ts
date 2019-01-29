@@ -43,6 +43,23 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                             /// update memory cache
                             result.ops.forEach( (data) => {
                                 let { _id: objectId, _created_at: createdAt, _updated_at: updatedAt, ...rest } = data;
+                                /// resolve rest pointers
+                                let resolvePointers = (data) => {
+                                    let isArray = Array.isArray(data);
+                                    /// bypass array of pointers for now.
+                                    if (isArray) return data;
+                                    return Object.keys(data).reduce( (final, key) => {
+                                        let value = data[key];
+                                        if (typeof value === 'object') final[key] = resolvePointers(value);
+                                        else if (key[0] === "_" && key.indexOf("_p_") === 0) {
+                                            key = key.substr(3, key.length);
+                                            let [ className, objectId ] = value.split("$");
+                                            final[key] = { __type: "Pointer", className, objectId };
+                                        } else final[key] = value;
+                                        return final;
+                                    }, {});
+                                }
+                                rest = resolvePointers(rest);
                                 let final = {objectId, ...rest, createdAt, updatedAt};
                                 this.pushCache(className, final);
                             });
@@ -148,13 +165,21 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
         let cache = this.cacheMap.get(className);
         if (cache) return null;
         return new Promise( async (resolve, reject) => {
-            let schema = await super.getClass(className);
+            let schema;
+            try {
+                schema = await super.getClass(className);
+            } catch(e) {
+                let result = [];
+                this.cacheMap.set(className, result);
+                return resolve(result);
+            }
             super.find(className,
                 schema,
                 // { className, fields: {}, classLevelPermissions: {}, indexes: { _id_: { _id: 1 } } },
                 { _rperm: { '$in': [ null, '*' ] } },
                 { skip: undefined, limit: undefined, sort: {}, keys: undefined, readPreference: undefined }
             ).then( (result) => {
+                result = result || [];
                 this.cacheMap.set(className, result);
                 resolve(result);
             });
@@ -274,6 +299,7 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
             main: do {
                 /// get real data
                 data = this.findFieldValue(data, key);
+                if (!data) break main;
                 
                 /// compare data with rules
                 if (typeof value === 'string') {

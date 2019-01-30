@@ -1,7 +1,8 @@
 import { MongoStorageAdapter } from 'parse-server/lib/Adapters/Storage/Mongo/MongoStorageAdapter';
 import { retrievePrimaryClassMeta } from '../parse-helper';
-import { jsMapAssign } from 'helpers/utility';
-var caller = require('caller');
+import { Log } from 'helpers/utility';
+
+const LogTitle: string = "InmemoriableMongoDB";
 
 type SchemaType = any;
 type QueryType = any;
@@ -83,9 +84,9 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                 let { memoryCache } = meta || {} as any;
                 if (memoryCache) {
                     await this.makeCache(className);
-                    console.time(`cache time ${className}`);
+                    Log.TraceTime(LogTitle, `cache time ${className}`);
                     let result = this.findInMemoryCache(className, schema, query, options);
-                    console.timeEnd(`cache time ${className}`);
+                    Log.TraceTimeEnd(LogTitle, `cache time ${className}`);
                     return resolve(result);
                 }
                 console.time(`query time ${className}`);

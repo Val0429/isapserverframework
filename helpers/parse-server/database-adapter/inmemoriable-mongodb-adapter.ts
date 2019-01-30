@@ -89,10 +89,10 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                     Log.TraceTimeEnd(LogTitle, `cache time ${className}`);
                     return resolve(result);
                 }
-                console.time(`query time ${className}`);
+                Log.TraceTime(LogTitle, `query time ${className}`);
                 super.find(className, schema, query, options)
                     .then( (result) => {
-                        console.timeEnd(`query time ${className}`);
+                        Log.TraceTimeEnd(LogTitle, `query time ${className}`);
                         resolve(result);
                     }).catch( (e) => reject(e));
 

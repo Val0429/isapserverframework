@@ -96,7 +96,7 @@ export class PinCode {
 
             /// if not exists, create
             Log.Info("PinCode", "Creating...");
-            Log.time("PinCode", `${digits} Digits PinCode Created`);
+            Log.InfoTime("PinCode", `${digits} Digits PinCode Created`);
             let pinNumbers = new Array();
             for (let i=min, j=0; i<max; ++i, ++j) pinNumbers[j] = i;
             shuffle(pinNumbers);
@@ -108,7 +108,7 @@ export class PinCode {
                 index: 0, total: totalSize, pin: buf
             }, () => {
                 makeSubjectReady(pins);
-                Log.timeEnd("PinCode", `${digits} Digits PinCode Created`);
+                Log.InfoTimeEnd("PinCode", `${digits} Digits PinCode Created`);
             });
 
         })();

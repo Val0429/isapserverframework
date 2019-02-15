@@ -126,8 +126,15 @@ export interface ICalendarUnit<T> {
     data: T;
 }
 
-type ParseObjectClass = { new(): ParseObject<any> };
+type ParseObjectClass = { new(...args): ParseObject<any> };
 type InstanceType<T> = T extends { new(...args): infer A } ? A : never;
+
+export class Schedule<T extends ISchedule<any, any, any, any, any>> extends ParseObject<T> {
+    protected constructor(...args) {
+        super(...arguments);
+    }
+}
+
 export namespace Schedule {
     export function Of<
         Who, Where, What, How, Others,
@@ -145,7 +152,7 @@ export namespace Schedule {
         OthersT = Others extends { new(): infer A } ? A : never
     >(who: Who, where: Where, what?: What, how?: How, others?: Others) {
 
-        let Schd = class Schedule extends ParseObject<IS> {
+        let Schd = class ScheduleImpl extends Schedule<IS> {
             constructor(data: Partial<IS>) {
                 super(data);
                 /// default priority
@@ -178,8 +185,9 @@ export namespace Schedule {
             }
             ///////////////////////////////////////////////////////////////
 
-            static async buildCalendar(on: Who | Where | What | How, timeRange?: IScheduleTimeRange) {
-                let query = new Parse.Query<Schedule>(this);
+            static async buildCalendar<M extends ScheduleImpl>(this: new(...args) => M, on: Who | Where | What | How, timeRange?: IScheduleTimeRange) {
+                let thisClass: { new(): M } = this;
+                let query = new Parse.Query(thisClass);
                 
                 /// filter "on"
                 if (typeof who === 'function' && on instanceof who) query.equalTo("who", on);
@@ -222,8 +230,7 @@ export namespace Schedule {
             }
 
             /// find all matches calendar unit, in time range
-            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule.All): ICalendarUnit<T>[];
-            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange): ICalendarUnit<T>[];
+            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule?: EBuildScheduleRule.All): ICalendarUnit<T>[];
             static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule.LastOnly): ICalendarUnit<T>[] | EBuildScheduleLast;
             static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule.LastOnly): ICalendarUnit<T>[];
             /* private */static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule = EBuildScheduleRule.All): ICalendarUnit<T>[] | EBuildScheduleLast {

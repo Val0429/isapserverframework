@@ -17,7 +17,7 @@ export interface IPermission<PermissionList, PermissionOf, Role1, Role2, Role3, 
     access: PermissionList;
 }
 
-type ParseObjectClass = { new(): ParseObject<any> };
+type ParseObjectClass = { new(...args): ParseObject<any> };
 
 export interface IPermissionListArgs<PermissionOf, On> {
     of?: PermissionOf;

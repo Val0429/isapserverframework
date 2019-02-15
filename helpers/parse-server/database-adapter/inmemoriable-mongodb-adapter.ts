@@ -1,5 +1,5 @@
 import { MongoStorageAdapter } from 'parse-server/lib/Adapters/Storage/Mongo/MongoStorageAdapter';
-import { retrievePrimaryClassMeta } from '../parse-helper';
+import { retrievePrimaryClassMeta, ParseObject } from '../parse-helper';
 import { Log } from 'helpers/utility';
 
 const LogTitle: string = "InmemoriableMongoDB";
@@ -49,6 +49,7 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                                     let isArray = Array.isArray(data);
                                     /// bypass array of pointers for now.
                                     if (isArray) return data;
+                                    if (data instanceof Date) return { __type: 'Date', iso: data.toISOString() }
                                     return Object.keys(data).reduce( (final, key) => {
                                         let value = data[key];
                                         if (typeof value === 'object') final[key] = resolvePointers(value);

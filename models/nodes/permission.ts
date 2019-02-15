@@ -1,3 +1,4 @@
+import * as util from 'util';
 import { ParseObject } from "helpers/parse-server/parse-helper";
 import { Meta } from "helpers/utility/meta";
 import { Mutex, Log } from "helpers/utility";
@@ -40,10 +41,10 @@ export namespace Permission {
                     Role3 extends ParseObjectClass,
                     Role4 extends ParseObjectClass,
 
-                    U = Role1 extends { new(): infer A } ? A : never,
-                    V = Role2 extends { new(): infer A } ? A : never,
-                    K = Role3 extends { new(): infer A } ? A : never,
-                    C = Role4 extends { new(): infer A } ? A : never,
+                    U = Role1 extends { new(...args): infer A } ? A : never,
+                    V = Role2 extends { new(...args): infer A } ? A : never,
+                    K = Role3 extends { new(...args): infer A } ? A : never,
+                    C = Role4 extends { new(...args): infer A } ? A : never,
 
                     PermissionOn = V extends never ? U :
                                    K extends never ? U | V :
@@ -53,6 +54,9 @@ export namespace Permission {
 
                 return class extends ParseObject<IPermission<PermissionList, T, U, V, K, C>> {
                     /// real functions of Permission
+                    /**
+                     * List all related permission. of + on
+                     */
                     static async list<M extends ParseObject<any>>(this: new() => M, options?: IPermissionListArgs<T, PermissionOn>): Promise<M[]> {
                         let thisClass: { new(): M } = this;
                         let query = new Parse.Query<M>(thisClass);
@@ -61,9 +65,13 @@ export namespace Permission {
                             let on = options.on;
                             if (on) {
                                 if (on instanceof role1) query = query.equalTo("a", on);
-                                else if (on instanceof role2) query = query.equalTo("b", on);
-                                else if (on instanceof role3) query = query.equalTo("c", on);
-                                else if (on instanceof role4) query = query.equalTo("d", on);
+                                else if (role2 && on instanceof role2) query = query.equalTo("b", on);
+                                else if (role3 && on instanceof role3) query = query.equalTo("c", on);
+                                else if (role4 && on instanceof role4) query = query.equalTo("d", on);
+                                else {
+                                    /// Schedule related object should not goes here
+                                    throw `<Permission> exception class - ${util.inspect(on)}`;
+                                }
                             }
                         }
                         return query.find();
@@ -111,7 +119,6 @@ export namespace Permission {
 
                     static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M): Promise<PermissionList[M]> {
                         if (!Array.isArray(on)) on = [on];
-
                         /// if data is Tree<T>, flattern into array of child/parent. if not, return array of data.
                         let flattern = async (data /*: ParseObject<any> | Tree<any>*/) => {
                             if (data instanceof Tree && Meta.get(data.constructor).container) {

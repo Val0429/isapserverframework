@@ -38,12 +38,12 @@ export class CacheQuery<T extends ParseObjectClass, U = T extends { new(...args)
     }
 
     equalTo(key: string, value: any) {
-        this.filterFunc.push( this.makeFilterFunc(key, value, (a, b) => a === b) );
+        this.filterFunc.push( this.makeFilterFunc(key, value, (a, b) => a instanceof ParseObject ? a.id === b.id : a === b) );
         return this;
     }
 
     notEqualTo(key: string, value: any) {
-        this.filterFunc.push( this.makeFilterFunc(key, value, (a, b) => a !== b) );
+        this.filterFunc.push( this.makeFilterFunc(key, value, (a, b) => a instanceof ParseObject ? a.id !== b.id : a !== b) );
         return this;
     }
 
@@ -105,11 +105,11 @@ export class CacheParse {
         let first = false;
         let sj = jsMapAssign(this.caching, classObj.name, () => { first = true; return new BehaviorSubject(undefined) });
         if (first) {
-            //(async () => sj.next(await new Parse.Query(classObj).find()))();
-            (async () => {
-                let result = await new Parse.Query(classObj).find();
-                sj.next(result);
-            })();
+            (async () => sj.next(await new Parse.Query(classObj).find()))();
+            // (async () => {
+            //     let result = await new Parse.Query(classObj).find();
+            //     sj.next(result);
+            // })();
         }
         return new CacheQuery(classObj, sj as any);
     }

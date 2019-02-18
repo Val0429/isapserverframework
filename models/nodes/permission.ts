@@ -178,6 +178,16 @@ export namespace Permission {
 
                                 } else {
                                 /// 2.2) Normal case
+                                    let idx = on.findIndex((value) => value instanceof role);
+                                    if (idx < 0) continue;
+                                    for (let flatOn of await flattern(on[idx])) {
+                                        /// verify permission between eachOf -> flatOn
+                                        let permissions = await this.list({ of: eachOf, on: flatOn }, CParse);
+                                        if (permissions.length === 0) continue;
+                                        let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
+                                        let attr = attrs.access[key];
+                                        if (attr !== undefined) { result = attr; break main; } 
+                                    }
                                 }
                             }
                         }

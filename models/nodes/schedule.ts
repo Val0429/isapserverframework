@@ -150,13 +150,21 @@ export namespace Schedule {
         WhatT = What extends { new(): infer A } ? A : never,
         HowT = How extends { new(): infer A } ? A : never,
         OthersT = Others extends { new(): infer A } ? A : never
-    >(who: Who, where: Where, what?: What, how?: How, others?: Others) {
+    >(config: {
+        who?: Who, where?: Where, what?: What, how?: How, others?: Others
+    }) {
+        let { who, where, what, how, others } = config;
 
         let Schd = class ScheduleImpl extends Schedule<IS> {
+            /* protected */static who: Who = who;
+            /* protected */static where: Where = where;
+            /* protected */static what: What = what;
+            /* protected */static how: How = how;
+            /* protected */static others: Others = others;
             constructor(data: Partial<IS>) {
                 super(data);
                 /// default priority
-                if (this.attributes.priority === undefined) this.setValue("priority", EPriority.Normal);
+                if (data && this.attributes.priority === undefined) this.setValue("priority", EPriority.Normal);
             }
 
             /// before save, calculate endDate
@@ -185,19 +193,26 @@ export namespace Schedule {
             }
             ///////////////////////////////////////////////////////////////
 
-            static async buildCalendar<M extends ScheduleImpl>(this: new(...args) => M, on: Who | Where | What | How, timeRange?: IScheduleTimeRange) {
+            static async buildCalendar<M extends ScheduleImpl>(this: new(...args) => M, on: M[], timeRange?: IScheduleTimeRange);
+            static async buildCalendar<M extends ScheduleImpl>(this: new(...args) => M, on: Who | Where | What | How, timeRange?: IScheduleTimeRange);
+            static async buildCalendar<M extends ScheduleImpl>(this: new(...args) => M, on: M[] | Who | Where | What | How, timeRange?: IScheduleTimeRange) {
                 let thisClass: { new(): M } = this;
                 let query = new Parse.Query(thisClass);
                 
                 /// filter "on"
-                if (typeof who === 'function' && on instanceof who) query.equalTo("who", on);
-                else if (typeof where === 'function' && on instanceof where) query.equalTo("where", on);
-                else if (typeof what === 'function' && on instanceof what) query.equalTo("what", what);
-                else if (typeof how === 'function' && on instanceof how) query.equalTo("how", how);
+                let result: M[];
+                if (Array.isArray(on)) result = on;
+                else {
+                    if (typeof who === 'function' && on instanceof who) query.equalTo("who", on);
+                    else if (typeof where === 'function' && on instanceof where) query.equalTo("where", on);
+                    else if (typeof what === 'function' && on instanceof what) query.equalTo("what", what);
+                    else if (typeof how === 'function' && on instanceof how) query.equalTo("how", how);
+                    result = await query.find();
+                }
+
                 /// filter "timeRange"
                 if (!timeRange) timeRange = { start: new Date() };
 
-                let result = await query.find();
                 return new Cal(result, timeRange);
             }
         }
@@ -222,6 +237,7 @@ export namespace Schedule {
                 let rtn: ICalendarUnit<T>[] = [];
                 for (let unit of this.calendarUnits) {
                     if (date > unit.end) continue;
+                    // console.log('comp', date, unit.start, date < unit.start);
                     if (date < unit.start) break;
                     rtn.push(unit);
                 }
@@ -278,7 +294,7 @@ export namespace Schedule {
                         for (let i=0; ; ++unit, ++i) {
                             let start = nStart + (unit * interval);
                             let end = nEnd + (unit * interval);
-                            if (start >= nRefEnd) break;
+                            if (start > nRefEnd) break;
 
                             /// end type = Date
                             if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
@@ -311,12 +327,13 @@ export namespace Schedule {
                         let distance = (weekdays[0] - beginDate.getDay()) % 7;
                         nStart += distance * OneDay; nEnd += distance * OneDay;
                         let baseInterval = when.repeat.value * OneWeek;
-                        let unit = Math.max( Math.floor((nRefStart - nEnd) / baseInterval) + 1, 0 );
+                        let unit = Math.max( Math.floor((nRefStart - nEnd) / baseInterval)/* + 1*/, 0 );
                         main: for (let i=0; ; ++unit, ++i) {
                             for (let intval of interval) {
                                 let start = nStart + (unit * baseInterval) + (intval * OneDay);
                                 let end = nEnd + (unit * baseInterval) + (intval * OneDay);
-                                if (start >= nRefEnd) break main;
+                                if (start > nRefEnd) break main;
+                                if (end <= nRefStart) continue;
 
                                 /// end type = Date
                                 if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
@@ -360,7 +377,7 @@ export namespace Schedule {
                                      ++i) {
                                     let start = new Date(tYear, tMonth, tDate, tHour, tMinute, tSecond, tMSecond);
                                     let end = new Date(start.valueOf() + interval);
-                                    if (start >= timeRange.end) break;
+                                    if (start > timeRange.end) break;
 
                                     /// end type = Date
                                     if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
@@ -412,7 +429,7 @@ export namespace Schedule {
                                     ++i) {
                                     let start = nthWeekdayOfMonth(tWeekday, tNthWeekday, new Date(tYear, tMonth, 1, tHour, tMinute, tSecond, tMSecond));
                                     let end = new Date(start.valueOf() + interval);
-                                    if (start >= timeRange.end) break;
+                                    if (start > timeRange.end) break;
 
                                     /// end type = Date
                                     if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&

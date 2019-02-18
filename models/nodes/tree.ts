@@ -2,6 +2,7 @@ import { ParseObject } from "helpers/parse-server/parse-helper";
 import { pickObject } from "helpers/utility/pick-object";
 import { Mutex } from "helpers/utility";
 import { Meta } from "helpers/utility/meta";
+import { CacheParse } from "helpers/parse-server/cache-helper";
 
 type ExtractInterface<T> = T extends Tree<infer U> ? U : never;
 type Never<T> = { [P in keyof T]: never; }
@@ -28,25 +29,25 @@ export class Tree<T> extends ParseObject<ITree<T>> {
     }
 
     /// get root leaf
-    static async getRoot<T extends Tree<any>>(this: { new(): T }): Promise<T> {
+    static async getRoot<T extends Tree<any>>(this: { new(): T }, CParse?: CacheParse): Promise<T> {
         let thisClass: { new(): T } = this;
-        return new Parse.Query<T>(thisClass)
+        return (CParse ? CParse.Query(thisClass) : new Parse.Query<T>(thisClass))
             .equalTo("lft", 1)
             .first();
     }
 
     /// get the first parent ancestor
-    async getParentLeaf<U extends Tree<T>>(this: U): Promise<U> {
-        let parents = await this.getParentLeafs();
+    async getParentLeaf<U extends Tree<T>>(this: U, CParse?: CacheParse): Promise<U> {
+        let parents = await this.getParentLeafs(CParse);
         if (parents.length === 0) return null;
         return parents[0];
     }
 
     /// get parent leafs
-    async getParentLeafs<U extends Tree<T>>(this: U): Promise<U[]> {
+    async getParentLeafs<U extends Tree<T>>(this: U, CParse?: CacheParse): Promise<U[]> {
         let thisClass: { new(): U } = this.constructor as any;
         let { lft, rgt } = this.attributes;
-        return await new Parse.Query<U>(thisClass)
+        return (CParse ? CParse.Query(thisClass) : new Parse.Query<U>(thisClass))
             .lessThan("lft", lft)
             .greaterThan("rgt", rgt)
             .descending("lft")

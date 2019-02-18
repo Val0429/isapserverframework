@@ -1,8 +1,12 @@
 import * as util from 'util';
 import { ParseObject } from "helpers/parse-server/parse-helper";
 import { Meta } from "helpers/utility/meta";
-import { Mutex, Log } from "helpers/utility";
+import { Mutex, Log, jsMapAssign } from "helpers/utility";
 import { Tree } from "./tree";
+import { Schedule } from './schedule';
+import { Floors } from 'core/events.gen';
+import { BehaviorSubject } from 'rxjs';
+import { CacheParse } from 'helpers/parse-server/cache-helper';
 
 const LogTitle = "Permission";
 
@@ -23,6 +27,11 @@ type ParseObjectClass = { new(...args): ParseObject<any> };
 export interface IPermissionListArgs<PermissionOf, On> {
     of?: PermissionOf;
     on?: On;
+}
+
+export interface IPermissionVerifyConfig {
+    date?: Date;
+    CParse?: CacheParse;
 }
 
 export namespace Permission {
@@ -57,9 +66,9 @@ export namespace Permission {
                     /**
                      * List all related permission. of + on
                      */
-                    static async list<M extends ParseObject<any>>(this: new() => M, options?: IPermissionListArgs<T, PermissionOn>): Promise<M[]> {
+                    static async list<M extends ParseObject<any>>(this: new() => M, options?: IPermissionListArgs<T, PermissionOn>, CParse?: CacheParse): Promise<M[]> {
                         let thisClass: { new(): M } = this;
-                        let query = new Parse.Query<M>(thisClass);
+                        let query = CParse ? CParse.Query(thisClass) : new Parse.Query<M>(thisClass);
                         if (options) {
                             options.of && (query = query.equalTo("of", options.of));
                             let on = options.on;
@@ -117,12 +126,20 @@ export namespace Permission {
                         return null;
                     }
 
-                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M): Promise<PermissionList[M]> {
+                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M, config?: IPermissionVerifyConfig): Promise<PermissionList[M]> {
+                        if (!config) config = {};
+                        let CParse: CacheParse = config.CParse || undefined;
+                        let result = undefined;
+                        /// closure start /////////////
+                        try { if (!CParse) CParse = new CacheParse();
+                        ///////////////////////////////
+
                         if (!Array.isArray(on)) on = [on];
                         /// if data is Tree<T>, flattern into array of child/parent. if not, return array of data.
                         let flattern = async (data /*: ParseObject<any> | Tree<any>*/) => {
+                            /// for Tree /w container, check all parent leafs for permission
                             if (data instanceof Tree && Meta.get(data.constructor).container) {
-                                let leafs = await data.getParentLeafs();
+                                let leafs = await data.getParentLeafs(CParse);
                                 return [data, ...leafs];
                             } else {
                                 return [data];
@@ -130,26 +147,82 @@ export namespace Permission {
                         }
 
                         /// for loop each "of"
-                        let result = undefined;
+                        /// 1) of should not be Schedule. directly flattern.
                         main: for (let eachOf of await flattern(of)) {
-                            /// for loop each "on"
-                            for (let eachOn of on) {
-                                /// for loop each "flatOn"
-                                for (let flatOn of await flattern(eachOn)) {
-                                    /// verify permission between eachOf -> flatOn
-                                    /// todo: may make it faster
-                                    let permissions = await this.list({ of: eachOf, on: flatOn });
-                                    if (permissions.length === 0) continue;
-                                    let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
-                                    let attr = attrs.access[key];
-                                    if (attr !== undefined) { result = attr; break main; }
-                                    continue;
+                            /// 2) scan all roles
+                            for (let role of [role1, role2, role3, role4]) {
+                                if (!role) break;
+                                /// 2.1) Schedule case
+                                if (role.prototype instanceof Schedule) {
+                                    let query = CParse.Query(role);
+                                    for (let item of [of, ...on]) {
+                                        for (let target of ["who", "where", "what", "how", "others"]) {
+                                            if (role[target] && item instanceof role[target]) {
+                                                query.equalTo(target, item);
+                                            }
+                                        }
+                                    }
+                                    let schedules = await query.find();
+                                    /// 2.1.1) build schedules into Calendar for match
+                                    let date = config.date || new Date();
+                                    let calendar = (await (role as any).buildCalendar(schedules, {start: date})).matchTime(date);
+                                    if (calendar.length > 0) {
+                                        let permissions = await this.list({ of: eachOf, on: calendar[0].data }, CParse);
+                                        if (permissions.length === 0) continue;
+                                        // console.log('get permission...', calendar, permissions);
+                                        let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
+                                        let attr = attrs.access[key];
+                                        // console.log('final attr!', attrs, key)
+                                        if (attr !== undefined) { result = attr; break main; }
+                                    }
+
+                                } else {
+                                /// 2.2) Normal case
                                 }
                             }
                         }
 
+                        /// closure end ///////////////
+                        } catch(e) {} finally { if (!config.CParse) CParse.dispose() }
+                        ///////////////////////////////
+                   
                         return result;
                     }
+
+                    // static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M): Promise<PermissionList[M]> {
+                    //     if (!Array.isArray(on)) on = [on];
+                    //     /// if data is Tree<T>, flattern into array of child/parent. if not, return array of data.
+                    //     let flattern = async (data /*: ParseObject<any> | Tree<any>*/) => {
+                    //         /// for Tree /w container, check all parent leafs for permission
+                    //         if (data instanceof Tree && Meta.get(data.constructor).container) {
+                    //             let leafs = await data.getParentLeafs();
+                    //             return [data, ...leafs];
+                    //         } else {
+                    //             return [data];
+                    //         }
+                    //     }
+
+                    //     /// for loop each "of"
+                    //     let result = undefined;
+                    //     main: for (let eachOf of await flattern(of)) {
+                    //         /// for loop each "on"
+                    //         for (let eachOn of on) {
+                    //             /// for loop each "flatOn"
+                    //             for (let flatOn of await flattern(eachOn)) {
+                    //                 /// verify permission between eachOf -> flatOn
+                    //                 /// todo: may make it faster
+                    //                 let permissions = await this.list({ of: eachOf, on: flatOn });
+                    //                 if (permissions.length === 0) continue;
+                    //                 let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
+                    //                 let attr = attrs.access[key];
+                    //                 if (attr !== undefined) { result = attr; break main; }
+                    //                 continue;
+                    //             }
+                    //         }
+                    //     }
+
+                    //     return result;
+                    // }
                     // static get<M>(this: this: new() => M, permissionOf: T, on: PermissionOn[]): PermissionList {
                     //     return null;
                     // }

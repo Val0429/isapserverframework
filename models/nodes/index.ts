@@ -1,2 +1,3 @@
-export * from './permission';
+export * from './schedule';
 export * from './tree';
+export * from './permission';

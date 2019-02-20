@@ -146,15 +146,17 @@ export namespace Permission {
                             }
                         }
 
-                        /// for loop each "of"
-                        /// 1) of should not be Schedule. directly flattern.
-                        main: for (let eachOf of await flattern(of)) {
-                            /// 2) scan all roles
-                            for (let role of [role1, role2, role3, role4]) {
-                                if (!role) break;
-                                /// 2.1) Schedule case
-                                if (role.prototype instanceof Schedule) {
+                        let roleList = [role1, role2, role3, role4];
+                        let flatOf = await flattern(of);
+                        /// 1) scan all roles
+                        main: for (let role of roleList) {
+                            if (!role) break;
+                            /// 2) Schedule case
+                            if (role.prototype instanceof Schedule) {
+                                /// 2.1) for loop flatterned of
+                                for (let eachOf of flatOf) {
                                     let query = CParse.Query(role);
+                                    /// 2.1.1) map back to query
                                     for (let item of [eachOf, ...on]) {
                                         for (let target of ["who", "where", "what", "how", "others"]) {
                                             if (role[target] && item instanceof role[target]) {
@@ -162,8 +164,9 @@ export namespace Permission {
                                             }
                                         }
                                     }
+                                    /// 2.1.2) execute
                                     let schedules = await query.find();
-                                    /// 2.1.1) build schedules into Calendar for match
+                                    /// 2.2) build schedules into Calendar for match
                                     let date = config.date || new Date();
                                     let calendar = (await (role as any).buildCalendar(schedules, {start: date})).matchTime(date);
                                     if (calendar.length > 0) {
@@ -175,9 +178,11 @@ export namespace Permission {
                                         // console.log('final attr!', attrs, key)
                                         if (attr !== undefined) { result = attr; break main; }
                                     }
-
-                                } else {
-                                /// 2.2) Normal case
+                                }
+                            } else {
+                            /// 3) Normal case
+                                /// 3.1) for loop flatterned of
+                                for (let eachOf of flatOf) {
                                     let idx = on.findIndex((value) => value instanceof role);
                                     if (idx < 0) continue;
                                     for (let flatOn of await flattern(on[idx])) {
@@ -189,8 +194,55 @@ export namespace Permission {
                                         if (attr !== undefined) { result = attr; break main; } 
                                     }
                                 }
+
                             }
                         }
+
+                        /// for loop each "of"
+                        /// 1) of should not be Schedule. directly flattern.
+                        // main: for (let eachOf of await flattern(of)) {
+                        //     /// 2) scan all roles
+                        //     for (let role of [role1, role2, role3, role4]) {
+                        //         if (!role) break;
+                        //         /// 2.1) Schedule case
+                        //         if (role.prototype instanceof Schedule) {
+                        //             let query = CParse.Query(role);
+                        //             for (let item of [eachOf, ...on]) {
+                        //                 for (let target of ["who", "where", "what", "how", "others"]) {
+                        //                     if (role[target] && item instanceof role[target]) {
+                        //                         query.equalTo(target, item);
+                        //                     }
+                        //                 }
+                        //             }
+                        //             let schedules = await query.find();
+                        //             /// 2.1.1) build schedules into Calendar for match
+                        //             let date = config.date || new Date();
+                        //             let calendar = (await (role as any).buildCalendar(schedules, {start: date})).matchTime(date);
+                        //             if (calendar.length > 0) {
+                        //                 let permissions = await this.list({ of: eachOf, on: calendar[0].data }, CParse);
+                        //                 if (permissions.length === 0) continue;
+                        //                 // console.log('get permission...', calendar, permissions);
+                        //                 let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
+                        //                 let attr = attrs.access[key];
+                        //                 // console.log('final attr!', attrs, key)
+                        //                 if (attr !== undefined) { result = attr; break main; }
+                        //             }
+
+                        //         } else {
+                        //         /// 2.2) Normal case
+                        //             let idx = on.findIndex((value) => value instanceof role);
+                        //             if (idx < 0) continue;
+                        //             for (let flatOn of await flattern(on[idx])) {
+                        //                 /// verify permission between eachOf -> flatOn
+                        //                 let permissions = await this.list({ of: eachOf, on: flatOn }, CParse);
+                        //                 if (permissions.length === 0) continue;
+                        //                 let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
+                        //                 let attr = attrs.access[key];
+                        //                 if (attr !== undefined) { result = attr; break main; } 
+                        //             }
+                        //         }
+                        //     }
+                        // }
 
                         /// closure end ///////////////
                         } catch(e) {} finally { if (!config.CParse) CParse.dispose() }
@@ -198,44 +250,6 @@ export namespace Permission {
                    
                         return result;
                     }
-
-                    // static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M): Promise<PermissionList[M]> {
-                    //     if (!Array.isArray(on)) on = [on];
-                    //     /// if data is Tree<T>, flattern into array of child/parent. if not, return array of data.
-                    //     let flattern = async (data /*: ParseObject<any> | Tree<any>*/) => {
-                    //         /// for Tree /w container, check all parent leafs for permission
-                    //         if (data instanceof Tree && Meta.get(data.constructor).container) {
-                    //             let leafs = await data.getParentLeafs();
-                    //             return [data, ...leafs];
-                    //         } else {
-                    //             return [data];
-                    //         }
-                    //     }
-
-                    //     /// for loop each "of"
-                    //     let result = undefined;
-                    //     main: for (let eachOf of await flattern(of)) {
-                    //         /// for loop each "on"
-                    //         for (let eachOn of on) {
-                    //             /// for loop each "flatOn"
-                    //             for (let flatOn of await flattern(eachOn)) {
-                    //                 /// verify permission between eachOf -> flatOn
-                    //                 /// todo: may make it faster
-                    //                 let permissions = await this.list({ of: eachOf, on: flatOn });
-                    //                 if (permissions.length === 0) continue;
-                    //                 let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
-                    //                 let attr = attrs.access[key];
-                    //                 if (attr !== undefined) { result = attr; break main; }
-                    //                 continue;
-                    //             }
-                    //         }
-                    //     }
-
-                    //     return result;
-                    // }
-                    // static get<M>(this: this: new() => M, permissionOf: T, on: PermissionOn[]): PermissionList {
-                    //     return null;
-                    // }
 
                     /// private
                     /*private*/ static getMutex(): Mutex {

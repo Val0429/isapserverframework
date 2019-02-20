@@ -406,8 +406,6 @@ export namespace Schedule {
                                     return Math.floor( (date.getDate() + date.getDay() - ref.getDay()) / 7 ) + 1;
                                 }
 
-                                let specWeekday = beginDate.getDay();
-                                let specNthWeekday = dateForMonthWeekdayNth(beginDate);
                                 let step = when.repeat.value;
                                 let interval = when.endDate.valueOf() - when.beginDate.valueOf();
                                 /// pick larger one for date reference

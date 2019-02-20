@@ -155,7 +155,7 @@ export namespace Permission {
                                 /// 2.1) Schedule case
                                 if (role.prototype instanceof Schedule) {
                                     let query = CParse.Query(role);
-                                    for (let item of [of, ...on]) {
+                                    for (let item of [eachOf, ...on]) {
                                         for (let target of ["who", "where", "what", "how", "others"]) {
                                             if (role[target] && item instanceof role[target]) {
                                                 query.equalTo(target, item);

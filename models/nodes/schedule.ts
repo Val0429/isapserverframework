@@ -112,6 +112,8 @@ export interface ISchedule<Who, Where, What = string, How = string, Others = nev
     how?: How;
 
     data?: Others;
+
+    title?: string;
 }
 
 export interface IScheduleTimeRange {
@@ -446,27 +448,6 @@ export namespace Schedule {
                         }
                         break;
 
-                        // /// calculate first time range
-                        // let interval = when.repeat.value * OneDay;
-                        // let unit = Math.max( Math.floor((nRefStart - nEnd) / interval) + 1, 0 );
-                        // for (let i=0; ; ++unit, ++i) {
-                        //     let start = nStart + (unit * interval);
-                        //     let end = nEnd + (unit * interval);
-                        //     if (start >= nRefEnd) break;
-
-                        //     /// end type = Date
-                        //     if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
-                        //         start >= when.repeat.endValue.valueOf()) break;
-                        //     /// end type = TotalTimes
-                        //     if (when.repeat.endType === EScheduleUnitRepeatEndType.TotalTimes &&
-                        //         i >= when.repeat.endValue) break;
-
-                        //     makeOneCalendarUnit(new Date(start), new Date(end), schedule);
-
-                        //     /// rule: FirstOnly
-                        //     if (rule === EBuildScheduleRule.FirstOnly && rtn.length > 0) break;
-                        // }
-                        // break;
                     }
 
                 } while(0);
@@ -479,18 +460,6 @@ export namespace Schedule {
     }
 }
 
-// let tt: IScheduleUnit = {
-//     beginDate: new Date(),
-//     endDate: new Date(),
-//     fullDay: false,
-//     repeat: {
-//         type: EScheduleUnitRepeatType.Month,
-//         value: 1,
-//         data: EScheduleUnitRepeatMonthType.ByDay,
-//         endType: EScheduleUnitRepeatEndType.TotalTimes,
-//         endValue: 1
-//     }
-// }
 
 enum EBuildScheduleRule {
     All,

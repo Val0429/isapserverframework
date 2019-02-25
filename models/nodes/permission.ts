@@ -126,10 +126,16 @@ export namespace Permission {
                         return null;
                     }
 
-                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M, config?: IPermissionVerifyConfig): Promise<PermissionList[M]> {
+                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], config?: IPermissionVerifyConfig): Promise<PermissionList>;
+                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M, config?: IPermissionVerifyConfig): Promise<Pick<PermissionList, M>>;
+                    static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], key: M | IPermissionVerifyConfig, config?: IPermissionVerifyConfig): Promise<PermissionList | Pick<PermissionList, M>> {
+                        if (typeof key !== 'string') {
+                            config = key as any; key = undefined;
+                        }
+
                         if (!config) config = {};
                         let CParse: CacheParse = config.CParse || undefined;
-                        let result = undefined;
+                        let result: any = {};
                         /// closure start /////////////
                         try { if (!CParse) CParse = new CacheParse();
                         ///////////////////////////////
@@ -174,9 +180,16 @@ export namespace Permission {
                                         if (permissions.length === 0) continue;
                                         // console.log('get permission...', calendar, permissions);
                                         let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
-                                        let attr = attrs.access[key];
-                                        // console.log('final attr!', attrs, key)
-                                        if (attr !== undefined) { result = attr; break main; }
+                                        if (key) {
+                                            let attr = attrs.access[key as M];
+                                            if (attr !== undefined) { result[key] = attr; break main; }
+                                        } else {
+                                            for (let key in attrs.access) {
+                                                if (result[key] !== undefined) continue;
+                                                let value = attrs.access[key];
+                                                result[key] = value;
+                                            }
+                                        }
                                     }
                                 }
                             } else {
@@ -190,8 +203,16 @@ export namespace Permission {
                                         let permissions = await this.list({ of: eachOf, on: flatOn }, CParse);
                                         if (permissions.length === 0) continue;
                                         let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
-                                        let attr = attrs.access[key];
-                                        if (attr !== undefined) { result = attr; break main; } 
+                                        if (key) {
+                                            let attr = attrs.access[key as M];
+                                            if (attr !== undefined) { result[key] = attr; break main; } 
+                                        } else {
+                                            for (let key in attrs.access) {
+                                                if (result[key] !== undefined) continue;
+                                                let value = attrs.access[key];
+                                                result[key] = value;
+                                            }
+                                        }
                                     }
                                 }
 

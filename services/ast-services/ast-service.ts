@@ -56,13 +56,26 @@ class AstService {
         let arytmp = [];
         /// Input Type
         let ir = [];
+
+        let parseRestfulType = (types: (string | Type<ts.Type>)[]) => {
+            /// Ignore Restful.*
+            if (types.length === 0) return types;
+            let firstType = types[0];
+            if (typeof firstType !== 'string') return types;
+            let regex = /Restful.[^<]+<([a-z0-9_]+)>/i;
+            let matches = firstType.match(regex);
+            if (matches && matches.length < 2) return types;
+            return [firstType, AstParser.getType({ path: request.type.path, type: matches[1] })];
+        }
+
         let types = AstParser.getReportType(request.type);
+        types = parseRestfulType(types);
         if (!types) throw `Internal Error: type <${request.type.type}> is not a valid type.`;
         for (let type of types) {
             if (typeof type === 'string') {
                 ir.push(type); continue;
             }
-            ir = [...ir, ...AstParser.reportType(type)];
+            ir = [...ir, ...AstParser.reportType(type, request)];
         }
         if (ir.length > 0) {
         arytmp.push(`
@@ -75,12 +88,13 @@ ${ir.join("\r\n")}
         /// Output Type
         let otypes = AstParser.getOutputType(request.type);
         if (otypes) {
+        otypes = parseRestfulType(otypes);
         let or = [];
         for (let type of otypes) {
             if (typeof type === 'string') {
                 or.push(type); continue;
             }
-            or = [...or, ...AstParser.reportType(type)];
+            or = [...or, ...AstParser.reportType(type, request)];
         }
         if (or.length > 0) {
         arytmp.push(`
@@ -452,7 +466,7 @@ namespace AstParser {
     }
 
 
-    export function reportType(type: Type<ts.Type>): string[] {
+    export function reportType(type: Type<ts.Type>, request?: RequestReportType): string[] {
         if (type.isInterface() || type.isAnonymous()) {
             return [AstParser.getTypeInfo(type)];
 

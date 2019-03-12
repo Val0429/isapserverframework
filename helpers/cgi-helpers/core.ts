@@ -331,13 +331,13 @@ export namespace Restful {
         var all = "true" == paging.all;
         if (all) pageSize = Number.MAX_SAFE_INTEGER;
         let total = 0, totalPages = 0;
-
         let results;
 
         if (query instanceof Parse.Query) {
-            var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
             total = await query.count();
             totalPages = Math.ceil(total / pageSize);
+            page = Math.min(page, totalPages);
+            var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
     
             if (tuner) o = await tuner(o);
             results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );

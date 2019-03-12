@@ -10,7 +10,13 @@ export interface IUserData {
 
 export interface IUser<T = {}> {
     username: string;
+    /**
+     * @uiHidden - true
+     */
     password: string;
+    /**
+     * @uiHidden - true
+     */
     email?: string;
     publicEmailAddress?: string;
     phone?: string;

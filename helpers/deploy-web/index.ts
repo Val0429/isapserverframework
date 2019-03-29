@@ -34,7 +34,7 @@ function deployWeb(directory: string, appOrPort: express.Application | number) {
 
                     } while(0);
                     /// redirect to root!
-                    res.redirect(307, `/`);
+                    res.sendFile(webIndexPath);
                 });
             });
         });

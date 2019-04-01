@@ -56,31 +56,35 @@ export namespace Log {
         return msg;
     }
 
-    export function TraceTime(title: string, message: string) {
-        if (!TestPass(Level.Trace)) return;
-        let msg = getTraceMessage(title, message, false);
-        console.time(msg);
-        return msg;
+    class TimeEndWrapper {
+        private msg: string;
+        constructor(msg: string) {
+            this.msg = msg;
+        }
+        public end() {
+            console.timeEnd(this.msg);
+        }
     }
 
-    export function TraceTimeEnd(title: string, message: string) {
+    let timeCount = 0;
+    export function TraceTime(title: string, message: string) {
         if (!TestPass(Level.Trace)) return;
-        let msg = getTraceMessage(title, message, false);
-        console.timeEnd(msg);
-        return msg;
+        let msg = getTraceMessage(title, message, false) + `(#${++timeCount})`;
+        console.time(msg);
+        return new TimeEndWrapper(msg);
     }
 
     export function InfoTime(title: string, message: string) {
         if (!TestPass(Level.Info)) return;
-        let msg = getInfoMessage(title, message, false);
+        let msg = getInfoMessage(title, message, false) + `(#${++timeCount})`;
         console.time(msg);
-        return msg;
+        return new TimeEndWrapper(msg);
     }
 
     export function InfoTimeEnd(title: string, message: string) {
         if (!TestPass(Level.Info)) return;
-        let msg = getInfoMessage(title, message, false);
+        let msg = getInfoMessage(title, message, false) + `(#${++timeCount})`;
         console.timeEnd(msg);
-        return msg;
+        return new TimeEndWrapper(msg);
     }
 }

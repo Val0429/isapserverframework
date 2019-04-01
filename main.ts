@@ -10,27 +10,27 @@ import { Log } from 'helpers/utility';
 const LogTitle = "Startup";
 
 /// todo remove: log loading time
-Log.TraceTime(LogTitle, "Compiler");
+let trace = Log.TraceTime(LogTitle, "Compiler");
 import './core/compiler';
-Log.TraceTimeEnd(LogTitle, "Compiler");
+trace.end();
 
-Log.TraceTime(LogTitle, "AST Service");
+trace = Log.TraceTime(LogTitle, "AST Service");
 import './services/ast-services/ast-client';
-Log.TraceTimeEnd(LogTitle, "AST Service");
+trace.end();
 
-Log.TraceTime(LogTitle, "Create Index");
+trace = Log.TraceTime(LogTitle, "Create Index");
 import './core/create-index';
-Log.TraceTimeEnd(LogTitle, "Create Index");
+trace.end();
 
-Log.TraceTime(LogTitle, "Scheduler Loader");
+trace = Log.TraceTime(LogTitle, "Scheduler Loader");
 import './core/scheduler-loader';
-Log.TraceTimeEnd(LogTitle, "Scheduler Loader");
+trace.end();
 
-Log.TraceTime(LogTitle, "Load Main Application");
+trace = Log.TraceTime(LogTitle, "Load Main Application");
 import './core/main.gen';
-Log.TraceTimeEnd(LogTitle, "Load Main Application");
+trace.end();
 
-Log.TraceTime(LogTitle, "Load Workspace");
+trace = Log.TraceTime(LogTitle, "Load Workspace");
 import './workspace/main';
-Log.TraceTimeEnd(LogTitle, "Load Workspace");
+trace.end();
 

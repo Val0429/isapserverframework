@@ -2,6 +2,7 @@ import { ScheduleActionBase } from './core';
 
 import { Config } from 'core/config.gen';
 import * as nodemailer from 'nodemailer';
+import { FileHelper } from 'core/cgi-package';
 
 /// email core /////////////////////////
 export enum ScheduleActionEmailResult {
@@ -46,11 +47,24 @@ export class ScheduleActionEmail extends ScheduleActionBase<
                 }
             });
 
+            let attachments;
+            if (input.attachments) {
+                attachments = [];
+                for (let attachment of input.attachments) {
+                    let content = await FileHelper.downloadParseFile(attachment);
+                    attachments.push({
+                        filename: attachment.name(),
+                        content
+                    });
+                }
+            }
+
             let mailOptions = {
                 from: Config.smtp.email,
                 to: input.to.join(", "),
                 subject: input.subject,
-                html: input.body
+                html: input.body,
+                attachments
             }
             await transporter.sendMail(mailOptions);
 

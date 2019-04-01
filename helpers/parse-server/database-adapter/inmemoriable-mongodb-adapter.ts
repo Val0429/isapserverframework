@@ -85,15 +85,15 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                 let { memoryCache } = meta || {} as any;
                 if (memoryCache) {
                     await this.makeCache(className);
-                    Log.TraceTime(LogTitle, `cache time ${className}`);
+                    let trace = Log.TraceTime(LogTitle, `cache time ${className}`);
                     let result = this.findInMemoryCache(className, schema, query, options);
-                    Log.TraceTimeEnd(LogTitle, `cache time ${className}`);
+                    trace.end();
                     return resolve(result);
                 }
-                Log.TraceTime(LogTitle, `query time ${className}`);
+                let trace = Log.TraceTime(LogTitle, `query time ${className}`);
                 super.find(className, schema, query, options)
                     .then( (result) => {
-                        Log.TraceTimeEnd(LogTitle, `query time ${className}`);
+                        trace.end();
                         resolve(result);
                     }).catch( (e) => reject(e));
 

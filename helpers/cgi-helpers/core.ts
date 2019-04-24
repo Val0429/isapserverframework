@@ -336,7 +336,7 @@ export namespace Restful {
         if (query instanceof Parse.Query) {
             total = await query.count();
             totalPages = Math.ceil(total / pageSize);
-            page = Math.min(page, totalPages);
+            page = Math.max(Math.min(page, totalPages), 1);
             var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
     
             if (tuner) o = await tuner(o);

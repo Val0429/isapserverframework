@@ -63,7 +63,10 @@ action.post<InputC>({ inputType: "InputC" }, async (data) => {
  ********************************/
 action.get( async (data) => {
     let xml = await licenseService.getLicense();
-    return ParseObject.toOutputJSON(xml);
+    return {
+        results: xml.licenses,
+        summary: xml.summary
+    }
 });
 /// CRUD end ///////////////////////////////////
 

@@ -13,7 +13,10 @@ interface ITreeCore {
 }
 export type ITree<T extends Never<ITreeCore>> = ITreeCore & T;
 
-export class Tree<T> extends ParseObject<ITree<T>> {
+
+export abstract class Tree<T> extends ParseObject<ITree<T>> {
+    abstract groupBy: keyof T | null;
+
     constructor(data?: Partial<ITree<T>>) {
         super(data);
 
@@ -29,29 +32,46 @@ export class Tree<T> extends ParseObject<ITree<T>> {
     }
 
     /// get root leaf
-    static async getRoot<T extends Tree<any>>(this: { new(): T }, CParse?: CacheParse): Promise<T> {
+    static async getRoot<T extends Tree<any>>(this: { new(): T }, groupBy?: any, CParse?: CacheParse): Promise<T> {
         let thisClass: { new(): T } = this;
-        return (CParse ? CParse.Query(thisClass) : new Parse.Query<T>(thisClass))
-            .equalTo("lft", 1)
-            .first();
+        let groupByKey = new (this as any)().groupBy;
+        if (groupByKey && !groupBy) throw `<${this.name}.getRoot> should provide <groupBy> parameter of <${groupByKey}>`;
+
+        let query = (CParse ? CParse.Query(thisClass) : new Parse.Query<T>(thisClass));
+        if (groupBy) query.equalTo(groupByKey, groupBy);
+        query = query.equalTo("lft", 1);
+        return query.first();
+    }
+
+    /// get all children
+    async getChildren(CParse?: CacheParse): Promise<this[]> {
+        let thisClass = this.constructor as any;
+        let { lft, rgt } = this.attributes;
+        let query = (CParse ? CParse.Query(thisClass) : new Parse.Query(thisClass))
+            .greaterThanOrEqualTo("lft", lft)
+            .lessThanOrEqualTo("rgt", rgt)
+            .ascending("lft");
+        if (this.groupBy) query.equalTo(this.groupBy as any, this.attributes[this.groupBy]);
+        return query.find() as any;
     }
 
     /// get the first parent ancestor
-    async getParentLeaf<U extends Tree<T>>(this: U, CParse?: CacheParse): Promise<U> {
+    async getParentLeaf(CParse?: CacheParse): Promise<this> {
         let parents = await this.getParentLeafs(CParse);
         if (parents.length === 0) return null;
         return parents[0];
     }
 
     /// get parent leafs
-    async getParentLeafs<U extends Tree<T>>(this: U, CParse?: CacheParse): Promise<U[]> {
-        let thisClass: { new(): U } = this.constructor as any;
+    async getParentLeafs(CParse?: CacheParse): Promise<this[]> {
+        let thisClass = this.constructor as any;
         let { lft, rgt } = this.attributes;
-        return (CParse ? CParse.Query(thisClass) : new Parse.Query<U>(thisClass))
+        let query = (CParse ? CParse.Query(thisClass) : new Parse.Query(thisClass))
             .lessThan("lft", lft)
             .greaterThan("rgt", rgt)
-            .descending("lft")
-            .find();
+            .descending("lft");
+        if (this.groupBy) query.equalTo(this.groupBy as any, this.attributes[this.groupBy]);
+        return query.find() as any;
     }
 
     /// add a child
@@ -63,8 +83,9 @@ export class Tree<T> extends ParseObject<ITree<T>> {
         /// before add, update me
         await this.updateLeafProhibited();
         /// 1) get all leafs
-        let results = await new Parse.Query(thisClass)
-            .find();
+        let query = new Parse.Query(thisClass);
+        if (this.groupBy) query.equalTo(this.groupBy as any, this.attributes[this.groupBy]);
+        let results = await query.find();
         let bulkWrites = [];
         /// 2) make new leaf and increase lft, rgt
         let refRgt = this.attributes.rgt;
@@ -92,10 +113,10 @@ export class Tree<T> extends ParseObject<ITree<T>> {
 
     /// unfrequent helpers
     /// normally won't be used. make first root component.
-    static async setRoot<T extends Tree<any>>(this: { new(): T }, data: ExtractInterface<T>): Promise<T> {
+    static async setRoot<T extends Tree<any>>(this: { new(): T }, data: ExtractInterface<T>, groupBy?: any): Promise<T> {
         let thisClass: { new(): T } = this;
         let mutex = Tree.getMutex(thisClass); await mutex.acquire();
-        let root = await (this as any).getRoot();
+        let root = await (this as any).getRoot(groupBy);
         if (root) throw "Root already exists";
         let obj = new (thisClass as any)({
             ...data as object, lft: 1, rgt: 2
@@ -114,29 +135,39 @@ export class Tree<T> extends ParseObject<ITree<T>> {
     destroy<U extends Tree<T>>(this: U, options?: Parse.Object.DestroyOptions): Parse.Promise<this> {
         let promise = new Parse.Promise<this>();
         let thisClass: { new(): U } = this.constructor as any;
-        let { rgt: refRgt } = this.attributes;
+        let { rgt: refRgt, lft: refLft } = this.attributes;
 
         (async () => {
             let mutex = Tree.getMutex(thisClass); await mutex.acquire();
             try {
                 /// get all leafs
-                let results = await new Parse.Query(thisClass).find();
+                let query = new Parse.Query(thisClass);
+                if (this.groupBy) query.equalTo(this.groupBy as any, this.attributes[this.groupBy]);
+                let results = await query.find();
                 /// call destroy
                 let deleteId = this.id;
                 await super.destroy(options);
                 /// bulk write on the rest
                 /// every other leafs lft or rgt > this.rgt, should decrease by 2
                 let bulkWrites = [];
+                let bulkDestroy = [];
+                let padding = refRgt - refLft + 1;
                 results.forEach( (data) => {
                     let { lft, rgt } = data.attributes;
                     if (data.id === deleteId) return;
-                    if (lft < refRgt && rgt < refRgt) return;
-                    if (lft > refRgt) data.setValue("lft", lft-2 as any);
-                    if (rgt > refRgt) data.setValue("rgt", rgt-2 as any);
+                    if (lft > refLft && rgt < refRgt) {
+                        bulkDestroy.push(data);
+                        return;
+                    }
+                    if (lft > refRgt) data.setValue("lft", lft-padding as any);
+                    if (rgt > refRgt) data.setValue("rgt", rgt-padding as any);
                     data.canSaveLftRgt = true;
                     bulkWrites.push(data);
                 });
-                await Parse.Object.saveAll(bulkWrites);
+                await Promise.all([
+                    Parse.Object.saveAll(bulkWrites),
+                    Parse.Object.destroyAll(bulkDestroy)
+                ]);
                 promise.resolve(this);
             } catch(e) { promise.reject(e); mutex.release(); }
         })();
@@ -182,4 +213,15 @@ export class Tree<T> extends ParseObject<ITree<T>> {
         this.setValue("rgt", rgt as any);
     }
     //////////////////////////////////////////////////////////////
+}
+
+export interface IGetTreeNodeL<T> {
+    groupBy: T;
+};
+export interface IGetTreeNodeR {
+    objectId: string;
+}
+export type IGetTreeNode<T> = IGetTreeNodeL<T> | IGetTreeNodeR;
+function getTreeNode(nodeoptions: IGetTreeNode<any>) {
+    
 }

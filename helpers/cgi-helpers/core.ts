@@ -41,6 +41,7 @@ import { Log, Mutex, retry } from 'helpers/utility';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
 import { UserHelper } from 'helpers/parse-server/user-helper';
+import { Tree } from 'models/nodes';
 
 
 export interface ActionConfig<T = any, U = any> {
@@ -366,11 +367,13 @@ export namespace Restful {
         }
         options = { ...defaultCRUDOptions, ...options };
 
-        var isClass = retrievePrimaryClass(className) ? true : false;
+        let realClass = retrievePrimaryClass(className);
+        let isClass = realClass ? true : false;
+        let isTree = isClass && new realClass() instanceof Tree ? true : false;
 
         if ( (!isClass && className[0] === 'I') || isClass ) {
             /// handle interface & class
-            CRUDMaker(caller(), className, options, isClass);
+            CRUDMaker(caller(), className, options, isClass, isTree);
 
         } else {
             throw `Internal Error: <${className}> should be a valid object for CRUD.`;

@@ -103,7 +103,7 @@ action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
     let result;
     if (!parent) {
         result = await {0}.getRoot(groupBy);
-        if (result) throw Errors.throw(Errors.CustomBadRequest, [\`{0} group <\${groupBy}> already has a root.\`]); 
+        if (result) throw Errors.throw(Errors.CustomBadRequest, [\`Parameters required: <parent>, becasue ${0} group <\${groupBy}> already has a root.\`]);         
         result = await {0}.setRoot(data.inputType, groupBy);
     } else {
         let leaf = await new Parse.Query({0})

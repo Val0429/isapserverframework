@@ -169,7 +169,8 @@ export abstract class Tree<T> extends ParseObject<ITree<T>> {
                     Parse.Object.destroyAll(bulkDestroy)
                 ]);
                 promise.resolve(this);
-            } catch(e) { promise.reject(e); mutex.release(); }
+            } catch(e) { promise.reject(e) }
+            finally { mutex.release(); }
         })();
 
         return promise;
@@ -200,7 +201,9 @@ export abstract class Tree<T> extends ParseObject<ITree<T>> {
                 let latest = await new Parse.Query(thisClass).get(this.id);
                 obj = { ...obj, ...pickObject(latest.attributes, prohibited) };
                 await super.save(obj, options);
-            } catch(e) { promise.reject(e); mutex.release(); }
+                promise.resolve(this);
+            } catch(e) { promise.reject(e) }
+            finally { mutex.release(); }
         })();
         return promise;
     }
@@ -223,5 +226,5 @@ export interface IGetTreeNodeR {
 }
 export type IGetTreeNode<T> = IGetTreeNodeL<T> | IGetTreeNodeR;
 function getTreeNode(nodeoptions: IGetTreeNode<any>) {
-    
+
 }

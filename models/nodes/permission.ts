@@ -4,7 +4,6 @@ import { Meta } from "helpers/utility/meta";
 import { Mutex, Log, jsMapAssign } from "helpers/utility";
 import { Tree } from "./tree";
 import { Schedule } from './schedule';
-import { Floors } from 'core/events.gen';
 import { BehaviorSubject } from 'rxjs';
 import { CacheParse } from 'helpers/parse-server/cache-helper';
 

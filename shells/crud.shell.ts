@@ -98,12 +98,12 @@ action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
     let { parent } = data.inputType;
     delete data.inputType.parent;
     let groupByKey = new {0}().groupBy;
-    let groupBy = data.inputType[groupByKey];
+    let groupBy = groupByKey ? data.inputType[groupByKey as any] : null;
     /// 1) Create Object
     let result;
     if (!parent) {
         result = await {0}.getRoot(groupBy);
-        if (result) throw Errors.throw(Errors.CustomBadRequest, [\`Parameters required: <parent>, becasue ${0} group <\${groupBy}> already has a root.\`]);         
+        if (result) throw Errors.throw(Errors.CustomBadRequest, [\`Parameters required: <parent>, because \${groupBy ? \`group <\${groupBy}> \` : ''}already has a root.\`]);
         result = await {0}.setRoot(data.inputType, groupBy);
     } else {
         let leaf = await new Parse.Query({0})
@@ -118,7 +118,8 @@ action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
 /********************************
  * R: get object
  ********************************/
-type I{0}RQuery = IGetTreeNodeL<I{0}[{0}["groupBy"]]> | IGetTreeNodeR;
+type ReduceRQuery<C extends Tree<I>, I> = C["groupBy"] extends null ? {} | IGetTreeNodeR : IGetTreeNodeL<I[C["groupBy"]]> | IGetTreeNodeR;
+type I{0}RQuery = ReduceRQuery<{0}, I{0}>;
 type InputR = Restful.InputR<I{0}> & I{0}RQuery;
 type OutputR = Restful.OutputR<I{0}>;
 

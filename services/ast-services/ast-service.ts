@@ -64,7 +64,7 @@ class AstService {
             if (typeof firstType !== 'string') return types;
             let regex = /Restful.[^<]+<([a-z0-9_]+)>/i;
             let matches = firstType.match(regex);
-            if (matches && matches.length < 2) return types;
+            if (!matches || (matches && matches.length < 2)) return types;
             return [firstType, AstParser.getType({ path: request.type.path, type: matches[1] })];
         }
 

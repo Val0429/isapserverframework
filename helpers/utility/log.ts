@@ -81,10 +81,10 @@ export namespace Log {
         return new TimeEndWrapper(msg);
     }
 
-    export function InfoTimeEnd(title: string, message: string) {
-        if (!TestPass(Level.Info)) return;
-        let msg = getInfoMessage(title, message, false) + `(#${++timeCount})`;
-        console.timeEnd(msg);
-        return new TimeEndWrapper(msg);
-    }
+    // export function InfoTimeEnd(title: string, message: string) {
+    //     if (!TestPass(Level.Info)) return;
+    //     let msg = getInfoMessage(title, message, false) + `(#${++timeCount})`;
+    //     console.timeEnd(msg);
+    //     return new TimeEndWrapper(msg);
+    // }
 }

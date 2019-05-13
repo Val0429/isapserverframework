@@ -63,7 +63,7 @@ if (Config.mongodb.enable) {
     let serverURL = !Config.core.httpDisabled ?
         \`\${myServerUrl}\${Config.parseServer.serverPath}\` :
         \`\${myServerUrl}\${Config.parseServer.serverPath}\`;
-    let databaseURI = \`mongodb://\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`; 
+    let databaseURI = \`mongodb://\${!Config.mongodb.account?'':\`\${Config.mongodb.account}:\${Config.mongodb.password}@\`}\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`;
     var ParseServer = new parse.ParseServer({
         //databaseURI,
         databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI}),

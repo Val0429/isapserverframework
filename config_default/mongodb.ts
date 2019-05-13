@@ -10,6 +10,8 @@ export interface Config {
     enable: boolean;
     ip: string;
     port: number;
+    account?: string;
+    password?: string;
     /**
      * Database / Collection used for app.
      */

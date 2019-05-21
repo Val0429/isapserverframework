@@ -1,5 +1,6 @@
 import './../../core/alias';
 
+import 'parse-server';
 import { Request, TypesFromAction, RequestType, EnumRequestType, getRequestType, RequestNormal, ResponseNormal, RequestReportType, ResponseReportType, ConverterEntity } from './ast-core';
 import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';

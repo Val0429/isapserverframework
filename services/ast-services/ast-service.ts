@@ -147,7 +147,8 @@ process.on('message', (data: Request) => {
             var rtnormal = getRequestType(data.action, data);
             var rtn: any;
             try {
-                canBeEmpty = false;
+                //canBeEmpty = false;
+                canBeEmpty = true;
                 rtn = ast.validate(rtnormal);
             } catch (reason) {
                 if (!(reason instanceof Errors)) {

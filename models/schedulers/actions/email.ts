@@ -16,11 +16,16 @@ export interface IInputScheduleActionEmail_FromTemplate {
     body: string;
 }
 
+interface IAttachment {
+    file: Parse.File;
+    cid: string;
+}
+
 export interface IInputScheduleActionEmail_FromController {
     to: string[];
     CC?: string[];
     BCC?: string[];
-    attachments?: Parse.File[];
+    attachments?: (Parse.File | IAttachment)[];
 }
 ////////////////////////////////////////
 
@@ -51,9 +56,13 @@ export class ScheduleActionEmail extends ScheduleActionBase<
             if (input.attachments) {
                 attachments = [];
                 for (let attachment of input.attachments) {
-                    let content = await FileHelper.downloadParseFile(attachment);
+                    let file = attachment instanceof Parse.File ? attachment : attachment.file;
+                    let cid = attachment instanceof Parse.File ? undefined : attachment.cid;
+
+                    let content = await FileHelper.downloadParseFile(file);
                     attachments.push({
-                        filename: attachment.name(),
+                        filename: file.name(),
+                        cid,
                         content
                     });
                 }

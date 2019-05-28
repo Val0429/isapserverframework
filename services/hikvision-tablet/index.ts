@@ -86,6 +86,11 @@ export interface IHikvisionTablet {
 }
 
 const tablets: Map<string, HikvisionTablet> = new Map<string, HikvisionTablet>();
+
+var path = require('path');
+var exec = require('child_process').execFile;
+var exeDir = path.resolve(__dirname, ".//lib");
+var exePath = `${exeDir}\\ExeProgram.exe`;
 export class HikvisionTablet {
     public static getInstance(config: IHikvisionTablet) {
         let key = JSON.stringify(config);
@@ -96,38 +101,100 @@ export class HikvisionTablet {
     }
 
     private config: IHikvisionTablet;
-    private sjInstance: BehaviorSubject<any> = new BehaviorSubject<any>(null);
     constructor(config: IHikvisionTablet) {
         this.config = config;
-        CreateInstance(config)
-            .then( (instance) => {
-                this.sjInstance.next( instance );
-            });
     }
 
     public async createCard(card: ICreateCard) {
-        return CreateCardItem({
-            instance: await this.waitForInstance(),
-            ...card
-        });
+        let args = [this.config.ip, this.config.port, this.config.account, this.config.password, "CreateCardItem", card.cardno];
+        do {
+            if (!card.employeeno) {
+                if (!card.name) break;
+                else card.employeeno = card.cardno;
+            }
+            args.push(card.employeeno);
+            if (!card.name) break;
+            args.push(card.name);
+            if (!card.start) break;
+            args.push(card.start.getFullYear());
+            args.push(card.start.getMonth()+1);
+            args.push(card.start.getDate());
+            if (!card.end) break;
+            args.push(card.end.getFullYear());
+            args.push(card.end.getMonth()+1);
+            args.push(card.end.getDate());
+
+        } while(false);
+
+        return new Promise( (resolve) => {
+            exec(exePath, args, { cwd: exeDir }, (err, stdout, stderr) => {
+                resolve();
+            });
+        })
     }
     public async removeCard(card: ICreateCard) {
-        return RemoveCardItem({
-            instance: await this.waitForInstance(),
-            ...card
-        });
+        let args = [this.config.ip, this.config.port, this.config.account, this.config.password, "RemoveCardItem", card.cardno];
+        return new Promise( (resolve) => {
+            exec(exePath, args, { cwd: exeDir }, (err, stdout, stderr) => {
+                resolve();
+            });
+        })
     }
 
     public async enrollFace(face: IEnrollFace) {
-        return EnrollFace({
-            instance: await this.waitForInstance(),
-            ...face
-        });
-    }
-
-    private async waitForInstance(): Promise<any> {
-        let instance = this.sjInstance.getValue();
-        if (instance) return instance;
-        return this.sjInstance.filter(v=>v).first().toPromise();
-    }
+        let tmpfile = `${__dirname}\\${new Date().valueOf()}.dat`;
+        fs.writeFileSync(tmpfile, face.buffer);
+        let args = [this.config.ip, this.config.port, this.config.account, this.config.password, "EnrollFace", face.cardno, tmpfile];
+        return new Promise( (resolve) => {
+            exec(exePath, args, { cwd: exeDir }, (err, stdout, stderr) => {
+                fs.unlinkSync(tmpfile);
+                resolve();
+            });
+        })
+    }    
 }
+// export class HikvisionTablet {
+//     public static getInstance(config: IHikvisionTablet) {
+//         let key = JSON.stringify(config);
+//         if (tablets.has(key)) return tablets.get(key);
+//         let tablet = new HikvisionTablet(config);
+//         tablets.set(key, tablet);
+//         return tablet;
+//     }
+
+//     private config: IHikvisionTablet;
+//     private sjInstance: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+//     constructor(config: IHikvisionTablet) {
+//         this.config = config;
+//         CreateInstance(config)
+//             .then( (instance) => {
+//                 this.sjInstance.next( instance );
+//             });
+//     }
+
+//     public async createCard(card: ICreateCard) {
+//         return CreateCardItem({
+//             instance: await this.waitForInstance(),
+//             ...card
+//         });
+//     }
+//     public async removeCard(card: ICreateCard) {
+//         return RemoveCardItem({
+//             instance: await this.waitForInstance(),
+//             ...card
+//         });
+//     }
+
+//     public async enrollFace(face: IEnrollFace) {
+//         return EnrollFace({
+//             instance: await this.waitForInstance(),
+//             ...face
+//         });
+//     }
+
+//     private async waitForInstance(): Promise<any> {
+//         let instance = this.sjInstance.getValue();
+//         if (instance) return instance;
+//         return this.sjInstance.filter(v=>v).first().toPromise();
+//     }
+// }

@@ -36,7 +36,7 @@ export class AstClient {
     private clients: { [index: string]: Client } = {};
 
     async finalConverter(data: any): Promise<any> {
-        if (typeof data !== 'object') {
+        if (!data || typeof data !== 'object') {
             return data;
         }
 

@@ -6,9 +6,10 @@ import {
 } from 'core/cgi-package';
 import * as request from 'request';
 import { actions } from 'helpers/routers/router-loader';
+let packinfo = require(`${__dirname}/../../../package.json`);
 
 var action = new Action({
-    loginRequired: true,
+    loginRequired: false,
 });
 
 /// CRUD start /////////////////////////////////
@@ -47,7 +48,8 @@ action.get( async (data) => {
                             url: `http://localhost:${Config.core.port}${uri}?help&sessionId=${data.parameters.sessionId}`,
                             method,
                         }, (err, res, body) => {
-                            if (res.statusCode === 401) return reject(401);
+                            //if (res.statusCode === 401) return reject(401);
+                            if (res.statusCode !== 200) return reject(res.statusCode);
                             resolve(body);
                         });
                     });
@@ -87,8 +89,19 @@ action.get( async (data) => {
                 case 'Ws':
                     /// get configs
                     /// login required?
-                    loginRequired = (action[`func${proto}Config`] || {}).loginRequired || ((action.config || {}).loginRequired);
-                    obj[proto] = { input: null, output: null, loginRequired };
+                    let config = action[`func${proto}Config`] || action.config || {};
+                    let strt = { input: null, output: null, loginRequired };
+                    loginRequired = config.loginRequired;
+                    if (!loginRequired) { obj[proto] = strt; break; }
+                    if (!data.role) break;
+                    let roles = data.role.map( (v) => v.attributes.name );
+                    let permitRoles: string[] = config.permission;
+                    let final = permitRoles ? roles.reduce( (final, role) => {
+                        if (permitRoles.indexOf(role) >= 0) final.push(role);
+                        return final;
+                    }, []) : roles;
+                    if (final.length > 0) obj[proto] = strt;
+                    break;
                 default:
                     break;
             }
@@ -96,7 +109,11 @@ action.get( async (data) => {
         if (Object.keys(obj).length !== 0 && obj.constructor === Object) final[uri] = obj;
     }
 
-    return final;
+    return {
+        serverVersion: packinfo.version,
+        frameworkVersion: packinfo.frameworkversion,
+        APIs: final
+    }
 });
 /// CRUD end ///////////////////////////////////
 

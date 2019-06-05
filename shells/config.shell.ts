@@ -35,6 +35,7 @@ var Config: IConfig = {
 }
 
 export { Config };
+let tmp = Config;   /// force initialize
 `;
 
 

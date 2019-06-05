@@ -87,6 +87,7 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                     await this.makeCache(className);
                     let trace = Log.TraceTime(LogTitle, `cache time ${className}`);
                     let result = this.findInMemoryCache(className, schema, query, options);
+                    console.log('cache result!', result, query, options);
                     trace.end();
                     return resolve(result);
                 }
@@ -296,7 +297,32 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
     }
 
     /// do query search
+    private makeOrQuery(value: any[]): (data) => boolean {
+        let filters = [];
+        for (let unit of value) {
+            let filter = [];                
+            Object.keys(unit).forEach( (key) => {
+                if (key === '_rperm') return;
+                let value = unit[key];
+                filter.push( this.makeQuery(key, value) );
+            });
+            filters.push(filter);
+        }
+
+        return (data) => {
+            main: for (let filter of filters) {
+                for (let filterunit of filter) {
+                    if (!filterunit(data)) continue main;
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+
     private makeQuery(key: string, value: any): (data) => boolean {
+        if (key === "$or") return this.makeOrQuery(value);
+
         return (data) => {
             main: do {
                 /// get real data

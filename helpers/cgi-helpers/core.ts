@@ -174,7 +174,8 @@ export class Action<T = any, U = any> {
 
         /// 2) login
         let cfLoginRequired = fetchConfig("loginRequired");
-        cfLoginRequired && middlewares.push(loginRequired);
+        middlewares.push(loginRequired(cfLoginRequired));
+        //cfLoginRequired && middlewares.push(loginRequired(cfLoginRequired));
         /// 3) permission
         let cfPermission = fetchConfig("permission");
         cfPermission && middlewares.push(permissionCheck(cfPermission));

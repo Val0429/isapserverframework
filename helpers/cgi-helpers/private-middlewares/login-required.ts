@@ -32,47 +32,57 @@ declare module 'express/lib/request' {
 }
 
 const keyOfSessionId: string = "sessionId";
-export async function loginRequired(req: Request, res: Response, next: NextFunction) {
-    var sessionKey: string = keyOfSessionId;
+export function loginRequired(required: boolean) {
 
-    /// should contain sessionId
-    var sessionId: string = req.parameters[sessionKey];
-    if (!sessionId) return next( Errors.throw(Errors.ParametersRequired, [sessionKey]) );
+    return async (req: Request, res: Response, next: NextFunction) => {
+        var sessionKey: string = keyOfSessionId;
+        /// should contain sessionId
+        var sessionId: string = req.parameters[sessionKey];
+        if (!sessionId) {
+            if (!required) return next();
+            return next( Errors.throw(Errors.ParametersRequired, [sessionKey]) );
+        }
 
-    var session: Parse.Session;
-    var user: Parse.User;
-    var role: Parse.Role[];
+        var session: Parse.Session;
+        var user: Parse.User;
+        var role: Parse.Role[];
 
-    try {
-        /// get session instance
-        session = await new Parse.Query("_Session")
-                .descending("createdAt")
-                .include("user")
-                .include("user.roles")
-                .first({sessionToken: sessionId}) as Parse.Session;
+        try {
+            /// get session instance
+            session = await new Parse.Query("_Session")
+                    .descending("createdAt")
+                    .include("user")
+                    .include("user.roles")
+                    .first({sessionToken: sessionId}) as Parse.Session;
 
-        /// session not match
-        if (!session || session.getSessionToken() != sessionId) return next( Errors.throw(Errors.LoginRequired) );
+            /// session not match
+            if (!session || session.getSessionToken() != sessionId) {
+                if (!required) return next();
+                return next( Errors.throw(Errors.LoginRequired) );
+            }
 
-        /// get user instance
-        user = session.get("user");
+            /// get user instance
+            user = session.get("user");
 
-        /// get user roles
-        role = user.get("roles");
+            /// get user roles
+            role = user.get("roles");
 
-        /// update session expiresAt
-        UserHelper.extendSessionExpires(session.id);
+            /// update session expiresAt
+            UserHelper.extendSessionExpires(session.id);
 
-    } catch(reason) {
-        return next( Errors.throw(Errors.SessionNotExists) );
+        } catch(reason) {
+            if (!required) return next();
+            return next( Errors.throw(Errors.SessionNotExists) );
+        }
+
+        /// final
+        req.session = session;
+        req.user = user;
+        req.role = role;
+
+        next();
     }
 
-    /// final
-    req.session = session;
-    req.user = user;
-    req.role = role;
-
-    next();
 }
 ////////////////////////////////////////////////////////////
 

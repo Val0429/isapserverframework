@@ -34,6 +34,12 @@ export function registerSubclass(collectionNameOrMeta?: string | IRegisterSubcla
         }
     }
 }
+export function registerCoreClassMeta(collectionName: string, targetClass: any, meta: IRegisterSubclassMeta) {
+    primaryClassMap[collectionName] = targetClass;
+    /// save meta
+    let metaObject = Meta.get(targetClass);
+    Object.keys(meta).forEach( (key) => metaObject[key] = meta[key] );
+}
 export function retrievePrimaryClass<T>(target: T): new () => (T extends string ? any : T) {
     var name: string = typeof target === 'string' ? target : target.constructor.name;
     return primaryClassMap[name];
@@ -227,6 +233,7 @@ import { Config } from 'core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Log } from 'helpers/utility';
 import { Meta } from 'helpers/utility/meta';
+import { any } from 'bluebird';
 
 export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> {
     let { ip, port, collection } = Config.mongodb;

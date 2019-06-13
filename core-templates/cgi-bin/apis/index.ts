@@ -39,51 +39,54 @@ action.get( async (data) => {
                     loginRequired = (action[`func${proto}Config`] || {}).loginRequired || ((action.config || {}).loginRequired);
                     hasInputType = (action[`func${proto}Config`] || {}).inputType || ((action.config || {}).inputType) ? true : false;
 
-                    let method = (proto === 'All' ? 'Get' : proto).toUpperCase();
+                    obj[proto] = { input: null, output: null, loginRequired };
+                    break;
 
-                    let result: string;
-                    try {
-                    result = await new Promise<string>( (resolve, reject) => {
-                        request({
-                            url: `http://localhost:${Config.core.port}${uri}?help&sessionId=${data.parameters.sessionId}`,
-                            method,
-                        }, (err, res, body) => {
-                            //if (res.statusCode === 401) return reject(401);
-                            if (res.statusCode !== 200) return reject(res.statusCode);
-                            resolve(body);
-                        });
-                    });
-                    } catch(e) {
-                        continue;
-                    }
-                    if (!hasInputType) {
-                        obj[proto] = { input: null, output: null, loginRequired };
-                        break;
-                    }
+                    // let method = (proto === 'All' ? 'Get' : proto).toUpperCase();
 
-                    /// extract input interface
-                    const iRegex = /Input Interface:(?:\r?\n|\r)=+(?:\r?\n|\r)*/;
-                    let imatch = iRegex.exec(result);
-                    /// extract output interface
-                    const oRegex = /(?:\r?\n|\r)*Output Interface:(?:\r?\n|\r)=+(?:\r?\n|\r)*/;
-                    let omatch = oRegex.exec(result);
+                    // let result: string;
+                    // try {
+                    // result = await new Promise<string>( (resolve, reject) => {
+                    //     request({
+                    //         url: `http://localhost:${Config.core.port}${uri}?help&sessionId=${data.parameters.sessionId}`,
+                    //         method,
+                    //     }, (err, res, body) => {
+                    //         //if (res.statusCode === 401) return reject(401);
+                    //         if (res.statusCode !== 200) return reject(res.statusCode);
+                    //         resolve(body);
+                    //     });
+                    // });
+                    // } catch(e) {
+                    //     continue;
+                    // }
+                    // if (!hasInputType) {
+                    //     obj[proto] = { input: null, output: null, loginRequired };
+                    //     break;
+                    // }
 
-                    /// matches
-                    let input = null;
-                    if (imatch !== null) {
-                        let istart = imatch.index + imatch[0].length;
-                        let iend = omatch ? omatch.index : result.length;
-                        input = result.substring(istart, iend);
-                    }
+                    // /// extract input interface
+                    // const iRegex = /Input Interface:(?:\r?\n|\r)=+(?:\r?\n|\r)*/;
+                    // let imatch = iRegex.exec(result);
+                    // /// extract output interface
+                    // const oRegex = /(?:\r?\n|\r)*Output Interface:(?:\r?\n|\r)=+(?:\r?\n|\r)*/;
+                    // let omatch = oRegex.exec(result);
 
-                    let output = null;
-                    if (omatch !== null) {
-                        let ostart = omatch.index + omatch[0].length;
-                        let oend = result.length;
-                        output = result.substring(ostart, oend).replace(/(?:\r?\n|\r)*$/, '');
-                    }
+                    // /// matches
+                    // let input = null;
+                    // if (imatch !== null) {
+                    //     let istart = imatch.index + imatch[0].length;
+                    //     let iend = omatch ? omatch.index : result.length;
+                    //     input = result.substring(istart, iend);
+                    // }
 
-                    obj[proto] = { input, output, loginRequired };
+                    // let output = null;
+                    // if (omatch !== null) {
+                    //     let ostart = omatch.index + omatch[0].length;
+                    //     let oend = result.length;
+                    //     output = result.substring(ostart, oend).replace(/(?:\r?\n|\r)*$/, '');
+                    // }
+
+                    // obj[proto] = { input, output, loginRequired };
 
                     break;
                 case 'Ws':

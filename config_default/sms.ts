@@ -1,5 +1,5 @@
 var config: Config = {
-    enable: true,
+    enable: false,
     comPort: "COM8",
     timeout: 10000
 }

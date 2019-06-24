@@ -6,7 +6,7 @@
 var template = `
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Administrator]
+    permission: [RoleList.Admin]
 });
 
 /// CRUD start /////////////////////////////////
@@ -81,7 +81,7 @@ export default action;
 var templateTree = `
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Administrator]
+    permission: [RoleList.Admin]
 });
 
 /// CRUD start /////////////////////////////////
@@ -183,7 +183,7 @@ export default action;
 var templateInterface = `
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Administrator]
+    permission: [RoleList.Admin]
 });
 
 /// CRUD start /////////////////////////////////

@@ -34,3 +34,7 @@ trace = Log.TraceTime(LogTitle, "Load Workspace");
 import './workspace/main';
 trace.end();
 
+// wait ms milliseconds
+// function wait(ms) {
+//     return new Promise(r => setTimeout(r, ms));
+// }

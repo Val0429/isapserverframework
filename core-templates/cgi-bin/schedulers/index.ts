@@ -10,7 +10,7 @@ import { IScheduleTimes, IScheduleActions, ISchedulers, Schedulers } from 'model
 
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Admin]
+    permission: [RoleList.Administrator]
 });
 
 const filter = { event: (value) => getEnumKey(EventList, value) };

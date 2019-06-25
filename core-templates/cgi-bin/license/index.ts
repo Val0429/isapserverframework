@@ -11,7 +11,7 @@ var getMac = require('getmac').getMac;
 
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.SystemAdministrator, RoleList.Admin]
+    permission: [RoleList.SystemAdministrator, RoleList.Administrator]
 });
 
 /// CRUD start /////////////////////////////////

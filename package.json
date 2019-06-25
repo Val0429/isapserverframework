@@ -1,7 +1,7 @@
 {
   "name": "isap-fts-service",
   "version": "2.01.03",
-  "frameworkversion": "1.06.00",
+  "frameworkversion": "1.07.00",
   "config": {
     "displayname": "iSap FTS Service"
   },

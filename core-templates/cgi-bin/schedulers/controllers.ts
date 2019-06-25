@@ -9,7 +9,7 @@ import { ScheduleControllerBase } from 'models/schedulers/schedulers.base';
 
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Admin, RoleList.SystemAdministrator]
+    permission: [RoleList.Administrator, RoleList.SystemAdministrator]
 });
 
 export interface Input {

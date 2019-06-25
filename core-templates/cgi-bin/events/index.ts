@@ -8,7 +8,7 @@ import {
 
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Admin]
+    permission: [RoleList.Administrator]
 });
 
 /// CRUD start /////////////////////////////////

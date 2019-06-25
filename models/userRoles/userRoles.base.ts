@@ -1,4 +1,5 @@
 import { RoleList } from 'core/userRoles.gen';
+import { APIRoles } from 'models/customRoles';
 
 export interface IRole {
     name: string;
@@ -22,4 +23,5 @@ export interface IUser<T = {}> {
     phone?: string;
     data: T & IUserData;
     roles: RoleList[];
+    apiRoles?: APIRoles[];
 }

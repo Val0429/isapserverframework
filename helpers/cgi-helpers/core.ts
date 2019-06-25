@@ -33,6 +33,7 @@ const caller = require('caller');
 /// private middlewares
 import { VBodyParserJson, VBodyParserRaw } from './private-middlewares/v-body-parser-json';
 import { permissionCheck } from './private-middlewares/permission-check';
+import { apiPermissionCheck } from './private-middlewares/api-permission-check';
 import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { inputType } from './private-middlewares/input-type';
@@ -175,11 +176,15 @@ export class Action<T = any, U = any> {
         /// 2) login
         let cfLoginRequired = fetchConfig("loginRequired");
         middlewares.push(loginRequired(cfLoginRequired));
-        //cfLoginRequired && middlewares.push(loginRequired(cfLoginRequired));
+
         /// 3) permission
         let cfPermission = fetchConfig("permission");
         cfPermission && middlewares.push(permissionCheck(cfPermission));
-        /// 4) inputType
+        /// 4) api permission
+        let cfApiPermission = fetchConfig("apiIdentifier");
+        cfApiPermission && middlewares.push(apiPermissionCheck(cfApiPermission));
+
+        /// 5) inputType
         let cfInputType = fetchConfig("inputType");
         cfInputType && middlewares.push(inputType(caller, cfInputType));
         /// mount others

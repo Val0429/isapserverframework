@@ -67,7 +67,7 @@ export namespace Permission {
                      */
                     static async list<M extends ParseObject<any>>(this: new() => M, options?: IPermissionListArgs<T, PermissionOn>, CParse?: CacheParse): Promise<M[]> {
                         let thisClass: { new(): M } = this;
-                        let query = CParse ? CParse.Query(thisClass) : new Parse.Query<M>(thisClass);
+                        let query = CParse ? CParse.Query(thisClass) : new Parse.Query<M>(thisClass).include("of").include("a").include("b").include("c").include("d");
                         if (options) {
                             options.of && (query = query.equalTo("of", options.of));
                             let on = options.on;
@@ -85,9 +85,9 @@ export namespace Permission {
                         return query.find();
                     }
 
-                    static async set<M extends keyof PermissionList>(of: T, on: PermissionOn, key: M, value: PermissionList[M]): Promise<void>;
-                    static async set(of: T, on: PermissionOn, access: PermissionList): Promise<void>;
-                    static async set<M extends keyof PermissionList>(of: T, on: PermissionOn, access: PermissionList | M, value?: PermissionList[M]): Promise<void> {
+                    static async set<M extends keyof PermissionList>(of: T, on: PermissionOn, key: M, value: PermissionList[M]): Promise<any>;
+                    static async set(of: T, on: PermissionOn, access: PermissionList): Promise<any>;
+                    static async set<M extends keyof PermissionList>(of: T, on: PermissionOn, access: PermissionList | M, value?: PermissionList[M]): Promise<any> {
                         if (!of) throw Log.Error(LogTitle, "<of> should not be null.");
                         if (!on) throw Log.Error(LogTitle, "<on> should not be null.");
 
@@ -106,7 +106,7 @@ export namespace Permission {
                             accessObj = (typeof access === 'string') ? { ...instance.getValue("access") as any, ...accessObj as any } : accessObj;
                             instance.setValue("access", accessObj);
                             await instance.save();
-                            return;
+                            return instance;
                         }
 
                         let thisClass: any = this;
@@ -118,11 +118,10 @@ export namespace Permission {
                         else if (on instanceof role4) options.d = on;
                         let obj = new (thisClass)(options);
                         await obj.save();
+                        return obj;
 
                         } catch(e) { return Promise.reject(e) }
                         finally { mtx.release(); }
-
-                        return null;
                     }
 
                     static async verify<M extends keyof PermissionList>(of: T, on: PermissionOn | PermissionOn[], config?: IPermissionVerifyConfig): Promise<PermissionList>;

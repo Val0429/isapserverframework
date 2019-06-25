@@ -4,12 +4,12 @@ import { Permission } from "models/nodes/permission";
 export interface IAPITokens {
     identifier: string;
 }
-@registerSubclass() export class APITokens extends ParseObject<IAPITokens> {}
+@registerSubclass({ memoryCache: true }) export class APITokens extends ParseObject<IAPITokens> {}
 
 export interface IAPIRoles {
     identifier: string;
 }
-@registerSubclass() export class APIRoles extends ParseObject<IAPIRoles> {}
+@registerSubclass({ memoryCache: true }) export class APIRoles extends ParseObject<IAPIRoles> {}
 
 export interface IAPIPermissions {
     C?: boolean;
@@ -17,4 +17,4 @@ export interface IAPIPermissions {
     U?: boolean;
     D?: boolean;
 }
-@registerSubclass() export class APIPermissions extends Permission.Of(APITokens).With<IAPIPermissions>().On(APIRoles) {}
+@registerSubclass({ memoryCache: true }) export class APIPermissions extends Permission.Of(APITokens).With<IAPIPermissions>().On(APIRoles) {}

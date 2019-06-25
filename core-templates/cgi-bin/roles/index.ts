@@ -8,7 +8,7 @@ import {
 
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.SystemAdministrator, RoleList.Administrator]
+    permission: [RoleList.SystemAdministrator, RoleList.Admin]
 });
 
 /// R: get roles //////////////////////////

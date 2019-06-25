@@ -1,11 +1,11 @@
 {
-  "name": "isap-smart-community-service",
-  "version": "1.00.00",
+  "name": "isap-fts-service",
+  "version": "2.01.03",
   "frameworkversion": "1.06.00",
   "config": {
-    "displayname": "iSap Smart Community Service"
+    "displayname": "iSap FTS Service"
   },
-  "description": "iSap Smart Community Service v1.00.00",
+  "description": "iSap FTS Service v2.01.02",
   "main": "test",
   "typings": "dist/index",
   "scripts": {

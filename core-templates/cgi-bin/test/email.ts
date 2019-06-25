@@ -9,7 +9,7 @@ import { ScheduleActionEmail, ScheduleActionEmailResult } from 'models/scheduler
 
 var action = new Action({
     loginRequired: true,
-    permission: [RoleList.Administrator, RoleList.SystemAdministrator]
+    permission: [RoleList.Admin, RoleList.SystemAdministrator]
 });
 
 export interface Input {

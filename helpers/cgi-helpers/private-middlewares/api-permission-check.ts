@@ -13,7 +13,7 @@ declare module "helpers/cgi-helpers/core" {
          * Is this action limit to specific api role?
          * Default = none.
          */
-        apiIdentifier?: string;
+        apiToken?: string;
     }
 }
 

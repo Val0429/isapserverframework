@@ -181,7 +181,7 @@ export class Action<T = any, U = any> {
         let cfPermission = fetchConfig("permission");
         cfPermission && middlewares.push(permissionCheck(cfPermission));
         /// 4) api permission
-        let cfApiPermission = fetchConfig("apiIdentifier");
+        let cfApiPermission = fetchConfig("apiToken");
         cfApiPermission && middlewares.push(apiPermissionCheck(cfApiPermission));
 
         /// 5) inputType

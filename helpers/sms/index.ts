@@ -1,10 +1,16 @@
-var edge = require('edge-js');
+const isWindows = process.platform === "win32";
 
-let sms = edge.func({
-    assemblyFile: `${__dirname}/lib/sms-dll.dll`,
-    typeName: 'sms_dll.Startup',
-    methodName: 'Invoke'
-});
+let edge, sms;
+
+if (isWindows) {
+    edge = require('edge-js');
+
+    sms = process.platform === "win32" ? edge.func({
+        assemblyFile: `${__dirname}/lib/sms-dll.dll`,
+        typeName: 'sms_dll.Startup',
+        methodName: 'Invoke'
+    }) : null;
+}
 
 export interface SMSCommand {
     comPort: string;
@@ -13,5 +19,6 @@ export interface SMSCommand {
     timeout: number;
 }
 export async function sendSMS(input: SMSCommand) {
+    if (!isWindows) throw "SMS currently not support on Linux";
     return await sms(input);
 }

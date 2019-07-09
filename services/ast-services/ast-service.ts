@@ -597,11 +597,17 @@ namespace AstConverter {
     }
 
     export function toDateEntity(input: string | number, name: string, isArray: boolean = false): ConverterEntity {
-        if (typeof input !== 'string' && typeof input !== 'number') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid string or number of Date${isArray?'[]':''}.`]);
-        return {
-            __type__: "Date",
-            data: new Date(input).toISOString()
-        }
+        do {
+            if (typeof input !== 'string' && typeof input !== 'number') break;
+            try {
+                return {
+                    __type__: "Date",
+                    data: new Date(input).toISOString()
+                }
+            } catch (e) { break; }
+        } while (0);
+
+        throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid string or number of Date${isArray ? '[]' : ''}.`]);
     }
 
     export function toBufferEntity(input: string, name: string, isArray: boolean = false): ConverterEntity {

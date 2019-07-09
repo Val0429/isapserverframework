@@ -60,8 +60,8 @@ type OutputU = Restful.OutputU<IAPIPermissions>;
 action.put<InputU, OutputU>({ inputType: "InputU" }, async (data) => {
     /// 1) Get Object
     var { objectId } = data.inputType;
-    var obj = await new Parse.Query(APITokens).get(objectId);
-    if (!obj) throw Errors.throw(Errors.CustomNotExists, [`APITokens <${objectId}> not exists.`]);
+    var obj = await new Parse.Query(APIPermissions).get(objectId);
+    if (!obj) throw Errors.throw(Errors.CustomNotExists, [`APIPermissions <${objectId}> not exists.`]);
     /// 2) Modify
     await obj.save({ ...data.inputType, objectId: undefined });
     /// 3) Output
@@ -77,8 +77,8 @@ type OutputD = Restful.OutputD<IAPIPermissions>;
 action.delete<InputD, OutputD>({ inputType: "InputD" }, async (data) => {
     /// 1) Get Object
     var { objectId } = data.inputType;
-    var obj = await new Parse.Query(APITokens).get(objectId);
-    if (!obj) throw Errors.throw(Errors.CustomNotExists, [`APITokens <${objectId}> not exists.`]);
+    var obj = await new Parse.Query(APIPermissions).get(objectId);
+    if (!obj) throw Errors.throw(Errors.CustomNotExists, [`APIPermissions <${objectId}> not exists.`]);
     /// 2) Delete
     obj.destroy({ useMasterKey: true });
     /// 3) Output

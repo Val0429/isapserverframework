@@ -22,10 +22,11 @@
   },
   "nodemonConfig": {
     "ignore": [
-      ".git/*",
-      ".cache*/*",
-      "logs/*",
-      "node_modules/*"
+      "**/.git/*",
+      "**/.cache*/*",
+      "**/logs/*",
+      "**/node_modules/*",
+      "**/assets/*"
     ],
     "delay": "200"
   },

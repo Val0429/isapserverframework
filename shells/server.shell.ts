@@ -24,6 +24,7 @@ import { deployWeb } from 'helpers/deploy-web';
 import 'colors';
 import { InMemoriableMongoDBAdapter } from 'helpers/parse-server/database-adapter/inmemoriable-mongodb-adapter';
 import GridStoreAdapter from 'parse-server/lib/Adapters/Files/GridStoreAdapter';
+import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 
 import { Config } from 'core/config.gen';
 
@@ -63,15 +64,7 @@ if (Config.mongodb.enable) {
     let serverURL = !Config.core.httpDisabled ?
         \`\${myServerUrl}\${Config.parseServer.serverPath}\` :
         \`\${myServerUrl}\${Config.parseServer.serverPath}\`;
-    const mergeDBConfig = (config) => {
-        let { collection, replica } = config;
-        const basic = (config) => \`\${!config.account?'':\`\${config.account}:\${config.password}@\`}\${config.ip}:\${config.port}\`;
-        if (!replica)
-            return \`mongodb://\${basic(config)}/\${collection}\`;
-        else
-            return \`mongodb://\${replica.servers.map(server => basic(server)).join(",")}/\${collection}?replicaSet=\${replica.name}\`;
-    }
-    let databaseURI = mergeDBConfig(Config.mongodb);
+    let databaseURI = mongoDBUrl();
     //let databaseURI = \`mongodb://\${!Config.mongodb.account?'':\`\${Config.mongodb.account}:\${Config.mongodb.password}@\`}\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`;
     var ParseServer = new parse.ParseServer({
         //databaseURI,

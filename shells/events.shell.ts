@@ -56,6 +56,7 @@ import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Subject } from 'rxjs';
 import { retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
 import { promisify } from 'bluebird';
+import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 
 export var EventSubjects: {
 {0}
@@ -69,7 +70,7 @@ export var EventsSubject: Subject<Events> = new Subject<Events>();
     await serverReady;
 
     let { ip, port, collection } = Config.mongodb;
-    const url = \`mongodb://\${ip}:\${port}\`;
+    const url = mongoDBUrl();
     let client = await MongoClient.connect(url);
     let db = client.db(collection);
 

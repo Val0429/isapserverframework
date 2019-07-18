@@ -63,7 +63,16 @@ if (Config.mongodb.enable) {
     let serverURL = !Config.core.httpDisabled ?
         \`\${myServerUrl}\${Config.parseServer.serverPath}\` :
         \`\${myServerUrl}\${Config.parseServer.serverPath}\`;
-    let databaseURI = \`mongodb://\${!Config.mongodb.account?'':\`\${Config.mongodb.account}:\${Config.mongodb.password}@\`}\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`;
+    const mergeDBConfig = (config) => {
+        let { collection, replica } = config;
+        const basic = (config) => \`\${!config.account?'':\`\${config.account}:\${config.password}@\`}\${config.ip}:\${config.port}\`;
+        if (!replica)
+            return \`mongodb://\${basic(config)}/\${collection}\`;
+        else
+            return \`mongodb://\${replica.servers.map(server => basic(server)).join(",")}/\${collection}?replicaSet=\${replica.name}\`;
+    }
+    let databaseURI = mergeDBConfig(Config.mongodb);
+    //let databaseURI = \`mongodb://\${!Config.mongodb.account?'':\`\${Config.mongodb.account}:\${Config.mongodb.password}@\`}\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`;
     var ParseServer = new parse.ParseServer({
         //databaseURI,
         databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI}),

@@ -388,6 +388,15 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                                 if ( !(!val === (data === undefined || data === null)) ) break main;
                                 break;
 
+                            case '$regex':
+                                // * for matches
+                                // * e.g. { '$regex': 'token', '$options': 'i' }
+                                if ( !new RegExp(val, value["$options"]).test(data) ) break main;
+                                break;
+                            case '$options':
+                                // won't handle $options, it groups with $regex.
+                                break;
+
                             case '__type':
                                 if ( !(value.objectId === data.objectId) ) break main;
                                 break;

@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { EnumAgentResponseStatus, ITaskFunctionDataKeeping, IDataKeeperStorage, TimestampToken } from "../core";
 import { ISocketDelegatorRequest } from "../socket-manager";
 import { BehaviorSubject, Subject } from "rxjs";

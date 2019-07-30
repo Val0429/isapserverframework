@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { Socket } from 'helpers/sockets/socket-helper';
 import { IAgentTaskFilterMapping } from './utilities/filters';
 import { IAgentTaskSchedulerMapping } from './utilities/schedulers';

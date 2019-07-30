@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
 import { Errors } from 'core/errors.gen';

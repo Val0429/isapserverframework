@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { registerSubclass, ParseObject } from "helpers/cgi-helpers/core";
 import { Permission } from "models/nodes/permission";
 

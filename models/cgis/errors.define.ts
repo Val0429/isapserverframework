@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 var errors: Config[] = [
     ["LoginRequired", 401, "This action requires login."],
     ["ParametersRequired", 400, "Parameters required: {0}"],

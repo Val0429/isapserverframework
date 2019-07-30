@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { ExtractScheduleActionBaseIT } from './../actions/core';
 
 export type ExtractScheduleTemplateBaseI<T> = T extends ScheduleTemplateBase<infer K, infer V, infer U> ? V : never;

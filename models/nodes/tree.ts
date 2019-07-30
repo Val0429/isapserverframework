@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { ParseObject } from "helpers/parse-server/parse-helper";
 import { pickObject } from "helpers/utility/pick-object";
 import { Mutex } from "helpers/utility";

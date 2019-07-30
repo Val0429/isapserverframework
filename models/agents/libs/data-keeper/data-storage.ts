@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { IDataKeeperStorage, TimestampToken } from "../core";
 import { Observable } from "rxjs";
 import { createMongoDB, sharedMongoDB } from "helpers/cgi-helpers/core";

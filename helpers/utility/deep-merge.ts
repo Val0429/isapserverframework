@@ -1,3 +1,8 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
 
 function isObject(item) {
     return (item && typeof item === 'object' && !isArray(item));

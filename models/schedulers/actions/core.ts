@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 export type ExtractScheduleActionBaseIT<T> = T extends ScheduleActionBase<infer U, infer K, infer V> ? U : never;
 export type ExtractScheduleActionBaseIC<T> = T extends ScheduleActionBase<infer U, infer K, infer V> ? K : never;
 export type ExtractScheduleActionBaseO<T> = T extends ScheduleActionBase<infer U, infer K, infer V> ? V : never;

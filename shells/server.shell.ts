@@ -1,8 +1,19 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { shellWriter2 } from 'helpers/shells/shell-writer';
 import { Config } from 'core/config.gen';
 
 var tHeader = `
 "use strict";
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
 
 import 'shells/events.shell';
 

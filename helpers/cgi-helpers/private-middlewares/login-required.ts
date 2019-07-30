@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { RoleList, IRole } from 'core/userRoles.gen';
 import { Errors } from 'core/errors.gen';
 

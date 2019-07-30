@@ -1,6 +1,18 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { shellWriter2, autoPad } from 'helpers/shells/shell-writer';
 
 var tHeader = `
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import * as util from 'util';
 import { ErrorObject } from 'models/cgis/errors.base';
 export * from 'models/cgis/errors.base';

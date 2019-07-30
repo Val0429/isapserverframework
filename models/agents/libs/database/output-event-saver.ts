@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { createMongoDB } from "helpers/cgi-helpers/core";
 import { Db } from "mongodb";
 import { BehaviorSubject, Observable } from "rxjs";

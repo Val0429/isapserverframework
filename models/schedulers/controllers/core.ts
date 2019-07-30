@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { ExtractScheduleActionBaseIT, ExtractScheduleActionBaseIC, ExtractScheduleActionBaseO, ScheduleActionBase } from './../actions/core';
 import { ExtractScheduleTemplateBaseI, ExtractScheduleTemplateBaseO, ScheduleTemplateBase } from './../templates/core';
 import { ObjectDiff } from 'helpers/parse-server/parse-helper';

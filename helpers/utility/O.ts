@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 let NF = new Proxy(() => ({}), { get(target, name) { return NF } });
 
 export function O<T>(someObject: T, defaultValue: T = NF as any as T) : T {

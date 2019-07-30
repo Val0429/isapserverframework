@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 const { fork } = require('child_process');
 import { RequestInit, RequestNormal, RequestBase, EnumRequestType, TypesFromAction, Response, ConverterEntity, IvParseFile, RequestReportType, RequestNormalSimple } from './ast-core';
 import { Errors } from 'core/errors.gen';

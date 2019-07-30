@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRegisterConfig, EAgentRequestType, Objective, MeUser, IAgentRequest, EnumAgentResponseStatus, TimestampToken } from "../core";
 import { Observable, Observer, BehaviorSubject } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";

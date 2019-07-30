@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { autoPad } from 'helpers/shells/shell-writer';
 import * as fs from 'fs';
 import * as p from 'path';
@@ -6,6 +12,12 @@ import { Log } from 'helpers/utility';
 // import coreConfig, { Config as coreConfigType } from 'config_default/core';
 // import mongodbConfig, { Config as mongodbConfigType } from 'config_default/mongodb';
 var tHeaderSpecial = `
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 {0}
 `;
 

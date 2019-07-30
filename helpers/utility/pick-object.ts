@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 /// pick object data, with given keys. reverse to ignore keys. also handle dot annotations.
 export function pickObject(data: object, keys: string[], reverse?: boolean) {
     if (data === undefined || data === null) return data;

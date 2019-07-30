@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import * as express from 'express';
 import { Request } from '~express/lib/request';
 import * as fs from 'fs';

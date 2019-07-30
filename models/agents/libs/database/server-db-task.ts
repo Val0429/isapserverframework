@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus } from "../core";
 import { ParseObject, registerSubclass } from "helpers/cgi-helpers/core";
 import { Mutex, jsMapAssign } from "helpers/utility";

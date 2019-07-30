@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, IRemoteAgentTask, injectTimestamp, injectErrorTimestamp, injectCompleteTimestamp, TimestampToken } from "../core";
 import { Subject, Observable } from "rxjs";
 import { Socket, ActionParam, ParseObject } from "helpers/cgi-helpers/core";

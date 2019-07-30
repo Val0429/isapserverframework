@@ -1,9 +1,21 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { shellWriter2, autoPad } from 'helpers/shells/shell-writer';
 
 // import {
 //     IEventLogin, IEventLogout
 // } from './events';
 var tHeader = `
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { registerSubclass, Omit, ParseTypedGetterSetter } from 'helpers/parse-server/parse-helper';
 import { IRole, IUser } from 'models/userRoles/userRoles.base';
 export * from 'models/userRoles/userRoles.base';

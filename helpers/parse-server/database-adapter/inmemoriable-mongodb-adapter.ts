@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { MongoStorageAdapter } from 'parse-server/lib/Adapters/Storage/Mongo/MongoStorageAdapter';
 import { retrievePrimaryClassMeta, ParseObject } from '../parse-helper';
 import { Log } from 'helpers/utility';

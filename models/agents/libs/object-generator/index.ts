@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { ISocketDelegatorRequest } from "../socket-manager";
 import { RegistrationDelegator } from "../declarations";
 import { IAgentRequest, EAgentRequestType, IAgentResponse } from "../core";

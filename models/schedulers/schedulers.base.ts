@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import { ParseObject, registerSubclass, retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
 import { IEvent } from 'models/events/events.base';
 import { EventList } from 'core/events.gen';

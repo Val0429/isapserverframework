@@ -1,8 +1,9 @@
-// export interface IInputPaging {
-//     page?: number;
-//     pageSize?: number;
-//     all?: "true" | "false";
-// }
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 export interface IInputPagingBase {
     page?: number;
     pageSize?: number;

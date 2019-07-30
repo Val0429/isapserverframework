@@ -1,3 +1,9 @@
+/*
+ * Created on Tue Jul 30 2019
+ * Author: Val Liu
+ * Copyright (c) 2019, iSAP Solution
+ */
+
 import * as util from 'util';
 import { ParseObject } from "helpers/parse-server/parse-helper";
 import { Meta } from "helpers/utility/meta";

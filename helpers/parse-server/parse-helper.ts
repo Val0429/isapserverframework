@@ -240,10 +240,11 @@ import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { Log } from 'helpers/utility';
 import { Meta } from 'helpers/utility/meta';
 import { any } from 'bluebird';
+import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 
 export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> {
     let { ip, port, collection } = Config.mongodb;
-    const url = `mongodb://${ip}:${port}`;
+    const url = mongoDBUrl();
     let client = await MongoClient.connect(url);
     let db = client.db(collection);
     return { client, db };

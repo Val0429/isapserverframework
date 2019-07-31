@@ -177,6 +177,7 @@ export class ParseObject<T> extends Parse.Object {
             else if (type === 'string') return data;
             else if (type === 'number') return data;
             else if (type === 'undefined') return data;
+            else if (data === null) return data;
             else if (data instanceof Date) return data.toISOString();
             else if (data instanceof Parse.File) return data.url();
             else if (data instanceof Parse.Relation) return undefined;
@@ -193,7 +194,6 @@ export class ParseObject<T> extends Parse.Object {
             /// 17)
             else if (data instanceof Buffer) return data.toString("base64");
             else if (type === 'object') {
-                if (!data) return data;
                 var isArray = Array.isArray(data);
                 var result = isArray ? [] : {};
 

@@ -16,7 +16,7 @@ const removing: string[] = [];
 /**
  * Data Storage delegation class,
  * to save into DB (next),
- * and to giveup save into DB (redraw).
+ * and to giveup save into DB (withdraw).
  */
 
 export class DataStorage {
@@ -25,8 +25,8 @@ export class DataStorage {
         keeping.push(value);
     }
 
-    /// redraw save into db.
-    static redraw(value: IDataKeeperStorage) {
+    /// withdraw save into db.
+    static withdraw(value: IDataKeeperStorage) {
         /// find in keeping
         let idx = keeping.findIndex( (data) => data === value );
         if (idx >= 0) {

@@ -134,8 +134,8 @@ export class DataKeeper {
                     break;
                 default: throw "<DataKeeper> should not happen.";
             }
-            /// redraw db
-            DataStorage.redraw(data);
+            /// withdraw db
+            DataStorage.withdraw(data);
 
         } while(1);
     }

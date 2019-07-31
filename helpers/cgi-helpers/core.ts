@@ -245,7 +245,7 @@ export class Action<T = any, U = any> {
                     var response = <any>info.res;
                     var socket = await Socket.get(info, cb);
                     /// send 200 ok
-                    socket.io.send(JSON.stringify({statusCode: 200}));
+                    socket.send({statusCode: 200});
 
                     /// auto update session ///////////////////////
                     if (Config.core.sessionExpireSeconds >= 0 && request.session) {

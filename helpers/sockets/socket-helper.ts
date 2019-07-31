@@ -16,9 +16,9 @@ export class Socket {
     io: WSSocket;
     private sendCount: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
-    static get(response: Response);
-    static get(ws: WSSocket);
-    static get(info: ExpressWsRouteInfo, cb: ExpressWsCb);
+    static get(response: Response): Promise<Socket>;
+    static get(ws: WSSocket): Promise<Socket>;
+    static get(info: ExpressWsRouteInfo, cb: ExpressWsCb): Promise<Socket>;
     static get(arg1: any, arg2?: any): Promise<Socket> {
         return new Promise( (resolve) => {
             var ws, info, cb;

@@ -25,6 +25,8 @@ function deployWeb(directory: string, appOrPort: express.Application | number) {
             fs.exists(webIndexPath, (exists) => {
                 if (!exists) return;
                 app.use(async (req: Request, res, next) => {
+                    /// don't response web page for websocket
+                    if ((req as any).method === 'WEBSOCKET') return next();
                     do {
                         /// detect in cgi-bin
                         let uri = url.parse(!Config.core.cgiPath ? req.originalUrl : req.originalUrl.replace(`/${Config.core.cgiPath}`, ''));

@@ -36,6 +36,12 @@ export namespace UserHelper {
             /// Success
             sessionId = user.getSessionToken();
 
+            /// delete outdated session
+            let sessions = await new Parse.Query("_Session")
+                .equalTo("user", user).find({useMasterKey: true});
+            sessions = sessions.filter( session => session.attributes.sessionToken !== sessionId );
+            Parse.Object.destroyAll(sessions, { useMasterKey: true });
+
         } catch(reason) {
             throw Errors.throw(Errors.LoginFailed);
         }

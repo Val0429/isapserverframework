@@ -49,6 +49,22 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
 import { UserHelper } from 'helpers/parse-server/user-helper';
 import { Tree } from 'models/nodes';
+import CollectionWatcher from 'helpers/mongodb/collection-watcher';
+
+
+let connectedSockets: { [sid: string]: Socket[] } = {};
+/// connected socket being kick out handler
+(async () => {
+    (await CollectionWatcher.watch("_Session"))
+        .subscribe( (change) => {
+            if (change.operationType !== 'delete') return;
+            let sid = change.documentKey._id;
+            (connectedSockets[sid] || []).forEach( (socket) => {
+                socket.send({statusCode: 401, message: "Session being logged out."});
+                socket.closeGracefully();
+            });
+        });
+})();
 
 
 export interface ActionConfig<T = any, U = any> {
@@ -244,8 +260,11 @@ export class Action<T = any, U = any> {
                     var request = <any>info.req;
                     var response = <any>info.res;
                     var socket = await Socket.get(info, cb);
+                    let sid = (request.session || {}).id;
                     /// send 200 ok
                     socket.send({statusCode: 200});
+                    /// insert connected socket. ignore loginRequired == false
+                    sid && ( connectedSockets[sid] || (connectedSockets[sid] = []) ).push(socket);
 
                     /// auto update session ///////////////////////
                     if (Config.core.sessionExpireSeconds >= 0 && request.session) {
@@ -257,6 +276,13 @@ export class Action<T = any, U = any> {
                         }, tick );
                         socket.io.addListener("close", () => {
                             clearInterval(intv);
+
+                            /// remove connected socket
+                            if (!sid) return;
+                            let sockets = connectedSockets[sid];
+                            if (!sockets) return;
+                            let idx = sockets.findIndex( v => v === socket );
+                            sockets.splice(idx, 1);
                         })
                     }
                     ///////////////////////////////////////////////

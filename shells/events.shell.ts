@@ -15,6 +15,7 @@ var tHeader = `
  */
 
 import { registerSubclass, ParseObject, Omit } from 'helpers/parse-server/parse-helper';
+import CollectionWatcher from 'helpers/mongodb/collection-watcher';
 import { Events, IEvents, IEvent } from 'models/events/events.base';
 export * from 'models/events/events.base';
 `;
@@ -85,25 +86,44 @@ export var EventsSubject: Subject<Events> = new Subject<Events>();
 
     let events = [{2}];
     for (let event of events) {
-        var instance = db.collection(event);
-        var stream = instance.watch();
-        stream.on("change", (change) => {
-            if (change.operationType !== 'insert') return;
-            var type = retrievePrimaryClass(event);
-            var rtn: any = new type();
-            rtn.id = change.documentKey._id;
-            EventSubjects[event].next(rtn);
-        });
+        (await CollectionWatcher.watch(event))
+            .subscribe( (change) => {
+                if (change.operationType !== 'insert') return;
+                var type = retrievePrimaryClass(event);
+                var rtn: any = new type();
+                rtn.id = change.documentKey._id;
+                EventSubjects[event].next(rtn);
+            });
     }
 
-    var instance = db.collection("Events");
-    var stream = instance.watch();
-    stream.on("change", (change) => {
-        if (change.operationType !== 'insert') return;
-        let rtn = new Events();
-        rtn.id = change.documentKey._id;
-        EventsSubject.next(rtn);
-    });
+    (await CollectionWatcher.watch("Events"))
+        .subscribe( (change) => {
+            if (change.operationType !== 'insert') return;
+            let rtn = new Events();
+            rtn.id = change.documentKey._id;
+            EventsSubject.next(rtn);
+        });
+
+    // for (let event of events) {
+    //     var instance = db.collection(event);
+    //     var stream = instance.watch();
+    //     stream.on("change", (change) => {
+    //         if (change.operationType !== 'insert') return;
+    //         var type = retrievePrimaryClass(event);
+    //         var rtn: any = new type();
+    //         rtn.id = change.documentKey._id;
+    //         EventSubjects[event].next(rtn);
+    //     });
+    // }
+
+    // var instance = db.collection("Events");
+    // var stream = instance.watch();
+    // stream.on("change", (change) => {
+    //     if (change.operationType !== 'insert') return;
+    //     let rtn = new Events();
+    //     rtn.id = change.documentKey._id;
+    //     EventsSubject.next(rtn);
+    // });
 
 })();
 `;

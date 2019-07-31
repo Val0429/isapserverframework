@@ -193,6 +193,7 @@ export class ParseObject<T> extends Parse.Object {
             /// 17)
             else if (data instanceof Buffer) return data.toString("base64");
             else if (type === 'object') {
+                if (!data) return data;
                 var isArray = Array.isArray(data);
                 var result = isArray ? [] : {};
 

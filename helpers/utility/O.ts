@@ -4,18 +4,20 @@
  * Copyright (c) 2019, iSAP Solution
  */
 
-let NF = new Proxy(() => ({}), { get(target, name) { return NF } });
-
-export function O<T>(someObject: T, defaultValue: T = NF as any as T) : T {
-    if (typeof someObject === 'undefined' || someObject === null)
+export function O<T>(someObject: T, defaultValue: T = {} as any as T) : T {
+    const type = typeof someObject;
+    if (someObject === null || someObject === undefined || type !== 'object')
         return defaultValue;
     else
         return someObject;
 }
 
-let NF2 = new Proxy(() => undefined, { get(target, name) { return undefined } });
-export function _O<T>(someObject: T, defaultValue: T = NF2 as any as T) : T {
-    if (someObject === undefined || someObject === null)
+
+/// legacy
+let NF = new Proxy(() => ({}), { get(target, name) { return NF } });
+
+export function _O<T>(someObject: T, defaultValue: T = NF as any as T) : T {
+    if (typeof someObject === 'undefined' || someObject === null)
         return defaultValue;
     else
         return someObject;

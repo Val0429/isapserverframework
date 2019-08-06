@@ -6,34 +6,18 @@
 
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Schedule, IScheduleUnit } from 'models/nodes';
+import { Log } from 'helpers/utility';
+
+const debug: boolean = true;
 
 /// helper class
 class ClassicSchedule extends Schedule.Of({}) {}
 
-// (async () => {
-//     console.time("123");
-//     let calendar = await ClassicSchedule.buildCalendar([
-//         new ClassicSchedule({
-//             when: {
-//                 beginDate: new Date(2019, 7, 4, 12, 0, 0),
-//                 endDate: new Date(2019, 7, 4, 13, 0, 0),
-//                 fullDay: false,
-//                 repeat: {
-//                     type: EScheduleUnitRepeatType.Day,
-//                     endType: EScheduleUnitRepeatEndType.NoStop,
-//                     value: 2
-//                 }
-//             }
-//         })
-//     ]);
-//     console.log('calendar...', calendar);
-//     console.timeEnd("123");
-// })();
 
 export namespace ScheduleHelperV2 {
-    export function observe(schedule: IScheduleUnit): Observable<any>;
-    export function observe(schedule: IScheduleUnit[]): Observable<any>;
-    export function observe(schedule: IScheduleUnit | IScheduleUnit[]): Observable<any> {
+    export function observe(schedule: IScheduleUnit, name?: string): Observable<any>;
+    export function observe(schedule: IScheduleUnit[], name?: string): Observable<any>;
+    export function observe(schedule: IScheduleUnit | IScheduleUnit[], name?: string): Observable<any> {
         if (!Array.isArray(schedule)) schedule = [schedule];
         const cschedule = schedule.map( (data) => {
             return new ClassicSchedule({ when: data });
@@ -42,22 +26,27 @@ export namespace ScheduleHelperV2 {
         return Observable.create( (subscriber) => {
             let timer;
             /// 1) build calendar
-            let calendarUnits, nextCalendarUnits;
+            let calendar, calendarUnits, nextCalendarUnits;
+            let matched = false;
 
             let doOnce = async () => {
                 let now = new Date();
                 /// 1) build calendar
-                if (!nextCalendarUnits || (nextCalendarUnits[0].start <= now)) {
-                    let calendar = await ClassicSchedule.buildCalendar(
+                if (!nextCalendarUnits || (nextCalendarUnits.length > 0 && nextCalendarUnits[0].start <= now)) {
+                    calendar = await ClassicSchedule.buildCalendar(
                         cschedule
                     );
+                    // console.log('rebuild calendar...', calendar);
                     calendarUnits = calendar.calendarUnits;
                     nextCalendarUnits = calendar.nextCalendarUnits;
+                    matched = false;
                 }
 
                 /// 1.1) if matches, next
-                if (calendarUnits.length !== 0) {
+                if (!matched && calendar.matchTime(now).length > 0) {
                     subscriber.next(calendarUnits);
+                    debug && Log.Info("ScheduleHelper", `${name ? `${name}: `:''}tick! ${JSON.stringify(calendarUnits)}`);
+                    matched = true;
                 }
                 /// 1.2) if no next, complete
                 if (nextCalendarUnits.length === 0) {
@@ -74,7 +63,7 @@ export namespace ScheduleHelperV2 {
                     timer = setTimeout( () => {
                         doOnce();
                     }, period);
-                    console.log('going to wait for...', period);
+                    debug && Log.Info("ScheduleHelper", `${name ? `${name}: `:''}wait for: ${period}`);
                 }
             }
             doOnce();

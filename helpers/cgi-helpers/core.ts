@@ -179,7 +179,7 @@ export class Action<T = any, U = any> {
         /////////////////////////////////////////////
         /// mount middlewares
         let fetchConfig = <T extends keyof ActionConfig>(key: T): ActionConfig[T] => {
-            return _O(this.config)[key] || _O(config)[key];
+            return O(this.config)[key] || O(config)[key];
         }
 
         /// 1) bodyParser

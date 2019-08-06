@@ -14,6 +14,9 @@ const OneWeek = OneDay * 7;
 
 export enum EScheduleUnitRepeatType {
     NoRepeat = 0,
+    Second = 2,
+    Minute = 4,
+    Hour = 6,
     Day = 10,
     Week = 30,
     Month = 50,
@@ -36,11 +39,26 @@ interface IScheduleUnitRepeatStarterBase {
     type: EScheduleUnitRepeatType;
     value: number;
     /// 重複資料
+    /// Second: never;
+    /// Minute: never;
+    /// Hour: never;
     /// Day: never;
     /// Week: number[];
     /// Month: By this Day | By this Weekday
     /// Year: By this Day | By this Weekday
     data?: any;
+}
+interface IScheduleUnitRepeatStarter_Second extends IScheduleUnitRepeatStarterBase {
+    type: EScheduleUnitRepeatType.Second;
+    data?: never;
+}
+interface IScheduleUnitRepeatStarter_Minute extends IScheduleUnitRepeatStarterBase {
+    type: EScheduleUnitRepeatType.Minute;
+    data?: never;
+}
+interface IScheduleUnitRepeatStarter_Hour extends IScheduleUnitRepeatStarterBase {
+    type: EScheduleUnitRepeatType.Hour;
+    data?: never;
 }
 interface IScheduleUnitRepeatStarter_Day extends IScheduleUnitRepeatStarterBase {
     type: EScheduleUnitRepeatType.Day;
@@ -58,7 +76,7 @@ interface IScheduleUnitRepeatStarter_Year extends IScheduleUnitRepeatStarterBase
     type: EScheduleUnitRepeatType.Year;
     data: EScheduleUnitRepeatMonthType;
 }
-type IScheduleUnitRepeatStarter = IScheduleUnitRepeatStarter_Day | IScheduleUnitRepeatStarter_Week | IScheduleUnitRepeatStarter_Month | IScheduleUnitRepeatStarter_Year;
+type IScheduleUnitRepeatStarter = IScheduleUnitRepeatStarter_Second | IScheduleUnitRepeatStarter_Minute | IScheduleUnitRepeatStarter_Hour | IScheduleUnitRepeatStarter_Day | IScheduleUnitRepeatStarter_Week | IScheduleUnitRepeatStarter_Month | IScheduleUnitRepeatStarter_Year;
 
 /// repeat end
 interface IScheduleUnitRepeatEndBase {
@@ -235,17 +253,6 @@ export namespace Schedule {
             nextCalendarUnits: ICalendarUnit<T>[];
             constructor(data: T[], timeRange: IScheduleTimeRange) {
                 if (!timeRange.end) timeRange.end = timeRange.start;
-                // this.calendarUnits = data.reduce<ICalendarUnit<T>[]>( (final, schedule) => {
-                //     final.splice(0, 0, ...Cal.buildSingleSchedule(schedule, timeRange));
-                //     return final;
-                // }, []).sort( (a, b) => {
-                //     let astart = a.start.valueOf(), bstart = b.start.valueOf();
-                //     let aprio = a.data.attributes.priority, bprio = b.data.attributes.priority;
-                //     if (astart < bstart) return -1; if (astart > bstart) return 1;
-                //     if (aprio < bprio) return -1; if (aprio > bprio) return 1;
-                //     return 0;
-                // })
-
                 let sorty = (a, b) => {
                     let astart = a.start.valueOf(), bstart = b.start.valueOf();
                     let aprio = a.data.attributes.priority, bprio = b.data.attributes.priority;
@@ -325,10 +332,21 @@ export namespace Schedule {
                         break;
                     }
 
-                    /// 1) by repeat type - By Day
-                    if (when.repeat.type === EScheduleUnitRepeatType.Day) {
+                    /// 1) by repeat type - By Second, Minute, Hour, Day
+                    if (
+                        when.repeat.type === EScheduleUnitRepeatType.Second ||
+                        when.repeat.type === EScheduleUnitRepeatType.Minute ||
+                        when.repeat.type === EScheduleUnitRepeatType.Hour ||
+                        when.repeat.type === EScheduleUnitRepeatType.Day
+                        ) {
+                        let intervalBase: number;
+                        if (when.repeat.type === EScheduleUnitRepeatType.Second) intervalBase = OneSecond;
+                        else if (when.repeat.type === EScheduleUnitRepeatType.Minute) intervalBase = OneMinute;
+                        else if (when.repeat.type === EScheduleUnitRepeatType.Hour) intervalBase = OneHour;
+                        else intervalBase = OneDay;
+
                         /// calculate first time range
-                        let interval = when.repeat.value * OneDay;
+                        let interval = when.repeat.value * intervalBase;
                         let unit = Math.max( Math.floor((nRefStart - nEnd) / interval) + 1, 0 );
                         for (let i=0; ; ++unit, ++i) {
                             let start = nStart + (unit * interval);
@@ -350,8 +368,36 @@ export namespace Schedule {
                             /// rule: FirstOnly
                             if (rule === EBuildScheduleRule.FirstOnly && rtn.matches.length > 0) break;
                         }
-                        break;
+                        break;                        
                     }
+
+                    // /// 1) by repeat type - By Day
+                    // if (when.repeat.type === EScheduleUnitRepeatType.Day) {
+                    //     /// calculate first time range
+                    //     let interval = when.repeat.value * OneDay;
+                    //     let unit = Math.max( Math.floor((nRefStart - nEnd) / interval) + 1, 0 );
+                    //     for (let i=0; ; ++unit, ++i) {
+                    //         let start = nStart + (unit * interval);
+                    //         let end = nEnd + (unit * interval);
+                    //         if (start > nRefEnd) {
+                    //             makeOneNextCalendarUnit(new Date(start), new Date(end), schedule);
+                    //             break;
+                    //         }
+
+                    //         /// end type = Date
+                    //         if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
+                    //             start >= when.repeat.endValue.valueOf()) break;
+                    //         /// end type = TotalTimes
+                    //         if (when.repeat.endType === EScheduleUnitRepeatEndType.TotalTimes &&
+                    //             i >= when.repeat.endValue) break;
+
+                    //         makeOneCalendarUnit(new Date(start), new Date(end), schedule);
+
+                    //         /// rule: FirstOnly
+                    //         if (rule === EBuildScheduleRule.FirstOnly && rtn.matches.length > 0) break;
+                    //     }
+                    //     break;
+                    // }
 
                     /// 2) by repeat type - By Week
                     if (when.repeat.type === EScheduleUnitRepeatType.Week) {

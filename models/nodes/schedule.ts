@@ -205,12 +205,12 @@ export namespace Schedule {
             static async buildCalendar<M extends ScheduleImpl>(this: new(...args) => M, on: Who | Where | What | How, timeRange?: IScheduleTimeRange);
             static async buildCalendar<M extends ScheduleImpl>(this: new(...args) => M, on: M[] | Who | Where | What | How, timeRange?: IScheduleTimeRange) {
                 let thisClass: { new(): M } = this;
-                let query = new Parse.Query(thisClass);
                 
                 /// filter "on"
                 let result: M[];
                 if (Array.isArray(on)) result = on;
                 else {
+                    let query = new Parse.Query(thisClass);
                     if (typeof who === 'function' && on instanceof who) query.equalTo("who", on);
                     else if (typeof where === 'function' && on instanceof where) query.equalTo("where", on);
                     else if (typeof what === 'function' && on instanceof what) query.equalTo("what", what);
@@ -241,7 +241,7 @@ export namespace Schedule {
                 })
             }
 
-            matchTime(date: Date, prioritize: boolean = true): ICalendarUnit<T>[] {
+            matchTime(date: Date = new Date(), prioritize: boolean = true): ICalendarUnit<T>[] {
                 let rtn: ICalendarUnit<T>[] = [];
                 for (let unit of this.calendarUnits) {
                     if (date > unit.end) continue;

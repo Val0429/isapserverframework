@@ -246,7 +246,7 @@ import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> {
     let { ip, port, collection } = Config.mongodb;
     const url = mongoDBUrl();
-    let client = await MongoClient.connect(url);
+    let client = await MongoClient.connect(url, {useNewUrlParser: true});
     let db = client.db(collection);
     return { client, db };
 }

@@ -91,7 +91,7 @@ interface IScheduleUnitRepeat_NoRepeat /* extends IScheduleUnitRepeatStarterBase
 /// summarize
 type IScheduleUnitRepeat = IScheduleUnitRepeat_NoRepeat | (IScheduleUnitRepeatStarter & IScheduleUnitRepeatEnd);
 
-interface IScheduleUnit {
+export interface IScheduleUnit {
     beginDate: Date;
     endDate: Date;
     fullDay: boolean;
@@ -132,6 +132,11 @@ export interface ICalendarUnit<T> {
     start: Date;
     end: Date;
     data: T;
+}
+
+interface ISingleScheduleResult<T> {
+    matches: ICalendarUnit<T>[];
+    nexts: ICalendarUnit<T>[];
 }
 
 type ParseObjectClass = { new(...args): ParseObject<any> };
@@ -195,9 +200,9 @@ export namespace Schedule {
             /// todo: half way
             /* private */calculateEndDate(): Date {
                 let calculated = Cal.buildSingleSchedule(this, { start: new Date(1900,0,1), end: new Date(2100,0,1) }, EBuildScheduleRule.LastOnly);
-                if (calculated === EBuildScheduleLast.EndLess || calculated.length === 0) return;
+                if (calculated === EBuildScheduleLast.EndLess || calculated.matches.length === 0) return;
                 console.log('calculated end?', calculated);
-                return calculated[calculated.length-1].end;
+                return calculated[calculated.matches.length-1].end;
             }
             ///////////////////////////////////////////////////////////////
 
@@ -227,18 +232,39 @@ export namespace Schedule {
 
         let Cal = class Calendar<T extends InstanceType<typeof Schd>> {
             /*private */calendarUnits: ICalendarUnit<T>[];
+            nextCalendarUnits: ICalendarUnit<T>[];
             constructor(data: T[], timeRange: IScheduleTimeRange) {
                 if (!timeRange.end) timeRange.end = timeRange.start;
-                this.calendarUnits = data.reduce<ICalendarUnit<T>[]>( (final, schedule) => {
-                    final.splice(0, 0, ...Cal.buildSingleSchedule(schedule, timeRange));
-                    return final;
-                }, []).sort( (a, b) => {
+                // this.calendarUnits = data.reduce<ICalendarUnit<T>[]>( (final, schedule) => {
+                //     final.splice(0, 0, ...Cal.buildSingleSchedule(schedule, timeRange));
+                //     return final;
+                // }, []).sort( (a, b) => {
+                //     let astart = a.start.valueOf(), bstart = b.start.valueOf();
+                //     let aprio = a.data.attributes.priority, bprio = b.data.attributes.priority;
+                //     if (astart < bstart) return -1; if (astart > bstart) return 1;
+                //     if (aprio < bprio) return -1; if (aprio > bprio) return 1;
+                //     return 0;
+                // })
+
+                let sorty = (a, b) => {
                     let astart = a.start.valueOf(), bstart = b.start.valueOf();
                     let aprio = a.data.attributes.priority, bprio = b.data.attributes.priority;
                     if (astart < bstart) return -1; if (astart > bstart) return 1;
                     if (aprio < bprio) return -1; if (aprio > bprio) return 1;
                     return 0;
-                })
+                }
+
+                let result = data.reduce<ISingleScheduleResult<T>>( (final, schedule) => {
+                    let single = Cal.buildSingleSchedule(schedule, timeRange);
+                    final.matches.splice(0, 0, ...single.matches);
+                    final.nexts.splice(0, 0, ...single.nexts);
+                    return final;
+                }, { matches: [], nexts: [] });
+                result.matches.sort(sorty);
+                result.nexts.sort(sorty);
+
+                this.calendarUnits = result.matches;
+                this.nextCalendarUnits = result.nexts;
             }
 
             matchTime(date: Date = new Date(), prioritize: boolean = true): ICalendarUnit<T>[] {
@@ -254,11 +280,14 @@ export namespace Schedule {
             }
 
             /// find all matches calendar unit, in time range
-            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule?: EBuildScheduleRule.All): ICalendarUnit<T>[];
-            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule.LastOnly): ICalendarUnit<T>[] | EBuildScheduleLast;
-            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule.LastOnly): ICalendarUnit<T>[];
-            /* private */static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule = EBuildScheduleRule.All): ICalendarUnit<T>[] | EBuildScheduleLast {
-                let rtn: ICalendarUnit<T>[] = [];
+            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule?: EBuildScheduleRule.All): ISingleScheduleResult<T>;
+            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule.LastOnly): ISingleScheduleResult<T> | EBuildScheduleLast;
+            static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule.LastOnly): ISingleScheduleResult<T>;
+            /* private */static buildSingleSchedule<T extends InstanceType<typeof Schd>>(schedule: T, timeRange: IScheduleTimeRange, rule: EBuildScheduleRule = EBuildScheduleRule.All): ISingleScheduleResult<T> | EBuildScheduleLast {
+                let rtn: ISingleScheduleResult<T> = {
+                    matches: [],
+                    nexts: []
+                };
                 
                 let attrs = schedule.attributes;
                 let when = attrs.when;
@@ -272,7 +301,8 @@ export namespace Schedule {
                 /// rule: LastOnly
                 if (rule === EBuildScheduleRule.LastOnly && when.repeat.endType === EScheduleUnitRepeatEndType.NoStop) return EBuildScheduleLast.EndLess;
 
-                let makeOneCalendarUnit = (start: Date, end: Date, data: T) => rtn.push({ start, end, data });
+                let makeOneCalendarUnit = (start: Date, end: Date, data: T) => rtn.matches.push({ start, end, data });
+                let makeOneNextCalendarUnit = (start: Date, end: Date, data: T) => rtn.nexts.push({ start, end, data });
 
                 do {
                     /// shared value
@@ -292,6 +322,7 @@ export namespace Schedule {
                             makeOneCalendarUnit(new Date(nStart), new Date(nEnd), schedule);
                             break;
                         }
+                        break;
                     }
 
                     /// 1) by repeat type - By Day
@@ -302,7 +333,10 @@ export namespace Schedule {
                         for (let i=0; ; ++unit, ++i) {
                             let start = nStart + (unit * interval);
                             let end = nEnd + (unit * interval);
-                            if (start > nRefEnd) break;
+                            if (start > nRefEnd) {
+                                makeOneNextCalendarUnit(new Date(start), new Date(end), schedule);
+                                break;
+                            }
 
                             /// end type = Date
                             if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
@@ -314,7 +348,7 @@ export namespace Schedule {
                             makeOneCalendarUnit(new Date(start), new Date(end), schedule);
 
                             /// rule: FirstOnly
-                            if (rule === EBuildScheduleRule.FirstOnly && rtn.length > 0) break;
+                            if (rule === EBuildScheduleRule.FirstOnly && rtn.matches.length > 0) break;
                         }
                         break;
                     }
@@ -340,7 +374,10 @@ export namespace Schedule {
                             for (let intval of interval) {
                                 let start = nStart + (unit * baseInterval) + (intval * OneDay);
                                 let end = nEnd + (unit * baseInterval) + (intval * OneDay);
-                                if (start > nRefEnd) break main;
+                                if (start > nRefEnd) {
+                                    makeOneNextCalendarUnit(new Date(start), new Date(end), schedule);
+                                    break main;
+                                }
                                 if (end <= nRefStart) continue;
 
                                 /// end type = Date
@@ -353,7 +390,7 @@ export namespace Schedule {
                                 makeOneCalendarUnit(new Date(start), new Date(end), schedule);
 
                                 /// rule: FirstOnly
-                                if (rule === EBuildScheduleRule.FirstOnly && rtn.length > 0) break main;
+                                if (rule === EBuildScheduleRule.FirstOnly && rtn.matches.length > 0) break main;
                             }
                         }
                         break;
@@ -385,7 +422,10 @@ export namespace Schedule {
                                      ++i) {
                                     let start = new Date(tYear, tMonth, tDate, tHour, tMinute, tSecond, tMSecond);
                                     let end = new Date(start.valueOf() + interval);
-                                    if (start > timeRange.end) break;
+                                    if (start > timeRange.end) {
+                                        makeOneNextCalendarUnit(start, end, schedule);
+                                        break;
+                                    }
 
                                     /// end type = Date
                                     if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
@@ -397,7 +437,7 @@ export namespace Schedule {
                                     makeOneCalendarUnit(start, end, schedule);
 
                                     /// rule: FirstOnly
-                                    if (rule === EBuildScheduleRule.FirstOnly && rtn.length > 0) break;
+                                    if (rule === EBuildScheduleRule.FirstOnly && rtn.matches.length > 0) break;
                                 }
 
                             } break;
@@ -435,7 +475,10 @@ export namespace Schedule {
                                     ++i) {
                                     let start = nthWeekdayOfMonth(tWeekday, tNthWeekday, new Date(tYear, tMonth, 1, tHour, tMinute, tSecond, tMSecond));
                                     let end = new Date(start.valueOf() + interval);
-                                    if (start > timeRange.end) break;
+                                    if (start > timeRange.end) {
+                                        makeOneNextCalendarUnit(start, end, schedule);
+                                        break;
+                                    }
 
                                     /// end type = Date
                                     if (when.repeat.endType === EScheduleUnitRepeatEndType.Date &&
@@ -447,7 +490,7 @@ export namespace Schedule {
                                     makeOneCalendarUnit(start, end, schedule);
 
                                     /// rule: FirstOnly
-                                    if (rule === EBuildScheduleRule.FirstOnly && rtn.length > 0) break;
+                                    if (rule === EBuildScheduleRule.FirstOnly && rtn.matches.length > 0) break;
                                 }
 
                             } break;

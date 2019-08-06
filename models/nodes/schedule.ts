@@ -278,7 +278,6 @@ export namespace Schedule {
                 let rtn: ICalendarUnit<T>[] = [];
                 for (let unit of this.calendarUnits) {
                     if (date > unit.end) continue;
-                    // console.log('comp', date, unit.start, date < unit.start);
                     if (date < unit.start) break;
                     rtn.push(unit);
                 }

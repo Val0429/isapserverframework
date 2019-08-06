@@ -1,11 +1,11 @@
 {
-  "name": "isap-smart-community-service",
-  "version": "1.00.00",
+  "name": "isap-vms-service",
+  "version": "2.01.00",
   "frameworkversion": "1.07.01",
   "config": {
-    "displayname": "iSap Smart Community Service"
+    "displayname": "iSap VMS Service"
   },
-  "description": "iSap Smart Community Service v1.00.00",
+  "description": "iSap VMS Service v2.01.00",
   "main": "test",
   "typings": "dist/index",
   "scripts": {
@@ -41,6 +41,7 @@
     "@types/node": "8.10.38",
     "@types/nodemailer": "4.6.2",
     "@types/parse": "2.4.7",
+    "bcryptjs": "^2.4.3",
     "bluebird": "3.5.1",
     "body-parser": "1.17.1",
     "caller": "1.0.1",

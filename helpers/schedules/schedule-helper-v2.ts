@@ -63,7 +63,7 @@ export namespace ScheduleHelperV2 {
                     timer = setTimeout( () => {
                         doOnce();
                     }, period);
-                    debug && Log.Info("ScheduleHelper", `${name ? `${name}: `:''}wait for: ${period}`);
+                    debug && Log.Info("ScheduleHelper", `${name ? `${name}: `:''}wait for ${period/1000} seconds.`);
                 }
             }
             doOnce();

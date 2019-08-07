@@ -661,6 +661,19 @@ namespace AstConverter {
     export function toTuple(type: Type<ts.Type>, input: Array<any>, name: string): Array<any> {
         if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
         var types = type.getTypeArguments();
+        
+        /// test example: [string, ...string[]];
+        let utypes = type.getText().match(/^\[(.*)\]$/)[1].split(",");
+        if (/^\s*\.\.\./.test(utypes[utypes.length-1])) {
+            /// array destructional assignment case
+            let len = utypes.length - 1;
+            if (input.length < len) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should contain at least ${len} elements.`]);
+            for (let key = 0; key < input.length; ++key)
+                input[key] = AstParser.validateType(types[Math.min(key, len)], input[key], `${name}.${key}`);
+            return input;
+        }
+
+        /// normal case
         if (types.length !== input.length) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should with exact length of ${types.length}.`]);
         for (var key = 0; key < types.length; ++key)
             input[key] = AstParser.validateType(types[key], input[key], `${name}.${key}`);

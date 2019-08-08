@@ -37,7 +37,7 @@
   "devDependencies": {},
   "dependencies": {
     "@types/bluebird": "3.5.22",
-    "@types/mongodb": "3.0.19",
+    "@types/mongodb": "3.1.26",
     "@types/node": "8.10.38",
     "@types/nodemailer": "4.6.2",
     "@types/parse": "2.4.7",

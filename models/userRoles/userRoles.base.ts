@@ -28,6 +28,6 @@ export interface IUser<T = {}> {
     publicEmailAddress?: string;
     phone?: string;
     data: T & IUserData;
-    roles: RoleList[];
+    roles: [RoleList, ...Array<RoleList>];
     apiRoles?: APIRoles[];
 }

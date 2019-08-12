@@ -70,6 +70,9 @@ action.post<InputC>({ inputType: "InputC" }, async (data) => {
 action.get( async (data) => {
     let xml = await licenseService.getLicense();
     return {
+        paging: {
+            total: xml.licenses.length,
+        },
         results: xml.licenses,
         summary: xml.summary
     }

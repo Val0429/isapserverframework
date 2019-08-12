@@ -503,7 +503,7 @@ namespace AstParser {
 
         try {
 
-        if (typeof data !== 'object' || Array.isArray(data)) throw Errors.throw(Errors.CustomInvalid, [`<${prefix}> should be valid object.`]);
+        if (data === null || data === undefined || typeof data !== 'object' || Array.isArray(data)) throw Errors.throw(Errors.CustomInvalid, [`<${prefix}> should be valid object.`]);
 
         var mem = AstParser.getInterfaceMembers(inf);
 

@@ -6,6 +6,7 @@
 
 import { Config } from 'core/config.gen';
 import * as mimeType from 'mime-types';
+import { ActionParam } from 'helpers/cgi-helpers/core';
 
 export namespace FileHelper {
 
@@ -46,10 +47,26 @@ export namespace FileHelper {
         return <any>file;
     }
 
-    export function getURL(file: Parse.File): string {
-        var url = file.url();
-        /// todo, make it right.
-        url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
+    // export function getURL(file: Parse.File): string {
+    //     var url = file.url();
+    //     /// todo, make it right.
+    //     url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
+    //     return url;
+    // }
+
+    export function getURL(file: Parse.File, data: ActionParam<any>);
+    export function getURL(file: Parse.File);
+    export function getURL(file: Parse.File, data?: ActionParam<any>): string {
+        let url = file.url();
+        let { localAddress, localPort } = data.request.connection;
+        
+        if (!data) {
+            url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
+        } else {
+            url = url.replace(/(\:\/\/)(localhost(?:\:[0-9]*)?)/, (a, b, c, d) => {
+                return `${b}${localAddress.replace(/^.*:/, '')}:${localPort}`;
+            });
+        }
         return url;
     }
 

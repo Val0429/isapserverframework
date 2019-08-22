@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as p from 'path';
 import { Action } from 'helpers/cgi-helpers/core';
 import { autoPad } from 'helpers/shells/shell-writer';
+import { blockingKey, blockingException } from './router-block';
 
 const defaultPath = "index";
 const hiddenPath = "__api__";
@@ -18,6 +19,10 @@ export var actions: Action[] = [];
 export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */, routeBasePath = '', first = true, level = 0): Action[] {
     let name = p.parse(path).name;
     if (name === hiddenPath) return;
+    /// level0 block
+    if (level === 0 && blockingKey && blockingKey.test(name)) {
+        if (name !== blockingException) return;
+    }
 
     var getTypesFromAction = (route: Action) => {
         if (route === null) return null;

@@ -238,7 +238,7 @@ export interface ParseObjectJSONRule {
  */
 import { Config } from 'core/config.gen';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
-import { Log } from 'helpers/utility';
+import { Log, Mutex } from 'helpers/utility';
 import { Meta } from 'helpers/utility/meta';
 import { any } from 'bluebird';
 import { mongoDBUrl } from 'helpers/mongodb/url-helper';
@@ -246,8 +246,22 @@ import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> {
     let { ip, port, collection } = Config.mongodb;
     const url = mongoDBUrl();
+
     let client = await MongoClient.connect(url, {useNewUrlParser: true});
     let db = client.db(collection);
+
+    /// check collection exists
+    
+    // await mutex.acquire();
+    // let dbs = await db.listCollections({ name: collection }).toArray();
+    // if(dbs.length === 0) {
+    //     await new Promise( (resolve, reject) => db.createCollection(collection, (err, res) => {
+    //         err && reject(err);
+    //         !err && resolve(res);
+    //     }) );
+    // }
+    // mutex.release();
+
     return { client, db };
 }
 
@@ -259,6 +273,21 @@ export async function sharedMongoDB(): Promise<Db> {
     sharedClient = client;
     sharedDb = db;
     return sharedDb;
+}
+
+const mutex: Mutex = new Mutex();
+export async function ensureCollectionExists(collectionName: string) {
+    let db = await sharedMongoDB();
+    /// ensure collection exists
+    await mutex.acquire();
+    let dbs = await db.listCollections({ name: collectionName }).toArray();
+    if(dbs.length === 0) {
+        await new Promise( (resolve, reject) => db.createCollection(collectionName, (err, res) => {
+            err && reject(err);
+            !err && resolve(res);
+        }) );
+    }
+    mutex.release();
 }
 
 export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions = {}) {

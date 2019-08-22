@@ -1,4 +1,4 @@
-import { createMongoDB, sharedMongoDB } from "./../parse-server/parse-helper";
+import { createMongoDB, sharedMongoDB, ensureCollectionExists } from "./../parse-server/parse-helper";
 import { BehaviorSubject, Subject } from "rxjs";
 import { Db } from "mongodb";
 
@@ -20,6 +20,7 @@ export class CollectionWatcher {
     }
 
     public async watch(collectionName: string): Promise<Subject<any>> {
+        await ensureCollectionExists(collectionName);
         let watched = this.watched[collectionName];
         if (watched) return watched;
         let db = await this.waitForDB();

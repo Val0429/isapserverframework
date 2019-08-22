@@ -58,11 +58,11 @@ export namespace FileHelper {
     export function getURL(file: Parse.File);
     export function getURL(file: Parse.File, data?: ActionParam<any>): string {
         let url = file.url();
-        let { localAddress, localPort } = data.request.connection;
         
         if (!data) {
             url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
         } else {
+            let { localAddress, localPort } = data.request.connection;
             url = url.replace(/(\:\/\/)(localhost(?:\:[0-9]*)?)/, (a, b, c, d) => {
                 return `${b}${localAddress.replace(/^.*:/, '')}:${localPort}`;
             });

@@ -614,7 +614,7 @@ namespace AstConverter {
         if (types.length === 0) {
             var tname = type.getSymbol().getName();
             var tvalue = (type.getSymbol().getValueDeclaration() as EnumMember).getValue();
-            if (tname === input || tvalue === input) return input;
+            if (tname == input || tvalue == input) return tvalue;
             throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be value <${tname}>.`])
         }
 
@@ -633,7 +633,7 @@ namespace AstConverter {
         /// match value
         for (var key in keyValue) {
             var value = keyValue[key];
-            if (input === value) return value;
+            if (input == value) return value;
         }
 
         /// else throw

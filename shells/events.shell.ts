@@ -223,13 +223,10 @@ var cevents = require(customDefPath).default;
 import * as fs from 'fs';
 import { Log } from 'helpers/utility';
 
-shellWriter(
-    [defPath, tmplPath, customDefPath],
+shellWriter2(
     genFilePath,
+    main([...events, ...cevents] as any),
     () => {
-        var merged: Config = <any>[...events, ...cevents];
-        fs.writeFileSync(genFilePath, main(merged));
         Log.Info("Code Generator", "Event file updated!");
     }
 );
-

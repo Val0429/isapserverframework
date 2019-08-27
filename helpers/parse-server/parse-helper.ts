@@ -172,7 +172,6 @@ export class ParseObject<T> extends Parse.Object {
 
         var NeutualizeType = (data: any, filter: any, refDetect = {}): any => {
             var type = typeof data;
-
             if (type === 'boolean') return data;
             else if (type === 'string') return data;
             else if (type === 'number') return data;
@@ -200,8 +199,9 @@ export class ParseObject<T> extends Parse.Object {
                 for (var key in data) {
                     var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
                     if (cfilter === false) result[key] = undefined;
-                    else if (typeof cfilter === 'function') result[key] = cfilter(data[key]);
-                    else {
+                    else if (typeof cfilter === 'function') {
+                        result[key] = cfilter(data[key]);
+                    } else {
                         let rtn = NeutualizeType(data[key], cfilter, refDetect);
                         !isArray && (result[key] = rtn);
                         isArray && (rtn !== undefined) && (<any>result).push(rtn);

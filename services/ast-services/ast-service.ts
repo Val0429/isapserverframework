@@ -607,34 +607,39 @@ namespace AstConverter {
 
     export function toEnum(type: Type<ts.Type>, input: string | number, name: string, isArray: boolean = false): string | number {
         var keyValue = {}, keyArray = [];
-        /// get key / value pair
-        var types = type.getUnionTypes();
-        
-        /// enum literal
-        if (types.length === 0) {
-            var tname = type.getSymbol().getName();
-            var tvalue = (type.getSymbol().getValueDeclaration() as EnumMember).getValue();
-            if (tname == input || tvalue == input) return tvalue;
-            throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be value <${tname}>.`])
-        }
+        do {
+            /// get key / value pair
+            var types = type.getUnionTypes();
+            /// enum literal
+            if (types.length === 0) {
+                var tname = type.getSymbol().getName();
+                var tvalue = (type.getSymbol().getValueDeclaration() as EnumMember).getValue();
+                if (tname == input || tvalue == input) return tvalue;
+                throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be value <${tname}>.`])
+            }
 
-        types.forEach( (data) => {
-            var name = data.getSymbol().getName();
-            keyValue[ name ] = (<any>data.compilerType).value;
-            keyArray.push(name);
-        });
+            types.forEach( (data) => {
+                var name = data.getSymbol().getName();
+                keyValue[ name ] = (<any>data.compilerType).value;
+                keyArray.push(name);
+            });
 
-        /// match key first
-        if (typeof input === 'string') {
-            var result = keyValue[input];
-            if (result !== undefined) return result;
-        }
+            /// disallow empty string
+            if (input === '') break;
 
-        /// match value
-        for (var key in keyValue) {
-            var value = keyValue[key];
-            if (input == value) return value;
-        }
+            /// match key first
+            if (typeof input === 'string') {
+                var result = keyValue[input];
+                if (result !== undefined) return result;
+            }
+
+            /// match value
+            for (var key in keyValue) {
+                var value = keyValue[key];
+                if (input == value) return value;
+            }
+
+        } while(0);
 
         /// else throw
         throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be one of value <${keyArray.join(", ")}>${isArray?'[]':''}.`])

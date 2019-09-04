@@ -79,14 +79,17 @@ if (Config.mongodb.enable) {
     //let databaseURI = \`mongodb://\${!Config.mongodb.account?'':\`\${Config.mongodb.account}:\${Config.mongodb.password}@\`}\${Config.mongodb.ip}:\${Config.mongodb.port}/\${Config.mongodb.collection}\`;
     var ParseServer = new parse.ParseServer({
         //databaseURI,
-        databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI}),
+        databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI, mongoOptions: {
+            reconnectInterval: 2000,
+            reconnectTries: 300000,
+        }}),
         filesAdapter: new GridStoreAdapter(databaseURI),
         appId: Config.parseServer.appId,
         masterKey: Config.parseServer.masterKey,
         fileKey: Config.parseServer.fileKey,
         enableSingleSchemaCache: true,
         serverURL,
-        sessionLength: Config.core.sessionExpireSeconds
+        sessionLength: Config.core.sessionExpireSeconds,
     });
     app.use(Config.parseServer.serverPath, ParseServer);
 }

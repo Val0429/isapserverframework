@@ -6,6 +6,8 @@
     "displayname": "iSap VMS Service"
   },
   "description": "iSap VMS Service v3.01.00",
+  "author": "Val Liu",
+  "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
   "typings": "dist/index",
   "scripts": {
@@ -32,8 +34,6 @@
     ],
     "delay": "200"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {},
   "dependencies": {
     "@types/bluebird": "3.5.22",

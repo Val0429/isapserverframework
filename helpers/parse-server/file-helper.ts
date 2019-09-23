@@ -21,6 +21,10 @@ export namespace FileHelper {
         return new Buffer(tmpstr, 'base64');
     }
 
+    export function toBase64FromBuffer(input: Buffer) {
+        return input.toString("base64");
+    }
+
     /// save base64 file(s) into Parse.File(s), and return.
     export async function toParseFile<T extends string | string[]>(input: T, name: string = null, mime: string = null):
         Promise<

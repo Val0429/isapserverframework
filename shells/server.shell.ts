@@ -40,6 +40,7 @@ import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 import { Config } from 'core/config.gen';
 
 let app: express.Application = expressWsRoutes();
+app.disable('x-powered-by');
 `;
 
 var tDebugStack = `

@@ -23,6 +23,8 @@ import { expressWsRoutes } from 'helpers/middlewares/express-ws-routes';
 import * as fs from 'fs';
 import * as p from 'path';
 import { noCache } from 'helpers/middlewares/no-cache';
+import { secureContentType } from 'helpers/middlewares/secure-content-type';
+import { blockRobots } from 'helpers/middlewares/block-robots';
 import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from 'helpers/routers/router-loader';
 import { makeServerReady } from 'core/pending-tasks';
@@ -51,6 +53,10 @@ lj.async_trace_limit = 20;
 `;
 
 var tDisableCache = `
+/// Secure Content-Type
+app.use(secureContentType);
+/// block SEO
+app.use(blockRobots);
 /// Disable Cache
 if (Config.core.disableCache) app.use(noCache);
 `;

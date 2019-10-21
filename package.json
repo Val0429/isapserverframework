@@ -1,6 +1,6 @@
 {
   "name": "isap-vms-service",
-  "version": "3.02.05",
+  "version": "3.02.10",
   "frameworkversion": "1.07.02",
   "config": {
     "displayname": "iSap VMS Service"

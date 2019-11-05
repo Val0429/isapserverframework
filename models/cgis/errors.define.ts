@@ -10,7 +10,7 @@ var errors: Config[] = [
     
     ["ParametersInvalid", 400, "Parameters invalid: {0}"],
     ["LoginFailed", 401, "Login failed."],
-    ["PermissionDenied", 401, "Permission denied."],
+    ["PermissionDenied", 403, "Permission denied."],
     ["SessionNotExists", 401, "Session not exists."],
 
     /**

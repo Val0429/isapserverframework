@@ -12,6 +12,8 @@ import {
 } from 'core/cgi-package';
 import * as request from 'request';
 import { actions } from 'helpers/routers/router-loader';
+import config from 'workspace/config/custom/vms';
+
 let packinfo = require(`${__dirname}/../../../package.json`);
 
 var action = new Action({
@@ -39,13 +41,23 @@ action.get( async (data) => {
                 case 'Get':
                 case 'Post':
                 case 'Put':
-                case 'Delete':
+                case 'Delete': {
                     /// get configs
                     /// login required?
-                    loginRequired = (action[`func${proto}Config`] || {}).loginRequired || ((action.config || {}).loginRequired);
-                    hasInputType = (action[`func${proto}Config`] || {}).inputType || ((action.config || {}).inputType) ? true : false;
+                    let config = Object.assign({}, action[`func${proto}Config`], action.config);
+                    loginRequired = config.loginRequired;
+                    hasInputType = config.inputType ? true : false;
+                    let strt = { input: null, output: null, loginRequired };
+                    if (!loginRequired) { obj[proto] = strt; break; }
+                    if (!data.role) break;
+                    let roles = data.role.map( (v) => v.attributes.name );
+                    let permitRoles: string[] = config.permission;
+                    let final = permitRoles ? roles.reduce( (final, role) => {
+                        if (permitRoles.indexOf(role) >= 0) final.push(role);
+                        return final;
+                    }, []) : roles;
+                    if (final.length > 0) obj[proto] = strt;
 
-                    obj[proto] = { input: null, output: null, loginRequired };
                     break;
 
                     // let method = (proto === 'All' ? 'Get' : proto).toUpperCase();
@@ -95,10 +107,11 @@ action.get( async (data) => {
                     // obj[proto] = { input, output, loginRequired };
 
                     break;
+                }
                 case 'Ws':
                     /// get configs
                     /// login required?
-                    let config = action[`func${proto}Config`] || action.config || {};
+                    let config = Object.assign({}, action[`func${proto}Config`], action.config);
                     let strt = { input: null, output: null, loginRequired };
                     loginRequired = config.loginRequired;
                     if (!loginRequired) { obj[proto] = strt; break; }
@@ -121,6 +134,7 @@ action.get( async (data) => {
     return {
         serverVersion: packinfo.version,
         frameworkVersion: packinfo.frameworkversion,
+        flow: config.flow,
         APIs: final
     }
 });

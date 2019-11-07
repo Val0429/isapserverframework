@@ -67,8 +67,8 @@ export namespace FileHelper {
             url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
         } else {
             let { localAddress, localPort } = data.request.connection;
-            url = url.replace(/(\:\/\/)(localhost(?:\:[0-9]*)?)/, (a, b, c, d) => {
-                return `${b}${localAddress.replace(/^.*:/, '')}:${localPort}`;
+            url = url.replace(/^(\w+)(\:\/\/)(localhost(?:\:[0-9]*)?)/, (a, b, c, d) => {
+                return `${data.request.protocol}${c}${localAddress.replace(/^.*:/, '')}:${localPort}`;
             });
         }
         return url;

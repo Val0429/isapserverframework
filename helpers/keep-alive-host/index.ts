@@ -72,7 +72,7 @@ export class KeepAliveHost {
         this.sjRealtimeAlives.next({ alive: Aliveness.Online, instance: user, socket });
 
         /// take over socket
-        socket.io.on("close", () => {
+        let closeHandler = () => {
             let idx = this.alives.findIndex( (instance) => {
                 return instance.socket === socket ? true : false
             });
@@ -82,7 +82,8 @@ export class KeepAliveHost {
             let instance = this.alives.splice(idx, 1)[0];
             /// send to pipeline
             this.sjRealtimeAlives.next({ alive: Aliveness.Offline, ...instance });
-        });
-    
+        };
+        socket.io.on("close", closeHandler);
+        socket.io.on("error", closeHandler);
     }
 }

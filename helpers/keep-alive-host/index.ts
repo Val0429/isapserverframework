@@ -13,20 +13,34 @@ export enum Aliveness {
     Offline,
     Online
 }
+export enum EKeepAliveType {
+    RealTime,
+    Message
+}
 export interface KeepAliveData {
     instance: Parse.User;
     socket: Socket;
+    data: any;
 }
 export interface KeepAliveRealTime {
+    type: EKeepAliveType.RealTime,
     alive: Aliveness;
     instance: Parse.User;
     socket: Socket;
+    data: any;
+}
+export interface MessageRealTime {
+    type: EKeepAliveType.Message;
+    instance: Parse.User;
+    socket: Socket;
+    data: any;
 }
 
 export class KeepAliveHost {
     private name: string;
     private alives: KeepAliveData[] = [];
     private sjRealtimeAlives: Subject<KeepAliveRealTime> = new Subject<KeepAliveRealTime>();
+    private sjRealtimeMessages: Subject<MessageRealTime> = new Subject<MessageRealTime>();
 
     /**
      * @param name What is this aliveness name? ex: Kiosk, Boat
@@ -41,6 +55,10 @@ export class KeepAliveHost {
 
     getAliveObservable(): Observable<KeepAliveRealTime> {
         return this.sjRealtimeAlives.asObservable();
+    }
+
+    getMessageObservable(): Observable<MessageRealTime> {
+        return this.sjRealtimeMessages.asObservable();
     }
 
     send(data: string);
@@ -67,11 +85,27 @@ export class KeepAliveHost {
         }
 
         /// otherwise add
-        this.alives.push({ instance: user, socket });
+        let instance = { instance: user, socket, data: {} };
+        this.alives.push(instance);
         /// send to pipeline
-        this.sjRealtimeAlives.next({ alive: Aliveness.Online, instance: user, socket });
+        this.sjRealtimeAlives.next({ type: EKeepAliveType.RealTime, alive: Aliveness.Online, ...instance });
 
         /// take over socket
+        /// on message
+        socket.io.on("message", (data) => {
+            data = JSON.parse(data);
+            /// update instance
+            let idx = this.alives.findIndex( (instance) => {
+                return instance.socket === socket ? true : false
+            });
+            if (idx >= 0) {
+                Object.assign(this.alives[idx].data, data);
+            }
+            /// broadcast message
+            this.sjRealtimeMessages.next({ type: EKeepAliveType.Message, instance: user, socket, data });
+        });
+
+        /// on close
         socket.io.on("close", () => {
             let idx = this.alives.findIndex( (instance) => {
                 return instance.socket === socket ? true : false
@@ -81,7 +115,7 @@ export class KeepAliveHost {
             /// remove
             let instance = this.alives.splice(idx, 1)[0];
             /// send to pipeline
-            this.sjRealtimeAlives.next({ alive: Aliveness.Offline, ...instance });
+            this.sjRealtimeAlives.next({ type: EKeepAliveType.RealTime, alive: Aliveness.Offline, ...instance });
         });
     
     }

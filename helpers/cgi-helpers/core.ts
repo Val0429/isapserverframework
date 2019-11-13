@@ -133,7 +133,7 @@ export class Action<T = any, U = any> {
         return count;
     }
     public static count(actions: Action[]) {
-        return actions.reduce( (final, action) => {
+        return (actions||[]).reduce( (final, action) => {
             return final + action.count();
         }, 0);
     }

@@ -17,6 +17,7 @@ export var actions: Action[] = [];
 
 /// meant to be called only once
 export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */, routeBasePath = '', first = true, level = 0): Action[] {
+    if (!fs.existsSync(path)) return;
     let name = p.parse(path).name;
     if (name === hiddenPath) return;
     /// level0 block

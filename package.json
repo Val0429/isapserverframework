@@ -1,6 +1,6 @@
 {
   "name": "isap-vms-service",
-  "version": "3.02.10",
+  "version": "3.02.28",
   "frameworkversion": "1.07.02",
   "config": {
     "displayname": "iSap VMS Service"
@@ -12,9 +12,10 @@
   "typings": "dist/index",
   "scripts": {
     "start": "npm run build:live",
-    "debug": "cross-env NODE_ENV=development npm run build:live",
+    "debug": "cross-env NODE_ENV=development npm run build:debug",
     "build": "ts-node main.ts",
-    "build:live": "nodemon --exec ts-node main.ts",
+    "build:live": "nodemon --restartcrash --exec ts-node main.ts",
+    "build:debug": "nodemon --exec ts-node main.ts",
     "build:live:new": "nodemon --exec node -r ts-node/register main.ts",
     "build:live:new:debug": "nodemon --exec node --inspect --inspect-port=0 -r ts-node/register main.ts",
     "clean": "ts-node ./shells/clean-cache.shell.ts",
@@ -60,7 +61,7 @@
     "network": "0.3.2",
     "node-csv-parse": "1.2.0",
     "nodemailer": "4.6.8",
-    "nodemon": "1.17.5",
+    "nodemon": "http://isap-dev-server:3000/iSAP-AP-Team/nodemon.git",
     "parse-dashboard": "1.2.0",
     "parse-server": "2.7.2",
     "qrcode": "^1.3.3",
@@ -75,7 +76,7 @@
     "typings": "2.1.1",
     "uuid": "3.3.0",
     "websocket": "1.0.25",
-    "winser": "https://github.com/Val0429/winser.git",
+    "winser": "http://isap-dev-server:3000/iSAP-AP-Team/winser.git",
     "xml2js": "0.4.19"
   }
 }

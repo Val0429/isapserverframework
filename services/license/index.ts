@@ -1,18 +1,22 @@
 /*
- * Created on Tue Jul 30 2019
+ * Created on Tue Nov 12 2019
  * Author: Val Liu
  * Copyright (c) 2019, iSAP Solution
  */
 
-var edge = require('edge-js');
-import { promisify } from 'bluebird';
 import * as fs from 'fs';
 import { Log } from 'helpers/utility';
-var xmlParser = new (require('xml2js')).Parser();
-
 const configPath: string = `${__dirname}/../../workspace/custom/license/`;
-const dllPath: string = `${__dirname}/lib/LibLicenseManager.dll`;
 
+/// import native module
+const isWindows = process.platform === "win32";
+const licenseClass = isWindows ?
+    require('./lib/windows/license_manager') :
+    require('./lib/linux/license_manager')
+    ;
+const license = new licenseClass.LicenseManager(configPath);
+
+/// interfaces
 export interface LicenseInfo {
     summary: { [productNO: string]: LicenseSummary };
     licenses: License[];
@@ -39,35 +43,19 @@ export interface License {
 interface IVerifyLicenseKey {
     key: string;
 }
-let VerifyLicenseKey: any = promisify(edge.func({
-    assemblyFile: dllPath,
-    typeName: 'LibLicenseManager.Startup',
-    methodName: 'VerifyLicenseKey'
-}));
+const VerifyLicenseKey = license.VerifyLicenseKey.bind(license);
 
 interface IVerifyLicenseXML {
     xml: string;
 }
-let VerifyLicenseXML: any = promisify(edge.func({
-    assemblyFile: dllPath,
-    typeName: 'LibLicenseManager.Startup',
-    methodName: 'VerifyLicenseXML'
-}));
+const VerifyLicenseXML = license.VerifyLicenseXML.bind(license);
 
 interface IAddLicense {
     xml: string;
 }
-let AddLicense: any = promisify(edge.func({
-    assemblyFile: dllPath,
-    typeName: 'LibLicenseManager.Startup',
-    methodName: 'AddLicense'
-}));
-
-let GetLicenseXML: any = promisify(edge.func({
-    assemblyFile: dllPath,
-    typeName: 'LibLicenseManager.Startup',
-    methodName: 'GetLicenseXML'
-}));
+const AddLicense = license.AddLicense.bind(license);
+const GetLicenseXML = license.GetLicenseXML.bind(license);
+const GetLicense = license.GetLicense.bind(license);
 
 interface InputLicenseInfo {
     val: string;
@@ -105,70 +93,34 @@ export class LicenseService {
     /**
      * Verify License Key (29 digits), return license count.
      */
-    public async verifyLicenseKey(input: IVerifyLicenseKey): Promise<number> {
-        return await VerifyLicenseKey({ path: configPath, ...input });
+    public verifyLicenseKey(input: IVerifyLicenseKey): Promise<number> {
+        return VerifyLicenseKey(input.key);
     }
 
     /**
      * Verify License XML, return true | false.
      */
-    public async verifyLicenseXML(input: IVerifyLicenseXML): Promise<boolean> {
-        return await VerifyLicenseXML({ path: configPath, ...input });
+    public verifyLicenseXML(input: IVerifyLicenseXML): Promise<boolean> {
+        return VerifyLicenseXML(input.xml);
     }
 
     /**
      * Add License.
      */
-    public async addLicense(input: IAddLicense) {
-        return await AddLicense({ path: configPath, ...input });
+    public addLicense(input: IAddLicense) {
+        return AddLicense(input.xml);
     }
 
     /**
      * Get whole Licenses XML.
      */
-    public async getLicenseXML(): Promise<string> {
-        return await GetLicenseXML({ path: configPath });
+    public getLicenseXML(): Promise<string> {
+        return GetLicenseXML();
     }
-    public async getLicenseJSON(): Promise<InputLicenseJSON> {
-        return new Promise<InputLicenseJSON>( async (resolve) => {
-            xmlParser.parseString( await GetLicenseXML({ path: configPath }), (err, data) => {
-                resolve(data);
-            });
-        });
-    }
-    public async getLicense(): Promise<LicenseInfo> {
-        let result: LicenseInfo = {
-            licenses: [], summary: {}
-        }
-        let data: InputLicenseJSON = await this.getLicenseJSON();
-        let adaptors = data.License.Adaptor;
-        for (let i=0; i<adaptors.length; ++i) {
-            let adapter = adaptors[i];
-            if (!adapter.Key || adapter.Key.length === 0) continue;
-            for (let j=0; j<adapter.Key.length; ++j) {
-                let lic = adapter.Key[j].$;
-                /// push into license
-                let license = {
-                    licenseKey: lic.val,
-                    description: adapter.Description[0],
-                    mac: adapter.MAC[0],
-                    brand: lic.Brand,
-                    productNO: lic.ProductNO,
-                    count: +lic.Count,
-
-                    trial: lic.Trial === '0' ? false : true,
-                    registerDate: lic.RegisterDate,
-                    expireDate: lic.ExpireDate,
-                    expired: lic.Expired === undefined || lic.Expired === '0' ? false : true
-                };
-                result.licenses.push(license);
-                if (license.expired === true) continue;
-                if (result.summary[license.productNO]) result.summary[license.productNO].totalCount += license.count;
-                else result.summary[license.productNO] = { totalCount: license.count };
-            }
-        }
-        return result;
+    public getLicense(): Promise<LicenseInfo> {
+        return GetLicense();
     }
 }
 
 export default new LicenseService();
+

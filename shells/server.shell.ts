@@ -160,7 +160,7 @@ var tRunServer = `
 let packinfo = require(\`\${__dirname}/../package.json\`);
 
 let jobHttp = () => {
-    if (Config.core.httpDisabled) return null;
+    if (!Config.core.enable || Config.core.httpDisabled) return null;
     let http = require('http');
     return new Promise( (resolve) => {
         let httpServer = http.createServer(app);
@@ -173,7 +173,7 @@ let jobHttp = () => {
 }
 
 let jobHttps = () => {
-    if (!Config.core.httpsEnabled) return null;
+    if (!Config.core.enable || !Config.core.httpsEnabled) return null;
     let https = require('https');
     return new Promise( (resolve) => {
         let key = fs.readFileSync(\`\${__dirname}/../workspace/custom/certificates/mykey.pem\`);

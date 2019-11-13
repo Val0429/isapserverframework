@@ -5,6 +5,7 @@
  */
 
 var config: Config = {
+    enable: true,
     port: 8080,
     disableCache: true,
     accessControlAllowOrigin: true,
@@ -19,6 +20,10 @@ var config: Config = {
 export default config;
 
 export interface Config {
+    /**
+     * If false, disable all http / https port.
+     */
+    enable?: boolean;
     /**
      * Server port.
      */

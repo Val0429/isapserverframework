@@ -363,7 +363,7 @@ export namespace Restful {
         }
         queryFilter(query, ps);
         //sorting
-        if(ps.sorting && ps.sorting.order && ps.sorting.field){
+        if(ps.sorting && ps.sorting.order !=undefined && ps.sorting.field){
            
             if(!ps.sorting.order)query.ascending(ps.sorting.field);
             else query.descending(ps.sorting.field);

@@ -10,8 +10,23 @@ export interface IInputPagingBase {
     all?: "true" | "false";
 }
 
+/// For Sort
+export enum ESort {
+    Ascending,
+    Descending
+}
+
+export interface IInputSortingBaseUnit {
+    field: string;
+    order: ESort;
+}
+
+export type IInputSortingBase = IInputSortingBaseUnit ;//| IInputSortingBaseUnit<T>[];
+/// For Sort End
+
 export type IInputPaging<T> = {
     paging?: IInputPagingBase;
+    sorting?: IInputSortingBase;
 } & T;
 
 export interface IOutputPagingBase {

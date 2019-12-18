@@ -342,21 +342,22 @@ export namespace Restful {
     export function Filter<T extends Parse.Object = any>(query: Parse.Query<T>, params: object): Parse.Query<T> {
         /// remove paging
         var ps :any = { ...params, paging: undefined };
+        //console.log('ps',ps);
         /// including others
         // for (var p in ps) query = query.equalTo(p, ps[p]);
         function queryFilter(query: Parse.Query<T>, params: object, prefix: string = null) {
-        // console.log('prefix', prefix, params);
+         //console.log('prefix', prefix, params);
             if (Array.isArray(params)) return query.containedIn(prefix, params);
             if (params instanceof Parse.Object ||
                 params instanceof Parse.User
                 ) return query.equalTo(`${prefix}`, params);
             if (typeof params === 'object') {
                 for (let key in params) {
-                    if(key=="sorting")continue;
+                    if(key=="sorting" || key=="filtering")continue;
                     queryFilter(query, params[key], (prefix ? `${prefix}.` : '') + key);
                 }
                 return;
-            }
+            }            
             return query.equalTo(prefix, params);
 
         }
@@ -366,6 +367,10 @@ export namespace Restful {
            
             if(!ps.sorting.order)query.ascending(ps.sorting.field);
             else query.descending(ps.sorting.field);
+        }
+        //filtering
+        if(ps.filtering && ps.filtering.field && ps.filtering.value){           
+           query.matches(ps.filtering.field, new RegExp(ps.filtering.value), "i");
         }
         return query;
     }

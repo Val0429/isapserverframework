@@ -75,7 +75,7 @@ export class ScheduleActionEmail extends ScheduleActionBase<
             }
 
             let mailOptions = {
-                from: Config.smtp.email,
+                from: Config.smtp.name ? `${Config.smtp.name} <${Config.smtp.email}>` : `${Config.smtp.email}`,
                 to: input.to.join(", "),
                 subject: input.subject,
                 html: input.body,

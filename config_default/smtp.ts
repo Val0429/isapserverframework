@@ -17,6 +17,7 @@ export interface Config {
     enable: boolean;
     host: string;
     port: number;
+    name?: string;
     email: string;
     password: string;
 }

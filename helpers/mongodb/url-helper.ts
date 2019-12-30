@@ -15,6 +15,8 @@ export function mongoDBUrl() {
     const basic = (config) => `${!config.account?'':`${config.account}:${config.password}@`}${config.ip}:${config.port}`;
     if (!replica)
         return `mongodb://${basic(config)}/${collection}`;
-    else
+    else if(config.account && config.password)
+        return `mongodb://${config.account}:${config.password}@${replica.servers.map(server => basic(server)).join(",")}/${collection}?replicaSet=${replica.name}`;
+    else 
         return `mongodb://${replica.servers.map(server => basic(server)).join(",")}/${collection}?replicaSet=${replica.name}`;
 }

@@ -8,7 +8,8 @@ import { ScheduleActionBase } from './core';
 
 import { Config } from 'core/config.gen';
 import * as nodemailer from 'nodemailer';
-import { FileHelper } from 'core/cgi-package';
+import { FileHelper } from 'helpers/parse-server/file-helper';
+
 
 /// email core /////////////////////////
 export enum ScheduleActionEmailResult {

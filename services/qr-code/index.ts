@@ -5,7 +5,7 @@
  */
 
 import { Log } from 'helpers/utility';
-import { FileHelper } from 'core/cgi-package';
+import { FileHelper } from 'helpers/parse-server/file-helper';
 let qrcode = require('qrcode');
 
 interface IQRCodeOptions {

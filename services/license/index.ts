@@ -83,7 +83,7 @@ interface InputLicenseJSON {
 
 export class LicenseService {
     constructor() {
-        fs.exists(`${configPath}/config/app/licensecap.xml`, (exists) => {
+        fs.exists(`${configPath}/licensecap.xml`, (exists) => {
             if (!exists) {
                 Log.Error("License", `licensecap not exists. should be located in: ${configPath}`);
             }

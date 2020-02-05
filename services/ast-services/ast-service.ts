@@ -14,6 +14,8 @@ import { deepMerge } from 'helpers/utility/deep-merge';
 import { _O } from 'helpers/utility/O';
 import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature, EnumMember, createWrappedNode, TypeReferenceNode } from 'ts-simple-ast';
 
+const debug = false;
+
 var reflector: Project = this.reflector = new Project({
     tsConfigFilePath: "./tsconfig.json",
     addFilesFromTsConfig: true
@@ -328,7 +330,6 @@ namespace AstParser {
 
         var showname = prefix;
         var obj = data;
-        var debug = false;
 
         if (typeof obj === 'undefined') return undefined;
 
@@ -656,11 +657,18 @@ namespace AstConverter {
     }
 
     export function toArray(type: Type<ts.Type>, input: Array<any>, name: string): Array<any> {
-        if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
+        // Allow any type to be `Array`
+        if (!Array.isArray(input)) input = [input];
         if (!canBeEmpty && input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty array.`]);
         var tType = type.getTypeArguments()[0];
         for (var key in input) input[key] = AstParser.validateType(tType, input[key], name, true);
         return input;
+
+        // if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
+        // if (!canBeEmpty && input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty array.`]);
+        // var tType = type.getTypeArguments()[0];
+        // for (var key in input) input[key] = AstParser.validateType(tType, input[key], name, true);
+        // return input;
     }
 
     export function toTuple(type: Type<ts.Type>, input: Array<any>, name: string): Array<any> {

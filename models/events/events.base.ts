@@ -99,7 +99,8 @@ export interface IEvents<T = IEvent> {
     static Query = {
         get(): Parse.Query<Events> {
             return new Parse.Query(Events)
-                .include("owner");
+                .include("owner")
+                .include("target");
         },
         tuner() {
             return async (data: Events[]): Promise<Events[]> => {

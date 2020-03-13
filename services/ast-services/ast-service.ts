@@ -13,11 +13,14 @@ import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
 import { _O } from 'helpers/utility/O';
 import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature, EnumMember, createWrappedNode, TypeReferenceNode } from 'ts-simple-ast';
+import * as path from 'path';
 
 const debug = false;
 
+const tsConfigFilePath = path.resolve(`${__dirname}/../../tsconfig.json`);
+
 var reflector: Project = this.reflector = new Project({
-    tsConfigFilePath: "./tsconfig.json",
+    tsConfigFilePath,
     addFilesFromTsConfig: true
 });
 reflector.addExistingSourceFiles("node_modules/@types/**/*");

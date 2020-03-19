@@ -61,7 +61,7 @@ export namespace ScheduleHelperV2 {
                     const oneHour = 60*60*1000;
                     if (period > 5000) period = Math.min(oneHour, period / 2);
                     timer = setTimeout( () => {
-                        doOnce();
+                        process.nextTick(doOnce);
                     }, period);
                     debug && Log.Info("ScheduleHelper", `${name ? `${name}: `:''}wait for ${Math.floor(period/100)/10} seconds.`);
                 }

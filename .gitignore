@@ -4,5 +4,6 @@ node_modules/
 .vscode/
 .vs/
 .cache*/
+.metals/
 workspace/
 core/*.gen.ts

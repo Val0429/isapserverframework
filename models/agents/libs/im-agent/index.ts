@@ -59,7 +59,8 @@ class AgentGenerator {
         } catch(e) {
             Log.Info(LogTitle, "Agent Server connect error. Try reconnect...");
             setTimeout( () => {
-                this.tryConnect();
+                // this.tryConnect();
+                process.nextTick( () => this.tryConnect() );
             }, 1000);
             return;
         }

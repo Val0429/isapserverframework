@@ -75,14 +75,14 @@ export namespace Log {
     let timeCount = 0;
     export function TraceTime(title: string, message: string) {
         if (!TestPass(Level.Trace)) return;
-        let msg = getTraceMessage(title, message, false) + `(#${++timeCount})`;
+        let msg = getTraceMessage(title, message, true) + `(#${++timeCount})`;
         console.time(msg);
         return new TimeEndWrapper(msg);
     }
 
     export function InfoTime(title: string, message: string) {
         if (!TestPass(Level.Info)) return;
-        let msg = getInfoMessage(title, message, false) + `(#${++timeCount})`;
+        let msg = getInfoMessage(title, message, true) + `(#${++timeCount})`;
         console.time(msg);
         return new TimeEndWrapper(msg);
     }

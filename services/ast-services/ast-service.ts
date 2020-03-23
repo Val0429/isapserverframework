@@ -675,7 +675,9 @@ namespace AstConverter {
     }
 
     export function toTuple(type: Type<ts.Type>, input: Array<any>, name: string): Array<any> {
-        if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
+        // Allow any type to be `Array`
+        if (!Array.isArray(input)) input = [input];
+        // if (!Array.isArray(input)) throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid array.`]);
         var types = type.getTypeArguments();
         
         /// test example: [string, ...string[]];

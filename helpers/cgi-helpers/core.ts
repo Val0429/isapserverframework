@@ -365,12 +365,12 @@ export namespace Restful {
         //sorting
         if(ps.sorting && ps.sorting.order !=undefined && ps.sorting.field){
            
-            if(!ps.sorting.order)query.ascending(ps.sorting.field);
+            if(!ps.sorting.order) query.ascending(ps.sorting.field);
             else query.descending(ps.sorting.field);
         }
         //filtering
-        if(ps.filtering && ps.filtering.field && ps.filtering.value){           
-           query.matches(ps.filtering.field, new RegExp(ps.filtering.value), "i");
+        if(ps.filtering && ps.filtering.field && ps.filtering.value){
+            query.matches(ps.filtering.field, new RegExp(ps.filtering.value), "i");
         }
         return query;
     }

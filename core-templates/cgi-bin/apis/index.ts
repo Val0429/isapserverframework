@@ -12,7 +12,6 @@ import {
 } from 'core/cgi-package';
 import * as request from 'request';
 import { actions } from 'helpers/routers/router-loader';
-import config from 'workspace/config/custom/vms';
 
 let packinfo = require(`${__dirname}/../../../package.json`);
 
@@ -134,7 +133,6 @@ action.get( async (data) => {
     return {
         serverVersion: packinfo.version,
         frameworkVersion: packinfo.frameworkversion,
-        flow: config.flow,
         APIs: final
     }
 });

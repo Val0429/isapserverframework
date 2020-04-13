@@ -1,11 +1,11 @@
 {
-  "name": "isap-vms-service",
-  "version": "3.03.00",
+  "name": "isap-smart-community-service",
+  "version": "1.00.00",
   "frameworkversion": "1.07.04",
   "config": {
-    "displayname": "iSap VMS Service"
+    "displayname": "iSap Smart Community Service"
   },
-  "description": "iSap VMS Service v3.01.00",
+  "description": "iSap Smart Community Service v1.00.00",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -71,7 +71,7 @@
     "request": "2.87.0",
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",
-    "server-packager": "git+http://isap-dev-server:3000/iSAP-AP-Team/server-packager.git#66d6eb08cb",
+    "server-packager": "git+http://isap-dev-server:3000/iSAP-AP-Team/server-packager.git#e801a0aa52",
     "sharp": "0.20.8",
     "shortid": "^2.2.15",
     "tmp-promise": "^1.0.5",

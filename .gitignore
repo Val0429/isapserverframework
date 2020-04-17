@@ -8,3 +8,6 @@ dist/
 .metals/
 workspace/
 core/*.gen.ts
+
+.setting*.json
+.setting*.json.example

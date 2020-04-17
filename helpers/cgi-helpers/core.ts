@@ -44,12 +44,17 @@ import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { inputType } from './private-middlewares/input-type';
 import { transform } from './private-middlewares/transform';
+import { MultiDataFromBody } from './private-middlewares/multi-data-from-body';
+import { MultiDataFromQuery } from './private-middlewares/multi-data-from-query';
 import { Log, Mutex, retry } from 'helpers/utility';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
 import { UserHelper } from 'helpers/parse-server/user-helper';
 import { Tree } from 'models/nodes';
 import CollectionWatcher from 'helpers/mongodb/collection-watcher';
+
+/// Ast
+import { default as Ast } from 'services/ast-services/ast-client';
 
 
 let connectedSockets: { [sid: string]: Socket[] } = {};
@@ -85,6 +90,21 @@ export interface ActionConfig<T = any, U = any> {
      * Default = none.
      */
     middlewares?: any[];
+
+    /**
+     * Use Multiple Mode
+     */
+    useMultipleMode?: boolean;
+
+    /**
+     * Multiple Mode Buffer Count
+     */
+    multipleModeBufferCount?: number;
+
+    /**
+     * Multiple Mode Buffer Count
+     */
+    multipleModeInputType?: string;
 }
 
 export interface ActionCallback<T, U> {
@@ -173,7 +193,7 @@ export class Action<T = any, U = any> {
     ws(arg1, arg2 = null) { return this._get("Ws", arg1, arg2); }
 
     /// translate ActionConfig to array of middlewares
-    configTranslate(config: ActionConfig, caller: string): any[] {
+    configTranslate(config: ActionConfig, caller: string, action: string): any[] {
         var middlewares = [];
         if (!config && !this.config) return middlewares;
         /////////////////////////////////////////////
@@ -185,6 +205,7 @@ export class Action<T = any, U = any> {
         /// 1) bodyParser
         let cfPostSizeLimit = fetchConfig("postSizeLimit");
         let cfTransform = fetchConfig("transform");
+        let cfUseMultipleMode = fetchConfig('useMultipleMode') || false;
 
         if (!cfTransform) {
             middlewares.push(
@@ -193,6 +214,11 @@ export class Action<T = any, U = any> {
         } else {
             middlewares.push( VBodyParserRaw() );
             middlewares.push( transform(cfTransform) );
+        }
+
+        if (cfUseMultipleMode) {
+            if (action === 'post' || action === 'put') middlewares.push(MultiDataFromBody());
+            else if (action === 'delete') middlewares.push(MultiDataFromQuery());
         }
 
         /// 2) login
@@ -208,7 +234,9 @@ export class Action<T = any, U = any> {
 
         /// 5) inputType
         let cfInputType = fetchConfig("inputType");
-        cfInputType && middlewares.push(inputType(caller, cfInputType));
+        if (!cfUseMultipleMode) {
+            cfInputType && middlewares.push(inputType(caller, cfInputType));
+        }
         /// mount others
         let cfMiddlewares = fetchConfig("middlewares");
         cfMiddlewares && (middlewares = [...middlewares, ...cfMiddlewares]);
@@ -236,10 +264,68 @@ export class Action<T = any, U = any> {
                 let realfunc = this[`func${func}`];
                 let config: ActionConfig = this[`func${func}Config`];
                 let realpath = (config ? config.path : "*") || "*";
-                router[func.toLowerCase()](realpath, this.configTranslate(config, this.caller), mergeParams,
+
+                let action: string = func.toLowerCase();
+
+                let useMultipleMode = !!config && !!config.useMultipleMode ? config.useMultipleMode : false;
+                let multipleModeBufferCount = !!config && !!config.multipleModeBufferCount ? config.multipleModeBufferCount : 10;
+                let multipleModeInputType = !!config && !!config.multipleModeInputType ? config.multipleModeInputType : '';
+
+                router[action](realpath, this.configTranslate(config, this.caller, action), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {
-                            var result = await realfunc({...request ,request, response});
+                            var result: any = undefined;
+                            if (useMultipleMode) {
+                                result = {
+                                    datas: request.parameters.resMessages,
+                                };
+
+                                if (!!multipleModeInputType) {
+                                    if (action === 'post' || action === 'put') {
+                                        request.parameters.reqParameters = []
+                                        for (let i: number = 0; i < request.parameters.datas.length; i++) {
+                                            request.parameters.reqParameters.push(await Ast.requestValidation({ path: this.caller, type: multipleModeInputType }, request.parameters.datas[i]));
+                                        }
+                                    } else if (action === 'delete') {
+                                        request.parameters.reqParameters = request.parameters.objectIds;
+                                    }
+                                }
+
+                                let datas = request.parameters.reqParameters || [];
+                                for (let i: number = 0; i < datas.length; i += multipleModeBufferCount) {
+                                    await Promise.all(
+                                        datas.slice(i, i + multipleModeBufferCount).map(async (value, index, array) => {
+                                            let _resMessage = request.parameters.resMessages[index + i];
+
+                                            let _result = undefined;
+                                            try {
+                                                _result = await realfunc({
+                                                    ...request,
+                                                    request,
+                                                    response,
+                                                    parameters: {
+                                                        ...request.parameters,
+                                                        reqParameter: value,
+                                                        reqIndex: index + i,
+                                                        resMessage: _resMessage,
+                                                    },
+                                                });
+                                            } catch (e) {
+                                                _result = {
+                                                    ..._resMessage,
+                                                    statusCode: e.detail ? e.detail.statusCode : 500,
+                                                    message: e.message ? e.message : e.args ? e.args.join('; ') : e,
+                                                };
+                                            }
+
+                                            result.datas[index + i] = _result;
+                                        }),
+                                    );
+                                } 
+                            } else {
+                                result = await realfunc({ ...request, request, response });
+                            }
+
                             /// don't do anything, if delegate doesn't return
                             if (result === undefined) return;
                             response.send(result);
@@ -255,7 +341,7 @@ export class Action<T = any, U = any> {
             let realfunc = this.funcWs;
             let config: ActionConfig = this.funcWsConfig;
             let realpath = (config ? config.path : "*") || "*";
-            router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller)), mergeParams,
+            router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller, 'websocket')), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {
                     var request = <any>info.req;
                     var response = <any>info.res;

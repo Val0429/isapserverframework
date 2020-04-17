@@ -14,9 +14,7 @@ export default config;
 
 interface IReplicaUnit {
     ip: string;
-    port: string;
-    account?: string;
-    password?: string;
+    port: number;
 }
 interface IReplica {
     /// replica set name, ex: rs0
@@ -41,6 +39,10 @@ export interface Config {
      * Database / Collection used for app.
      */
     collection: string;
+    /**
+     * Specify the database name associated with the user’s credentials. authSource defaults to the database specified in the connection string.
+     */
+    authSource?: string;
 }
 
 // const mergeDBConfig = (config: Config) => {

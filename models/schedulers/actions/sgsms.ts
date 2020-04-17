@@ -5,12 +5,16 @@
  */
 
 import { ScheduleActionBase } from './core';
-import { sendSMS, SMSCommand } from 'helpers/sms';
 import { Config } from 'core/config.gen';
 import * as request from 'request';
 
-import { ScheduleActionSMSResult } from './sms';
 import { Log } from 'helpers/utility';
+
+export enum ScheduleActionSMSResult {
+  Success = 0,
+  Failed = 1,
+  Disabled = -1
+}
 
 export interface IInputScheduleActionSGSMS_FromTemplate {
     message: string;

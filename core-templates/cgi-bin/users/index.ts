@@ -1,7 +1,7 @@
 /*
- * Created on Tue Jul 30 2019
+ * Created on Tue Apr 29 2020
  * Author: Val Liu
- * Copyright (c) 2019, iSAP Solution
+ * Copyright (c) 2020, iSAP Solution
  */
 
 import {
@@ -108,6 +108,11 @@ action.delete<InputD, OutputD>({ inputType: "InputD" }, async (data) => {
         .include("roles")
         .get(data.inputType.objectId);
     if (!user) throw Errors.throw(Errors.CustomNotExists, [`User <${data.inputType.objectId}> not exists.`]);
+
+    /// prevent delete self
+    if (data.user.id == user.id) throw Errors.throw(Errors.CustomBadRequest, [`Cannot delete yourself.`]);
+    /// prevent delete `Admin`
+    if (user.attributes.username === "Admin") throw Errors.throw(Errors.CustomBadRequest, [`Cannot delete default account.`]);
 
     user.destroy({ useMasterKey: true });
 

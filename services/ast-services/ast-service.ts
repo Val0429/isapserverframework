@@ -335,6 +335,7 @@ namespace AstParser {
         var obj = data;
 
         if (typeof obj === 'undefined') return undefined;
+        if (obj === undefined || obj === null) return undefined;
 
         if (type.isBoolean()) {
             /// 1) boolean

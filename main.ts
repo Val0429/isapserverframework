@@ -18,6 +18,7 @@ const LogTitle = "Startup";
 /// todo remove: log loading time
 let trace = Log.TraceTime(LogTitle, "Compiler");
 import './core/compiler';
+import './helpers/shells/config-manager';
 trace.end();
 
 trace = Log.TraceTime(LogTitle, "AST Service");
@@ -39,3 +40,4 @@ trace.end();
 trace = Log.TraceTime(LogTitle, "Load Workspace");
 import './workspace/main';
 trace.end();
+

@@ -12,13 +12,14 @@ import { execSync } from 'child_process';
 import { padLeft, padRight } from './../helpers/utility/pad-left';
 
 let outerpath = path.resolve(__dirname, "../");
+let outercwd = outerpath;
 let cwd = path.resolve(__dirname, "../", "workspace");
 let packagejsonpath = path.resolve(cwd, "package.json");
 let packagejson = require(packagejsonpath);
 let nsispath = path.resolve(cwd, "nsis");
 
-let outerpackagejsonpath = path.resolve(outerpath, "package.json");
-let outerpackagejson = require(outerpackagejsonpath);
+// let outerpackagejsonpath = path.resolve(outerpath, "package.json");
+// let outerpackagejson = require(outerpackagejsonpath);
 
 let version = packagejson.version;
 
@@ -146,11 +147,11 @@ export function findFilesInDir(startPath: string, filter) {
         fs.writeFileSync(packagejsonpath, newjsontext, { encoding: "UTF-8" });
 
         /// 6.5) write outer package.json
-        outerpackagejson.name = packagejson.name;
-        outerpackagejson.version = packagejson.version;
-        outerpackagejson.description = packagejson.description;
-        newjsontext = JSON.stringify(outerpackagejson, null, '  ');
-        fs.writeFileSync(outerpackagejsonpath, newjsontext, { encoding: "UTF-8" });
+        // outerpackagejson.name = packagejson.name;
+        // outerpackagejson.version = packagejson.version;
+        // outerpackagejson.description = packagejson.description;
+        // newjsontext = JSON.stringify(outerpackagejson, null, '  ');
+        // fs.writeFileSync(outerpackagejsonpath, newjsontext, { encoding: "UTF-8" });
 
         /// 7) write all nsi
         let regex = /^(\!define\ PRODUCT_VERSION\ )\"([^\"]+)\"$/im;
@@ -168,6 +169,11 @@ export function findFilesInDir(startPath: string, filter) {
         execSync(`git tag "${newtag}"`, { cwd });
         execSync(`git push -f --tags`, { cwd });
         execSync(`git push -f origin HEAD`, { cwd });
+
+        /// 8.1) push serverframework tag
+        try {execSync(`git tag -d "${newtag}"`, { cwd: outercwd }); } catch(e) {}
+        execSync(`git tag "${newtag}"`, { cwd: outercwd });
+        execSync(`git push -f --tags`, { cwd: outercwd });
 
         /// X) end
         process.exit(0);

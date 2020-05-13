@@ -1,10 +1,11 @@
 /*
- * Created on Tue Nov 12 2019
+ * Created on Tue May 12 2020
  * Author: Val Liu
- * Copyright (c) 2019, iSAP Solution
+ * Copyright (c) 2020, iSAP Solution
  */
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { Log } from 'helpers/utility';
 const configPath: string = `${__dirname}/../../workspace/custom/license/`;
 
@@ -14,6 +15,29 @@ const licenseClass = isWindows ?
     require('./lib/windows/license_manager') :
     require('./lib/linux/license_manager')
     ;
+
+
+/// license copy function
+{
+    const configFilePath = path.resolve(configPath, "license.xml");
+    const configAssetsDir = path.resolve(configPath, "../assets");
+    const configAssetsPath = path.resolve(configAssetsDir, "license.xml");
+    
+    /// if assets not exists, create
+    if (!fs.existsSync(configAssetsDir)) fs.mkdirSync(configAssetsDir);
+
+    /// everytime initial, copy from assets
+    if (fs.existsSync(configAssetsPath)) fs.copyFileSync(configAssetsPath, configFilePath);
+
+    /// everytime saved, copy to assets
+    fs.watchFile(configFilePath, (cur, prev) => {
+        /// if not exists
+        if (cur.mtime.getTime() === 0) return;
+        fs.copyFileSync(configFilePath, configAssetsPath);
+    });
+}
+
+
 const license = new licenseClass.LicenseManager(configPath);
 
 /// interfaces

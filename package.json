@@ -1,11 +1,11 @@
 {
-  "name": "isap-smart-community-service",
-  "version": "1.00.00",
-  "frameworkversion": "1.07.05",
+  "name": "thermal-server",
+  "version": "1.00.06",
+  "frameworkversion": "1.08.01",
   "config": {
-    "displayname": "iSap Smart Community Service"
+    "displayname": "iSap Thermal Server"
   },
-  "description": "iSap Smart Community Service v1.00.00",
+  "description": "iSap Thermal Server v1.00.06",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -24,7 +24,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "install-windows-service": "winser -i -s -a --startwithnpm --displayname \"%npm_package_config_displayname%\"",
     "uninstall-windows-service": "winser -r -x -s",
-    "pack": "server-packager ./ --no-bytecode --out-path=./dist"
+    "pack": "server-packager ./ --no-bytecode --out-path=./dist",
+    "dorelease": "ts-node ./shells/do-release.shell.ts -s"
   },
   "nodemonConfig": {
     "ignore": [
@@ -82,7 +83,8 @@
     "uuid": "3.3.0",
     "websocket": "1.0.25",
     "winser": "git+http://isap-dev-server:3000/iSAP-AP-Team/winser.git#33b6fd8e35",
-    "xml2js": "0.4.19"
+    "xml2js": "0.4.19",
+    "yesno": "^0.3.1"
   },
   "pkg": {
     "targets": [

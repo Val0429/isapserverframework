@@ -1,8 +1,8 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { registerSubclass, ParseObject } from 'helpers/parse-server/parse-helper-core';
 import * as path from "path";
 import { serverReady } from 'core/pending-tasks';
-import { Mutex } from 'helpers/utility';
+import { Mutex, Log } from 'helpers/utility';
 const caller = require('caller');
 
 export class DBConfigFactory<T> {
@@ -15,6 +15,7 @@ export class DBConfigFactory<T> {
     constructor(config: T, critical: boolean, callername: string) {
 
         let sjReady = new BehaviorSubject<boolean>(false);
+        let sjChange = new Subject<T>();
         let innateValue: T = {} as any;
         /// 1) get caller name
         let classname = `config_${callername}`;
@@ -27,15 +28,25 @@ export class DBConfigFactory<T> {
             get: () => sjReady.asObservable()
         });
 
+        Object.defineProperty(this, "obChange", { enumerable: false,
+            get: () => sjChange.asObservable()
+        });
+
         let dbObject = null;
         const mutex: Mutex = new Mutex();
         const save = async (value?) => {
             await mutex.acquire();
             if (!dbObject) dbObject = new Parse.Object(classname);
-            if (value) innateValue = { ...innateValue as any, ...value };
+            if (value) {
+                innateValue = { ...innateValue as any, ...value };
+                sjChange.next(innateValue);
+            }
             await dbObject.save(innateValue);
             mutex.release();
-            if (critical) setTimeout(() => process.exit(1), 200);
+            if (critical) setTimeout(() => {
+                Log.Info("ConfigChanged", "Server restarting...");
+                process.exit(1);
+            }, 200);
         }
         Object.defineProperty(this, "save", { enumerable: false,
             value: save
@@ -46,7 +57,10 @@ export class DBConfigFactory<T> {
         const get = (key) => {
             return innateValue[key];
         }
-        const set = (key, value) => innateValue[key] = value;
+        const set = (key, value) => {
+            innateValue[key] = value;
+            sjChange.next(innateValue);
+        }
 
         /// define Proxy
         let definedTable: any = {};

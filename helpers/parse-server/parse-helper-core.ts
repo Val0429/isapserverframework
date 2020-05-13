@@ -167,10 +167,10 @@ export class ParseObject<T> extends Parse.Object {
                 ACL: false,
                 sessionToken: false,
             },
-            // "Parse.Role": {
-            //     ACL: false,
-            //     name: EnumConverter(RoleList)
-            // }
+            "Parse.Role": {
+                ACL: false,
+                name: EnumConverter(RoleList)
+            }
         }
 
         var NeutualizeType = (data: any, filter: any, refDetect = {}): any => {

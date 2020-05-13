@@ -2,7 +2,8 @@ import * as fs from "fs";
 import * as path from 'path';
 import { Config, IConfig } from "core/config.gen";
 import { DBConfigFactory } from "helpers/config/db-config";
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Log } from "helpers/utility/log";
 
 /// utilize config
 const makeFileName = (key) => `.settings_${key}.json`;
@@ -22,6 +23,13 @@ export class ConfigManager {
         } else {
             Promise.resolve(true);
         }
+    }
+
+    public observe<T extends keyof IConfig>(key?: T): Observable<IConfig[T]> {
+        if ((Config[key] as any).isDBConfigFactory) {
+            return (Config[key] as any).obChange;
+        }
+        return null;
     }
 
     private envpath: string;
@@ -56,7 +64,10 @@ export class ConfigManager {
             return (Config[key] as any).save(value);
         } else {
             let rtn = this.updateConfig(key, value);
-            setTimeout(() => process.exit(1), 200);
+            setTimeout(() => {
+                Log.Info("ConfigChanged", "Server restarting...");
+                process.exit(1);
+            }, 200);
             return rtn;
         }
     }

@@ -6,7 +6,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Log } from "helpers/utility/log";
 
 /// utilize config
-const makeFileName = (key) => `.settings_${key}.json`;
+const checkTable = {
+    mongodb: "db"
+}
+const makeFileName = (key) => {
+    key = checkTable[key] || key;
+    return `.setting_${key}.json`;
+}
 
 export class ConfigManager {
     private static _instance;

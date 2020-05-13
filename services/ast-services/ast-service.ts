@@ -574,7 +574,7 @@ namespace AstConverter {
     export function toString(input: string, name: string, isArray: boolean = false): string {
         if (typeof input !== 'string') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be string${isArray?'[]':''}.`]);
         if (!canBeEmpty && input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty string.`]);
-        return input;
+        return input.trim();
     }
 
     export function toNumber(input: string | number, name: string, isArray: boolean = false): number {

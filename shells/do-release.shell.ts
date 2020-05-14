@@ -90,8 +90,9 @@ export function findFilesInDir(startPath: string, filter) {
     let Q2 = await yesno({
         question: `
     問題二，確認以下包版訊息
-    專案名稱：${packagename}
-    輸出tag：${newtag}
+    專案名稱：${packagename.yellow} (如有錯誤請修改Branch Name)
+    Service名稱：${packagejson.config.displayname.yellow} (如有錯誤請修改package.json)
+    輸出tag：${newtag.yellow}
     是否正確？ `
     });
     if (!Q2) process.exit(0);

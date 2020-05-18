@@ -71,7 +71,6 @@
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",
     "server-packager": "git+http://isap-dev-server:3000/iSAP-AP-Team/server-packager.git#e801a0aa52",
-    "sharp": "0.20.8",
     "shortid": "^2.2.15",
     "tmp-promise": "^1.0.5",
     "ts-node": "git+http://isap-dev-server:3000/iSAP-AP-Team/ts-node.git#cbe90a614e",

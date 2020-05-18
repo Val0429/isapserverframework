@@ -15,8 +15,6 @@ var tHeader = `
  * Author: Val Liu
  * Copyright (c) 2019, iSAP Solution
  */
-
-import { registerSubclass, Omit, ParseTypedGetterSetter } from 'helpers/parse-server/parse-helper';
 import { IRole, IUser } from 'models/userRoles/userRoles.base';
 export * from 'models/userRoles/userRoles.base';
 import { {0} } from 'workspace/custom/models/index';

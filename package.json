@@ -1,11 +1,11 @@
 {
   "name": "thermal-server",
-  "version": "1.00.06",
-  "frameworkversion": "1.08.01",
+  "version": "1.00.07",
+  "frameworkversion": "1.08.02",
   "config": {
     "displayname": "iSap Thermal Server"
   },
-  "description": "iSap Thermal Server v1.00.06",
+  "description": "iSap Thermal Server v1.00.07",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",

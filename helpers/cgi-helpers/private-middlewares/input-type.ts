@@ -40,19 +40,19 @@ export function inputType(caller: string, type: string, outputType?: string): Re
         var helpKey: string = keyOfHelp;
         var help: string = req.parameters[helpKey];
 
-        if (help !== undefined) {
-            let rtnary = [];
-            try {
-                let data = await ast.requestReportType({
-                    path: caller,
-                    type
-                });
-                return res.end(data);
+        // if (help !== undefined) {
+        //     let rtnary = [];
+        //     try {
+        //         let data = await ast.requestReportType({
+        //             path: caller,
+        //             type
+        //         });
+        //         return res.end(data);
 
-            } catch(reason) {
-                return next( reason );
-            }
-        }
+        //     } catch(reason) {
+        //         return next( reason );
+        //     }
+        // }
 
         try {
             var rtn = await ast.requestValidation({

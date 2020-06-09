@@ -1,7 +1,7 @@
 {
   "name": "isap-smart-community-service",
   "version": "1.00.00",
-  "frameworkversion": "1.07.07",
+  "frameworkversion": "1.07.08",
   "config": {
     "displayname": "iSap Smart Community Service"
   },

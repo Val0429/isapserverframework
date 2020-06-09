@@ -538,17 +538,17 @@ namespace AstParser {
 
 
         } catch (reason) {
-            if (reason instanceof Errors) {
-                reason.append( Errors.throw(Errors.Custom, [`${getImplementation()}\r\n`]) );
+            // if (reason instanceof Errors) {
+            //     reason.append( Errors.throw(Errors.Custom, [`${getImplementation()}\r\n`]) );
 
-                let base = inf;
-                let declarations: (InterfaceDeclaration | TypeAliasDeclaration | ClassDeclaration)[];
-                while ( base.getBaseDeclarations && (declarations = base.getBaseDeclarations()).length > 0 ) {
-                    base = declarations[0] as any as InterfaceDeclaration;
-                    reason.append( Errors.throw(Errors.Custom, [`${base.getText()}\r\n`]) );
-                }
-                reason.tag = newdata;
-            }
+            //     let base = inf;
+            //     let declarations: (InterfaceDeclaration | TypeAliasDeclaration | ClassDeclaration)[];
+            //     while ( base.getBaseDeclarations && (declarations = base.getBaseDeclarations()).length > 0 ) {
+            //         base = declarations[0] as any as InterfaceDeclaration;
+            //         reason.append( Errors.throw(Errors.Custom, [`${base.getText()}\r\n`]) );
+            //     }
+            //     reason.tag = newdata;
+            // }
             throw reason;
         }
 

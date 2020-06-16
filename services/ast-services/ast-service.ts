@@ -387,7 +387,7 @@ namespace AstParser {
         } else if (type.isArray()) {
             /// 8) Array --- Array
             debug && console.log(`${showname} is Array, obj ${typeof obj}`);
-            obj = obj.filter((n) => n !== null && n !== undefined);
+            obj = [].concat(obj).filter((n) => n !== null && n !== undefined);
             return AstConverter.toArray(type, obj, showname);
 
         } else if (type.isTuple()) {

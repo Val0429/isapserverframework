@@ -63,7 +63,6 @@
     "node-csv-parse": "1.2.0",
     "nodemailer": "4.6.8",
     "nodemon": "git+http://isap-dev-server:3000/iSAP-AP-Team/nodemon.git#dc821512",
-    "npm": "git+http://isap-dev-server:3000/iSAP-AP-Team/npm.git#96bdc33",
     "parse-dashboard": "1.2.0",
     "parse-server": "git+http://isap-dev-server:3000/iSAP-AP-Team/parse-server.git#b7a4b7fa03",
     "qrcode": "^1.3.3",

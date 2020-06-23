@@ -28,7 +28,6 @@ import { blockRobots } from 'helpers/middlewares/block-robots';
 import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from 'helpers/routers/router-loader';
 import { makeServerReady } from 'core/pending-tasks';
-import * as ParseDashboard from 'parse-dashboard';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
 import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
 import { Action } from 'helpers/cgi-helpers/core';
@@ -101,24 +100,6 @@ if (Config.mongodb.enable) {
     app.use(Config.parseServer.serverPath, ParseServer);
 }
 /////////////////////////
-`;
-
-var tRunParseDashboard = `
-/// run parse dashboard ////
-if (Config.mongodb.enable && Config.parseDashboard.enable) {
-var Dashboard = new ParseDashboard({
-    "apps": [
-    {
-        "serverURL": \`\${myServerUrl}\${Config.parseServer.serverPath}\`,
-        "appId": Config.parseServer.appId,
-        "masterKey": Config.parseServer.masterKey,
-        "appName": Config.parseDashboard.appName
-    }
-    ]
-});
-app.use(Config.parseDashboard.serverPath, Dashboard);
-}
-////////////////////////////
 `;
 
 var tRunWeb = `
@@ -267,10 +248,6 @@ function main(): string {
 
     /// run parse server ////////////////////////
     tmpstr.push(tRunParseServer);
-    /////////////////////////////////////////////
-
-    /// run parse dashboard /////////////////////
-    if (Config.parseDashboard.enable) tmpstr.push(tRunParseDashboard);
     /////////////////////////////////////////////
 
     /// run web /////////////////////////////////

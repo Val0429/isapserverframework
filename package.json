@@ -23,8 +23,7 @@
     "wc": "find . -name '*.ts' -not -path './node_modules/*' -not -path './typings/*' | xargs wc -c",
     "test": "echo \"Error: no test specified\" && exit 1",
     "install-windows-service": "winser -i -s -a --startwithnpm --displayname \"%npm_package_config_displayname%\"",
-    "uninstall-windows-service": "winser -r -x -s",
-    "pack": "server-packager ./ --no-bytecode --out-path=./dist"
+    "uninstall-windows-service": "winser -r -x -s"
   },
   "nodemonConfig": {
     "ignore": [
@@ -69,7 +68,6 @@
     "request": "2.87.0",
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",
-    "server-packager": "git+http://isap-dev-server:3000/iSAP-AP-Team/server-packager.git#e801a0aa52",
     "shortid": "^2.2.15",
     "tmp-promise": "^1.0.5",
     "ts-node": "git+http://isap-dev-server:3000/iSAP-AP-Team/ts-node.git#cbe90a614e",
@@ -80,28 +78,5 @@
     "websocket": "1.0.25",
     "winser": "git+http://isap-dev-server:3000/iSAP-AP-Team/winser.git#33b6fd8e35",
     "xml2js": "0.4.19"
-  },
-  "pkg": {
-    "targets": [
-      "node8-win-x64"
-    ],
-    "assets": [
-      "**/*",
-      "!workspace/config/**/*",
-      "!workspace/custom/license/**/*",
-      "!workspace/custom/files/**/*",
-      "!dist/**/*",
-      "!**/.git/**/*"
-    ],
-    "inplaces": [
-      "workspace/config/**/*",
-      "workspace/custom/license/**/*",
-      "workspace/custom/files/**/*"
-    ],
-    "natives": {
-      "helpers/sms/lib/sms-dll.dll": "./",
-      "services/license/lib/windows/license_manager.node": "./",
-      "services/face-detection/lib/LibFaceDetection.dll": "./"
-    }
   }
 }

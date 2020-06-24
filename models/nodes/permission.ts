@@ -9,7 +9,6 @@ import { ParseObject } from "helpers/parse-server/parse-helper";
 import { Meta } from "helpers/utility/meta";
 import { Mutex, Log, jsMapAssign } from "helpers/utility";
 import { Tree } from "./tree";
-import { Schedule } from './schedule';
 import { BehaviorSubject } from 'rxjs';
 import { CacheParse } from 'helpers/parse-server/cache-helper';
 
@@ -161,65 +160,28 @@ export namespace Permission {
                         /// 1) scan all roles
                         main: for (let role of roleList) {
                             if (!role) break;
-                            /// 2) Schedule case
-                            if (role.prototype instanceof Schedule) {
-                                /// 2.1) for loop flatterned of
-                                for (let eachOf of flatOf) {
-                                    let query = CParse.Query(role);
-                                    /// 2.1.1) map back to query
-                                    for (let item of [eachOf, ...on]) {
-                                        for (let target of ["who", "where", "what", "how", "others"]) {
-                                            if (role[target] && item instanceof role[target]) {
-                                                query.equalTo(target, item);
-                                            }
-                                        }
-                                    }
-                                    /// 2.1.2) execute
-                                    let schedules = await query.find();
-                                    /// 2.2) build schedules into Calendar for match
-                                    let date = config.date || new Date();
-                                    let calendar = (await (role as any).buildCalendar(schedules, {start: date})).matchTime(date);
-                                    if (calendar.length > 0) {
-                                        let permissions = await this.list({ of: eachOf, on: calendar[0].data }, CParse);
-                                        if (permissions.length === 0) continue;
-                                        // console.log('get permission...', calendar, permissions);
-                                        let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
-                                        if (key) {
-                                            let attr = attrs.access[key as M];
-                                            if (attr !== undefined) { result[key] = attr; break main; }
-                                        } else {
-                                            for (let key in attrs.access) {
-                                                if (result[key] !== undefined) continue;
-                                                let value = attrs.access[key];
-                                                result[key] = value;
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
+                            
                             /// 3) Normal case
-                                /// 3.1) for loop flatterned of
-                                for (let eachOf of flatOf) {
-                                    let idx = on.findIndex((value) => value instanceof role);
-                                    if (idx < 0) continue;
-                                    for (let flatOn of await flattern(on[idx])) {
-                                        /// verify permission between eachOf -> flatOn
-                                        let permissions = await this.list({ of: eachOf, on: flatOn }, CParse);
-                                        if (permissions.length === 0) continue;
-                                        let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
-                                        if (key) {
-                                            let attr = attrs.access[key as M];
-                                            if (attr !== undefined) { result[key] = attr; break main; } 
-                                        } else {
-                                            for (let key in attrs.access) {
-                                                if (result[key] !== undefined) continue;
-                                                let value = attrs.access[key];
-                                                result[key] = value;
-                                            }
+                            /// 3.1) for loop flatterned of
+                            for (let eachOf of flatOf) {
+                                let idx = on.findIndex((value) => value instanceof role);
+                                if (idx < 0) continue;
+                                for (let flatOn of await flattern(on[idx])) {
+                                    /// verify permission between eachOf -> flatOn
+                                    let permissions = await this.list({ of: eachOf, on: flatOn }, CParse);
+                                    if (permissions.length === 0) continue;
+                                    let attrs: IPermission<PermissionList, T, U, V, K, C> = permissions[0].attributes;
+                                    if (key) {
+                                        let attr = attrs.access[key as M];
+                                        if (attr !== undefined) { result[key] = attr; break main; } 
+                                    } else {
+                                        for (let key in attrs.access) {
+                                            if (result[key] !== undefined) continue;
+                                            let value = attrs.access[key];
+                                            result[key] = value;
                                         }
                                     }
                                 }
-
                             }
                         }
 

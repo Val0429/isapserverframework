@@ -28,10 +28,6 @@ trace = Log.TraceTime(LogTitle, "Create Index");
 import './core/create-index';
 trace.end();
 
-trace = Log.TraceTime(LogTitle, "Scheduler Loader");
-import './core/scheduler-loader';
-trace.end();
-
 trace = Log.TraceTime(LogTitle, "Load Main Application");
 import './core/main.gen';
 trace.end();

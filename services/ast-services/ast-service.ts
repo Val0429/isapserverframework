@@ -12,7 +12,7 @@ import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
 import { _O } from 'helpers/utility/O';
-import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature, EnumMember, createWrappedNode, TypeReferenceNode } from 'ts-simple-ast';
+import { Project, Type, ts, InterfaceDeclaration, ImportSpecifier, ClassDeclaration, SourceFile, PropertySignature, EnumMember } from 'ts-morph';
 import * as path from 'path';
 
 const debug = false;
@@ -23,7 +23,7 @@ var reflector: Project = this.reflector = new Project({
     tsConfigFilePath,
     addFilesFromTsConfig: true
 });
-reflector.addExistingSourceFiles("node_modules/@types/**/*");
+reflector.addSourceFilesAtPaths('node_modules/@types/**/*');
 var tSource = reflector.getSourceFile(`ast-core.ts`);
 
 class AstService {

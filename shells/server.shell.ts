@@ -15,8 +15,6 @@ var tHeader = `
  * Copyright (c) 2019, iSAP Solution
  */
 
-import 'shells/events.shell';
-
 import * as express from 'express';
 import * as parse from 'parse-server';
 import { expressWsRoutes } from 'helpers/middlewares/express-ws-routes';

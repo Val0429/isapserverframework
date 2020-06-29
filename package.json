@@ -68,7 +68,6 @@
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",
     "shortid": "^2.2.15",
-    "tmp-promise": "^1.0.5",
     "ts-node": "git+http://isap-dev-server:3000/iSAP-AP-Team/ts-node.git#cbe90a614e",
     "ts-simple-ast": "16.0.1",
     "typescript": "3.1.1",

@@ -88,6 +88,7 @@ if (Config.mongodb.enable) {
         databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI, mongoOptions: {
             reconnectInterval: 2000,
             reconnectTries: 300000,
+            useUnifiedTopology: true
         }}),
         filesAdapter: new GridStoreAdapter(databaseURI),
         appId: Config.parseServer.appId,

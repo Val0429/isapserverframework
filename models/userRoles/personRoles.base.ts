@@ -16,9 +16,7 @@ export interface IPersonRole extends IRole {
     people: Parse.Relation<PersonRole, Person>;
     roles: Parse.Relation<PersonRole, PersonRole>;
 }
-export interface PersonRole {
-    relation<T extends keyof IPersonRole>(relation: T);
-}
+
 @registerSubclass() export class PersonRole extends ParseObject<IPersonRole & IRole> {
     getRoles(): Parse.Relation<this, PersonRole> {
         return <any>this.relation("roles");

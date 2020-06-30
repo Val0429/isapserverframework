@@ -42,7 +42,7 @@
     "@types/mongodb": "3.5.25",
     "@types/node": "12.12.6",
     "@types/nodemailer": "4.6.2",
-    "@types/parse": "2.4.7",
+    "@types/parse": "2.12.1",
     "bcryptjs": "^2.4.3",
     "bluebird": "3.5.1",
     "body-parser": "^1.19.0",

@@ -85,7 +85,7 @@ export class ParseObject<T> extends Parse.Object {
     getValue<U extends keyof T>(key: U): T[U] {
         return super.get(key as string);
     }
-    setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean {
+    setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): false | this {
         return super.set(key as string, <any>value, options);
     }
 

@@ -436,7 +436,7 @@ export namespace Restful {
             if (Array.isArray(params)) return query.containedIn(prefix, params);
             if (params instanceof Parse.Object ||
                 params instanceof Parse.User
-                ) return query.equalTo(`${prefix}`, params);
+                ) return query.equalTo(`${prefix}`, params as any);
             if (typeof params === 'object') {
                 for (let key in params) {
                     if(key=="sorting" || key=="filtering")continue;

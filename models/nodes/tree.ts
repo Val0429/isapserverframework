@@ -138,79 +138,89 @@ export abstract class Tree<T> extends ParseObject<ITree<T>> {
 
     /// overwritten //////////////////////////////////////////////
     /// override destroy for correction lft & rgt
-    destroy<U extends Tree<T>>(this: U, options?: Parse.Object.DestroyOptions): Parse.Promise<this> {
-        let promise = new Parse.Promise<this>();
-        let thisClass: { new(): U } = this.constructor as any;
-        let { rgt: refRgt, lft: refLft } = this.attributes;
+    destroy<U extends Tree<T>>(this: U, options?: Parse.Object.DestroyOptions): Promise<this> {
+        let promise = new Promise<this>(async (resolve, reject) => {
+            let thisClass: { new(): U } = this.constructor as any;
+            
+            let { rgt: refRgt, lft: refLft } = this.attributes;
 
-        (async () => {
-            let mutex = Tree.getMutex(thisClass); await mutex.acquire();
+            let mutex = Tree.getMutex(thisClass);
+            await mutex.acquire();
+
             try {
                 /// get all leafs
                 let query = new Parse.Query(thisClass);
                 if (this.groupBy) query.equalTo(this.groupBy as any, this.attributes[this.groupBy]);
                 let results = await query.find();
+
                 /// call destroy
                 let deleteId = this.id;
-                await super.destroy(options);
+
                 /// bulk write on the rest
                 /// every other leafs lft or rgt > this.rgt, should decrease by 2
                 let bulkWrites = [];
                 let bulkDestroy = [];
                 let padding = refRgt - refLft + 1;
-                results.forEach( (data) => {
+                results.forEach((data) => {
                     let { lft, rgt } = data.attributes;
                     if (data.id === deleteId) return;
                     if (lft > refLft && rgt < refRgt) {
                         bulkDestroy.push(data);
                         return;
                     }
-                    if (lft > refRgt) data.setValue("lft", lft-padding as any);
-                    if (rgt > refRgt) data.setValue("rgt", rgt-padding as any);
+                    if (lft > refRgt) data.setValue('lft', (lft - padding) as any);
+                    if (rgt > refRgt) data.setValue('rgt', (rgt - padding) as any);
                     data.canSaveLftRgt = true;
                     bulkWrites.push(data);
                 });
-                await Promise.all([
-                    Parse.Object.saveAll(bulkWrites),
-                    Parse.Object.destroyAll(bulkDestroy)
-                ]);
-                promise.resolve(this);
-            } catch(e) { promise.reject(e) }
-            finally { mutex.release(); }
-        })();
+
+                await Promise.all([Parse.Object.saveAll(bulkWrites), Parse.Object.destroyAll(bulkDestroy)]);
+
+                resolve(super.destroy(options));
+            } catch (e) {
+                reject(e);
+            } finally {
+                mutex.release();
+            }
+        });
 
         return promise;
     }    
 
     public canSaveLftRgt: boolean = false;
     /// override save, to prohibited lft & rgt
-    save(attrs?: { [key: string]: any } | null, options?: Parse.Object.SaveOptions): Parse.Promise<this>;
-    save(key: string, value: any, options?: Parse.Object.SaveOptions): Parse.Promise<this>;
-    save(attrs: object, options?: Parse.Object.SaveOptions): Parse.Promise<this>;
-    save<U extends Tree<T>>(this: U, arg1?, arg2?, arg3?): Parse.Promise<this> {
+    save(attrs?: { [key: string]: any } | null, options?: Parse.Object.SaveOptions): Promise<this>;
+    save(key: string, value: any, options?: Parse.Object.SaveOptions): Promise<this>;
+    save(attrs: object, options?: Parse.Object.SaveOptions): Promise<this>;
+    save<U extends Tree<T>>(this: U, arg1?, arg2?, arg3?): Promise<this> {
         /// if inner called, by pass check
         if (this.canSaveLftRgt) return super.save(...arguments);
 
         /// if directly called, remove prohibited value
-        let promise = new Parse.Promise<this>();
-        let thisClass: { new(): U } = this.constructor as any;
-        /// 1) remove prohibited
-        let prohibited = ["lft", "rgt"];
-        let obj = !arg1 ? undefined :
-            typeof arg1 === 'string' ? { [arg1]: arg2 } :
-            arg1;
-        let options = typeof arg1 === 'string' ? arg3 : arg2;
-        /// 2) Fetch latest prohibited number
-        (async () => {
-            let mutex = Tree.getMutex(thisClass); await mutex.acquire();
+        let promise = new Promise<this>(async (resolve, reject) => {
+            let thisClass: { new(): U } = this.constructor as any;
+            
+            /// 1) remove prohibited
+            let prohibited = ['lft', 'rgt'];
+            let obj = !arg1 ? undefined : typeof arg1 === 'string' ? { [arg1]: arg2 } : arg1;
+            let options = typeof arg1 === 'string' ? arg3 : arg2;
+
+            /// 2) Fetch latest prohibited number
+            let mutex = Tree.getMutex(thisClass);
+            await mutex.acquire();
+
             try {
                 let latest = await new Parse.Query(thisClass).get(this.id);
                 obj = { ...obj, ...pickObject(latest.attributes, prohibited) };
-                await super.save(obj, options);
-                promise.resolve(this);
-            } catch(e) { promise.reject(e) }
-            finally { mutex.release(); }
-        })();
+
+                resolve(super.save(obj, options));
+            } catch (e) {
+                reject(e);
+            } finally {
+                mutex.release();
+            }
+        });
+        
         return promise;
     }
 

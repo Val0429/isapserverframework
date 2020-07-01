@@ -59,16 +59,15 @@ import { default as Ast } from 'services/ast-services/ast-client';
 
 let connectedSockets: { [sid: string]: Socket[] } = {};
 /// connected socket being kick out handler
-(async () => {
-    (await CollectionWatcher.watch("_Session"))
-        .subscribe( (change) => {
-            if (change.operationType !== 'delete') return;
-            let sid = change.documentKey._id;
-            (connectedSockets[sid] || []).forEach( (socket) => {
-                socket.send({statusCode: 401, message: "Session being logged out."});
-                socket.closeGracefully();
-            });
+(async () => {    
+    (await CollectionWatcher.watch('_Session')).subscribe((change) => {
+        if (change.operationType !== 'delete') return;
+        let sid = change.documentKey._id;
+        (connectedSockets[sid] || []).forEach((socket) => {
+            socket.send({ statusCode: 401, message: 'Session being logged out.' });
+            socket.closeGracefully();
         });
+    });
 })();
 
 

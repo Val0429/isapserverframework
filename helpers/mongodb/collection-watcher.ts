@@ -1,6 +1,7 @@
 import { createMongoDB, sharedMongoDB, ensureCollectionExists } from "./../parse-server/parse-helper";
 import { BehaviorSubject, Subject } from "rxjs";
 import { Db } from "mongodb";
+import { serverReady } from 'core/pending-tasks';
 
 export class CollectionWatcher {
     private sjDb: BehaviorSubject<Db> = new BehaviorSubject<Db>(null);
@@ -10,6 +11,8 @@ export class CollectionWatcher {
         this.init();
     }
     private async init() {
+        await serverReady;
+        
         let db = await sharedMongoDB();
         this.sjDb.next(db);
     }
@@ -20,6 +23,8 @@ export class CollectionWatcher {
     }
 
     public async watch(collectionName: string): Promise<Subject<any>> {
+        await serverReady;
+        
         await ensureCollectionExists(collectionName);
         let watched = this.watched[collectionName];
         if (watched) return watched;

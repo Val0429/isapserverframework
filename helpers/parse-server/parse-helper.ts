@@ -19,7 +19,7 @@ export async function createMongoDB(): Promise<{ client: MongoClient; db: Db }> 
     let { ip, port, collection } = Config.mongodb;
     const url = mongoDBUrl();
 
-    let client = await MongoClient.connect(url, { useNewUrlParser: true, poolSize: 100, useUnifiedTopology: true });
+    let client = await MongoClient.connect(url, { useNewUrlParser: true, poolSize: 100 });
     let db = client.db(collection);
 
     /// check collection exists

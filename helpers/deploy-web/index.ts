@@ -5,7 +5,8 @@
  */
 
 import * as express from 'express';
-import { Request } from '~express/lib/request';
+import { Request } from 'express/lib/request';
+import { Response } from 'express/lib/response';
 import * as fs from 'fs';
 import * as p from 'path';
 import * as url from 'url';

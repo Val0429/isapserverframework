@@ -23,7 +23,7 @@ var reflector: Project = this.reflector = new Project({
     tsConfigFilePath,
     addFilesFromTsConfig: true
 });
-reflector.addSourceFilesAtPaths('node_modules/@types/**/*');
+// reflector.addSourceFilesAtPaths('node_modules/@types/**/*');
 var tSource = reflector.getSourceFile(`ast-core.ts`);
 
 class AstService {

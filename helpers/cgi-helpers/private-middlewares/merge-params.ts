@@ -5,6 +5,7 @@
  */
 
 import { Request } from 'express/lib/request';
+import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
 import { bodyParserJson, bodyParser } from './../../middlewares/body-parser';
 

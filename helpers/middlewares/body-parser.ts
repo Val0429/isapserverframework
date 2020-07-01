@@ -6,6 +6,7 @@
 
 import * as bodyParser from 'body-parser';
 import { Request } from 'express/lib/request';
+import { Response } from 'express/lib/response';
 
 declare module 'express/lib/request' {
     interface Request {

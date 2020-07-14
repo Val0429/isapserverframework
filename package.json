@@ -13,9 +13,9 @@
   "typings": "dist/index",
   "scripts": {
     "start": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true npm run build",
-    "start:debug": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true npm run build:debug",
+    "start:debug": "cross-env NODE_ENV=development npm run build:debug",
     "start:ts-node": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true npm run build:ts-node",
-    "start:ts-node:debug": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true npm run build:ts-node",
+    "start:ts-node:debug": "cross-env NODE_ENV=development npm run build:ts-node",
     "build": "nodemon --restartcrash --exec ts-node main.ts",
     "build:debug": "nodemon --watch false --exec ts-node main.ts",
     "build:ts-node": "ts-node main.ts",

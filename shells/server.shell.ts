@@ -84,8 +84,9 @@ if (Config.mongodb.enable) {
     var ParseServer = new parse.ParseServer({
         //databaseURI,
         databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI, mongoOptions: {
-            reconnectInterval: 2000,
-            reconnectTries: 300000,
+            useNewUrlParser: true, 
+            poolSize: 100,
+            useUnifiedTopology: true,
         }}),
         filesAdapter: new GridStoreAdapter(databaseURI),
         appId: Config.parseServer.appId,
@@ -172,7 +173,7 @@ let jobCreateDB = () => {
         /// todo: this is a workaround. create database at the beginning.
         let { ip, port, collection } = Config.mongodb;
         let db = await sharedMongoDB();
-        await db.createCollection("_SCHEMA");
+        // await db.createCollection("_SCHEMA");
         ////////////////////////////////////////////////////////////////
         resolve();
     });

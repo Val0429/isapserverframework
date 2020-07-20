@@ -65,7 +65,6 @@
     "request": "2.87.0",
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",
-    "shortid": "^2.2.15",
     "ts-morph": "7.1.2",
     "ts-node": "8.10.2",
     "typescript": "3.8.3",

@@ -35,6 +35,7 @@ export class CollectionWatcher {
         stream.on("change", (change) => {
             watched.next(change);
         });
+        stream.on('error', (error) => {});
         return watched;
     }
 }

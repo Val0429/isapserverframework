@@ -36,6 +36,8 @@ import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 
 import { Config } from 'core/config.gen';
 
+import { PrintService } from 'helpers';
+
 const IsDebug: boolean = process.env.NODE_ENV === 'development';
 
 let app: express.Application = expressWsRoutes();
@@ -50,7 +52,10 @@ var tDebugStack = `
         var longjohn = require('longjohn');
         longjohn.async_trace_limit = 20;
         // process.on('uncaughtException', err => {});
+
+        PrintService.log('Enable long stack traces for node.js with configurable call trace length.', undefined, 'warning');
     } catch (e) {
+        PrintService.logCustomPath(e.message, 'server.shell/tDebugStack', 'error');
         process.exit(1);
     }
 })();
@@ -75,6 +80,7 @@ var tDisableCache = `
         /// Allow Origin Access
         if (Config.core.accessControlAllowOrigin) app.use(<any>accessControlAllowOrigin);
     } catch (e) {
+        PrintService.logCustomPath(e.message, 'server.shell/tDisableCache', 'error');
         process.exit(1);
     }
 })();
@@ -85,8 +91,9 @@ var tLoadRouter = `
 (async () => {
     try {
         var actions = routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.core.cgiPath);
-        Log.Info('API Loaded', \`Totally \${Action.count(actions)} APIs.\`);
+        PrintService.log(\`Api loaded totally \${Action.count(actions)} apis.\`, undefined, 'info');
     } catch (e) {
+        PrintService.logCustomPath(e.message, 'server.shell/tLoadRouter', 'error');
         process.exit(1);
     }
 })();
@@ -96,6 +103,7 @@ var tRunMongoDB = `
 /// Run MongoDB
 (async () => {
     try {
+        PrintService.log(\`MongoDB connect at \${mongoDBUrl()}.\`, undefined, 'info');
         let db = await sharedMongoDB();
         // await db.createCollection("_SCHEMA");
 
@@ -103,11 +111,11 @@ var tRunMongoDB = `
 
         stream.on('change', (change) => {});
         stream.on('error', (e) => {
-            console.log(e.message);
+            PrintService.logCustomPath(e.message, 'server.shell/tRunMongoDB', 'error');
             process.exit(1);
         });
     } catch (e) {
-        console.log(e.message);
+        PrintService.logCustomPath(e.message, 'server.shell/tRunMongoDB', 'error');
         process.exit(1);
     }
 })();
@@ -144,6 +152,7 @@ var tRunParseServer = `
 
         app.use(Config.parseServer.serverPath, ParseServer);
     } catch (e) {
+        PrintService.logCustomPath(e.message, 'server.shell/tRunParseServer', 'error');
         process.exit(1);
     }
 })();
@@ -156,6 +165,7 @@ var tRunWeb = `
         let webPath = \`\${__dirname}/../workspace/custom/web\`;
         deployWeb(webPath, app);
     } catch (e) {
+        PrintService.logCustomPath(e.message, 'server.shell/tRunWeb', 'error');
         process.exit(1);
     }
 })();
@@ -175,6 +185,7 @@ import { Errors } from 'core/errors.gen';
             }
         });
     } catch (e) {
+        PrintService.logCustomPath(e.message, 'server.shell/tFinalizeError', 'error');
         process.exit(1);
     }
 })();
@@ -196,7 +207,7 @@ var tRunServer = `
                     let httpServer = http.createServer(app);
                     httpServer.wsServer = expressWsRoutes.createWebSocketServer(httpServer, app, {});
                     httpServer.listen(Config.core.port, async () => {
-                        Log.Info(packinfo.config.displayname, \`running at port \${Config.core.port}. (http)\`);
+                        PrintService.log(\`Running at port \${Config.core.port}. (http)\`, undefined, 'info');
                         resolve();
                     });
                 } catch (e) {
@@ -220,7 +231,7 @@ var tRunServer = `
                     let httpsServer = https.createServer({key, cert}, app);
                     httpsServer.wsServer = expressWsRoutes.createWebSocketServer(httpsServer, app, {});
                     httpsServer.listen(Config.core.httpsPort, async () => {
-                        Log.Info(packinfo.config.displayname, \`running at port \${Config.core.httpsPort}. (https)\`);
+                        PrintService.log(\`Running at port \${Config.core.httpsPort}. (https)\`, undefined, 'info');
                         resolve();
                     });
                 } catch (e) {
@@ -234,6 +245,7 @@ var tRunServer = `
         await Promise.all([jobHttp(), jobHttps()]);
         makeServerReady();
     } catch (e) {
+        PrintService.logCustomPath(e.message, 'server.shell/tRunServer', 'error');
         process.exit(1);
     }
 })();
@@ -287,7 +299,8 @@ function main(): string {
 
 const genFilePath = `${__dirname}/../core/main.gen.ts`;
 const tmplPath = `${__dirname}/server.shell.ts`;
-import { Log } from 'helpers/utility';
 
-shellWriter2(genFilePath, main(), () => { Log.Info("Code Generator", "Server file updated!"); });
+import { PrintService } from 'helpers';
+
+shellWriter2(genFilePath, main(), () => { PrintService.log('Server file updated.', undefined, 'success'); });
 

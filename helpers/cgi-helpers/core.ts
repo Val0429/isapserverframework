@@ -52,6 +52,7 @@ import { IncomingMessage } from 'http';
 import { UserHelper } from 'helpers/parse-server/user-helper';
 import { Tree } from 'models/nodes';
 import CollectionWatcher from 'helpers/mongodb/collection-watcher';
+import { PrintService } from 'helpers'
 
 /// Ast
 import { default as Ast } from 'services/ast-services/ast-client';
@@ -270,6 +271,8 @@ export class Action<T = any, U = any> {
                 let multipleModeBufferCount = !!config && !!config.multipleModeBufferCount ? config.multipleModeBufferCount : 10;
                 let multipleModeInputType = !!config && !!config.multipleModeInputType ? config.multipleModeInputType : '';
 
+                let path: string = this.caller.substr(this.caller.indexOf('workspace')).replace(/\\\\/g, '/').replace(/\\/g, '/');
+
                 router[action](realpath, this.configTranslate(config, this.caller, action), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {
@@ -310,11 +313,16 @@ export class Action<T = any, U = any> {
                                                     },
                                                 });
                                             } catch (e) {
+                                                let error = e instanceof Errors ? e : Errors.throw(Errors.Custom, [typeof e === "object" ? JSON.stringify(e) : e]);
+                                                let message = error.resolve(null, false);
+
                                                 _result = {
                                                     ..._resMessage,
-                                                    statusCode: e.detail ? e.detail.statusCode : 500,
-                                                    message: e.message ? e.message : e.args ? e.args.join('; ') : e,
+                                                    statusCode: error.detail.statusCode,
+                                                    message: message,
                                                 };
+
+                                                PrintService.logCustomPath(`[${index + i}]: ${error.detail.statusCode}, ${message}`, `${path}:${action}`, 'error');
                                             }
 
                                             result.datas[index + i] = _result;
@@ -322,7 +330,16 @@ export class Action<T = any, U = any> {
                                     );
                                 } 
                             } else {
-                                result = await realfunc({ ...request, request, response });
+                                try {
+                                    result = await realfunc({ ...request, request, response });
+                                } catch (e) {
+                                    let error = e instanceof Errors ? e : Errors.throw(Errors.Custom, [typeof e === 'object' ? JSON.stringify(e) : e]);
+                                    let message = error.resolve(null, false);
+                                    
+                                    PrintService.logCustomPath(`${error.detail.statusCode}, ${message}`, `${path}:${action}`, 'error');
+                                    
+                                    throw error;
+                                }
                             }
 
                             /// don't do anything, if delegate doesn't return
@@ -340,6 +357,9 @@ export class Action<T = any, U = any> {
             let realfunc = this.funcWs;
             let config: ActionConfig = this.funcWsConfig;
             let realpath = (config ? config.path : "*") || "*";
+            
+            let path: string = this.caller.substr(this.caller.indexOf('workspace')).replace(/\\\\/g, '/').replace(/\\/g, '/');
+            
             router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller, 'websocket')), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {
                     var request = <any>info.req;
@@ -374,8 +394,13 @@ export class Action<T = any, U = any> {
 
                     try {
                         var result = await realfunc({...request, request, response, socket});
-                    } catch(reason) {
-                        next(reason);
+                    } catch(e) {
+                        let error = e instanceof Errors ? e : Errors.throw(Errors.Custom, [typeof e === 'object' ? JSON.stringify(e) : e]);
+                        let message = error.resolve(null, false);
+
+                        PrintService.logCustomPath(`${error.detail.statusCode}, ${message}`, `${path}:ws`, 'error');
+
+                        next(error);
                     }
                 }
             );

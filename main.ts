@@ -15,25 +15,24 @@ import './core/alias';
 import './core/create-file-index';
 
 import { Log } from 'helpers/utility';
-const LogTitle = "Startup";
 
 /// todo remove: log loading time
-let trace = Log.TraceTime(LogTitle, "Compiler");
+let trace = Log.SuccessTime(undefined, "Compiler");
 import './core/compiler';
 trace.end();
 
-trace = Log.TraceTime(LogTitle, "AST Service");
+trace = Log.SuccessTime(undefined, 'AST Service');
 import './services/ast-services/ast-client';
 trace.end();
 
-trace = Log.TraceTime(LogTitle, "Create Index");
+trace = Log.SuccessTime(undefined, 'Create Index');
 import './core/create-index';
 trace.end();
 
-trace = Log.TraceTime(LogTitle, "Load Main Application");
+trace = Log.SuccessTime(undefined, 'Load Main Application');
 import './core/main.gen';
 trace.end();
 
-trace = Log.TraceTime(LogTitle, "Load Workspace");
+trace = Log.SuccessTime(undefined, 'Load Workspace');
 import './workspace/main';
 trace.end();

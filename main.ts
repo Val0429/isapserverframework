@@ -7,6 +7,8 @@
  * Copyright (c) 2019, iSAP Solution
  */
 
+import './helpers'
+
 import 'parse-server';
 
 import './core/alias';

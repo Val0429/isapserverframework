@@ -56,15 +56,7 @@ export async function ensureCollectionExists(collectionName: string) {
     let db = await sharedMongoDB();
     /// ensure collection exists
     await mutex.acquire();
-    let dbs = await db.listCollections({ name: collectionName }).toArray();
-    if (dbs.length === 0) {
-        await new Promise((resolve, reject) =>
-            db.createCollection(collectionName, (err, res) => {
-                err && reject(err);
-                !err && resolve(res);
-            }),
-        );
-    }
+    await db.createCollection(collectionName);
     mutex.release();
 }
 

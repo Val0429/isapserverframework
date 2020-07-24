@@ -105,7 +105,8 @@ var tRunMongoDB = `
     try {
         PrintService.log(\`MongoDB connect at \${mongoDBUrl()}.\`, undefined, 'info');
         let db = await sharedMongoDB();
-        // await db.createCollection("_SCHEMA");
+
+        await db.createCollection("_User");
 
         let stream = db.collection("_User").watch()
 

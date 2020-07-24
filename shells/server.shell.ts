@@ -57,6 +57,23 @@ function GetRealMessage(e: any): string {
 }
 `;
 
+var tProcess = `
+/// Process
+(async () => {
+    try {
+        process.on("uncaughtException", (e) => {
+            PrintService.logCustomPath(GetRealMessage(e), 'process/uncaughtException', 'error');
+        })
+        process.on('unhandledRejection', (e) => {
+            PrintService.logCustomPath(GetRealMessage(e), 'process/unhandledRejection', 'error');
+        });
+    } catch (e) {
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tProcess', 'error');
+        process.exit(1);
+    }
+})();
+`;
+
 var tDebugStack = `
 /// Debug Stack
 (async () => {
@@ -273,6 +290,10 @@ function main(): string {
     
     /// make header /////////////////////////////
     tmpstr.push(tHeader.replace(/^[\r\n]+/, ''));
+    /////////////////////////////////////////////
+    
+    /// process /////////////////////////////////
+    tmpstr.push(tProcess);
     /////////////////////////////////////////////
 
     /// debug track /////////////////////////////

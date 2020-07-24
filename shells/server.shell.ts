@@ -41,6 +41,20 @@ import { PrintService } from 'helpers';
 const IsDebug: boolean = process.env.NODE_ENV === 'development';
 
 let app: express.Application = expressWsRoutes();
+
+/**
+ * Get real exception message
+ * @param e 
+ */
+function GetRealMessage(e: any): string {
+    try {
+        let message: string = e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : e.toString();
+
+        return message
+    } catch (e) {
+        throw e
+    }
+}
 `;
 
 var tDebugStack = `
@@ -55,7 +69,7 @@ var tDebugStack = `
 
         PrintService.log('Enable long stack traces for node.js with configurable call trace length.', undefined, 'warning');
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tDebugStack', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tDebugStack', 'error');
         process.exit(1);
     }
 })();
@@ -80,7 +94,7 @@ var tDisableCache = `
         /// Allow Origin Access
         if (Config.core.accessControlAllowOrigin) app.use(<any>accessControlAllowOrigin);
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tDisableCache', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tDisableCache', 'error');
         process.exit(1);
     }
 })();
@@ -93,7 +107,7 @@ var tLoadRouter = `
         var actions = routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.core.cgiPath);
         PrintService.log(\`Api loaded totally \${Action.count(actions)} apis.\`, undefined, 'info');
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tLoadRouter', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tLoadRouter', 'error');
         process.exit(1);
     }
 })();
@@ -112,11 +126,11 @@ var tRunMongoDB = `
 
         stream.on('change', (change) => {});
         stream.on('error', (e) => {
-            PrintService.logCustomPath(e.message, 'server.shell/tRunMongoDB', 'error');
+            PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tRunMongoDB', 'error');
             process.exit(1);
         });
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tRunMongoDB', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tRunMongoDB', 'error');
         process.exit(1);
     }
 })();
@@ -153,7 +167,7 @@ var tRunParseServer = `
 
         app.use(Config.parseServer.serverPath, ParseServer);
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tRunParseServer', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tRunParseServer', 'error');
         process.exit(1);
     }
 })();
@@ -166,7 +180,7 @@ var tRunWeb = `
         let webPath = \`\${__dirname}/../workspace/custom/web\`;
         deployWeb(webPath, app);
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tRunWeb', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tRunWeb', 'error');
         process.exit(1);
     }
 })();
@@ -186,7 +200,7 @@ import { Errors } from 'core/errors.gen';
             }
         });
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tFinalizeError', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tFinalizeError', 'error');
         process.exit(1);
     }
 })();
@@ -246,7 +260,7 @@ var tRunServer = `
         await Promise.all([jobHttp(), jobHttps()]);
         makeServerReady();
     } catch (e) {
-        PrintService.logCustomPath(e.message, 'server.shell/tRunServer', 'error');
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tRunServer', 'error');
         process.exit(1);
     }
 })();

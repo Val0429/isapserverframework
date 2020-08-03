@@ -1,11 +1,11 @@
 {
   "name": "isap-vms-service",
-  "version": "3.02.69",
-  "frameworkversion": "1.08.02",
+  "version": "3.03.01",
+  "frameworkversion": "1.08.03",
   "config": {
     "displayname": "iSap VMS Service"
   },
-  "description": "iSap VMS Service v3.02.69",
+  "description": "iSap VMS Service v3.03.01",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",

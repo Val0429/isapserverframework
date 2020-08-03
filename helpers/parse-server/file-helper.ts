@@ -44,7 +44,7 @@ export namespace FileHelper {
         var regex = /^data:([^;]+);base64,/i;
         var type = null;
         input = <any>(<string>input).replace(regex, (a, b) => { type = b; return ""; });
-        if (type !== null) name = `file.${mimeType.extension(type)}`;
+        if (type !== null) name = `file.${mimeType.extension(type) || "b64"}`;
 
         var file = new Parse.File(`${name || 'file.b64'}`, { base64: input }, mime);
         await file.save();

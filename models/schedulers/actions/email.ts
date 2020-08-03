@@ -6,7 +6,7 @@
 
 import { ScheduleActionBase } from './core';
 
-import { Config } from 'core/config.gen';
+import { Config, IConfig } from 'core/config.gen';
 import * as nodemailer from 'nodemailer';
 import { FileHelper } from 'helpers/parse-server/file-helper';
 
@@ -43,19 +43,20 @@ export class ScheduleActionEmail extends ScheduleActionBase<
     IInputScheduleActionEmail_FromController,
     ScheduleActionEmailResult> {
 
-    constructor() {
+    constructor(config?: IConfig["smtp"]) {
         super();
 
         this.register( async (input) => {
-            if (!Config.smtp.enable) return ScheduleActionEmailResult.Disabled;
+            config = config || Config.smtp;
+            if (!config.enable) return ScheduleActionEmailResult.Disabled;
 
             let transporter = nodemailer.createTransport({
-                host: Config.smtp.host,
-                port: Config.smtp.port,
-                secure: false,
+                host: config.host,
+                port: config.port,
+                secure: config.ssl,
                 auth: {
-                    user: Config.smtp.email,
-                    pass: Config.smtp.password
+                    user: config.email,
+                    pass: config.password
                 }
             });
 
@@ -76,7 +77,7 @@ export class ScheduleActionEmail extends ScheduleActionBase<
             }
 
             let mailOptions = {
-                from: Config.smtp.name ? `${Config.smtp.name} <${Config.smtp.email}>` : `${Config.smtp.email}`,
+                from: config.name ? `${config.name} <${config.email}>` : `${config.email}`,
                 to: input.to.join(", "),
                 subject: input.subject,
                 html: input.body,

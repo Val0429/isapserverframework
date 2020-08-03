@@ -104,9 +104,9 @@ export class FRSEdgeServer {
     private maintainTimer: any = null;
     private login() {
         if (this.sjStarted.getValue() === false) return;
-        const url = this.makeUrl("user/web/login");
 
         let tryLogin = () => {
+            const url = this.makeUrl("user/web/login");
             if (this.sjLoggingIn.getValue() === true || this.sjStarted.getValue() === false) return;
             this.sjLogined.next(false);
             this.sjLoggingIn.next(true);
@@ -123,10 +123,12 @@ export class FRSEdgeServer {
                     (res && res.statusCode !== 200)
                     ) {
                     let started = this.sjStarted.getValue();
-                    this.config.debug && Log.Error(LogTitle, `Login failed@${ip}:${port}. ${started ? "Retry in 1 second." : ""}`);
-                    started && await new Promise((resolve) => setTimeout(resolve, 1000));
-                    process.nextTick(tryLogin);
-                    //started && setTimeout(() => { tryLogin() }, 1000);
+                    let logined = this.sjLogined.getValue();
+                    !logined && this.config.debug && Log.Error(LogTitle, `Login failed@${ip}:${port}. ${started ? "Retry in 1 second." : ""}`);
+                    if (started && !logined) {
+                        await new Promise((resolve) => setTimeout(resolve, 1000));
+                        if (!logined) process.nextTick(tryLogin);
+                    }
                     return;
                 }
                 this.config.debug && Log.Info(LogTitle, `Login into Server@${ip}:${port}.`);

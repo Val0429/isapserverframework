@@ -17,8 +17,13 @@ const makeFileName = (key) => {
 export class ConfigManager {
     private static _instance;
     private sjReady: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    private cbValidate: { [P in keyof IConfig]?: any } = {};
     public static getInstance(): ConfigManager {
         return this._instance || (this._instance = new ConfigManager);
+    }
+
+    public setValidate<T extends keyof IConfig>(key: T, callback: (value: IConfig[T]) => Promise<void>) {
+        this.cbValidate[key] = callback;
     }
 
     public ready(key?: keyof IConfig): Promise<boolean> {
@@ -35,7 +40,7 @@ export class ConfigManager {
         if ((Config[key] as any).isDBConfigFactory) {
             return (Config[key] as any).obChange;
         }
-        return null;
+        throw `${key} is not DBConfig to observe`;
     }
 
     private envpath: string;
@@ -67,6 +72,8 @@ export class ConfigManager {
 
     public async update<T extends keyof IConfig, U extends IConfig[T]>(key: T, value: U) {
         if ((Config[key] as any).isDBConfigFactory) {
+            let callback = this.cbValidate[key];
+            callback && await callback(value);
             return (Config[key] as any).save(value);
         } else {
             let rtn = this.updateConfig(key, value);

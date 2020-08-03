@@ -1,11 +1,11 @@
 {
-  "name": "thermal-server",
-  "version": "1.00.07",
+  "name": "isap-vms-service",
+  "version": "3.02.69",
   "frameworkversion": "1.08.02",
   "config": {
-    "displayname": "iSap Thermal Server"
+    "displayname": "iSap VMS Service"
   },
-  "description": "iSap Thermal Server v1.00.07",
+  "description": "iSap VMS Service v3.02.69",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",

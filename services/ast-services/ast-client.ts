@@ -264,7 +264,11 @@ namespace AstConverter {
         }
 
         /// data has to be converted
+        /// Val edited 2020/7/30, if contain objectId, it's the modify case
+        let objectId = input.data.objectId;
+        if (objectId) delete input.data.objectId;
         var obj = new cls( await ast.finalConverter(input.data) );
+        if (objectId) obj.id = objectId;
         return obj;
     }
 

@@ -8,6 +8,7 @@ var config: Config = {
     enable: true,
     host: "mail.isapsolution.com",
     port: 25,
+    ssl: false,
     email: "services@isapsolution.com",
     password: "Az123456",
 }
@@ -17,6 +18,7 @@ export interface Config {
     enable: boolean;
     host: string;
     port: number;
+    ssl: boolean;
     name?: string;
     email: string;
     password: string;

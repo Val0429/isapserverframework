@@ -40,6 +40,26 @@ export const RoleInterfaceLiteralList = {
 }
 `;
 
+// export interface IPermissionMap {
+//     [RoleList.SystemAdministrator]: RoleList[];
+//     [RoleList.Administrator]: RoleList[];
+// }
+var tPermissionMap = `
+export interface IPermissionMap {
+    {0}
+}
+`;
+
+// export interface IPermissionCheck {
+//     [RoleList.SystemAdministrator]: boolean;
+//     [RoleList.Administrator]: boolean;
+// }
+var tPermissionCheck = `
+export interface IPermissionCheck {
+    {0}
+}
+`;
+
 // export type EventType<T> =
 //     T extends "0" ? IUserAdministrator :
 //     T extends "1" ? IUserTenant :
@@ -96,6 +116,26 @@ function main(events: Array<[number, string, string, string[]] | [number, string
     }
     tmpstr.push(
         tLiteralList.replace("{0}", tmp.join(",\r\n    "))
+    );
+    /////////////////////////////////////////////
+
+    /// make tPermissionMap /////////////////////
+    var tmp = [];
+    for (var event of events) {
+        tmp.push(`[RoleList.${event[1]}]: RoleList[];`);
+    }
+    tmpstr.push(
+        tPermissionMap.replace("{0}", tmp.join("\r\n    "))
+    );
+    /////////////////////////////////////////////
+
+    /// make tPermissionCheck /////////////////////
+    var tmp = [];
+    for (var event of events) {
+        tmp.push(`[RoleList.${event[1]}]: boolean;`);
+    }
+    tmpstr.push(
+        tPermissionCheck.replace("{0}", tmp.join("\r\n    "))
     );
     /////////////////////////////////////////////
 

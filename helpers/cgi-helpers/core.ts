@@ -36,7 +36,7 @@ import { O, _O } from 'helpers/utility/O';
 import { getEnumKeyArray } from 'helpers/utility/get-enum-key';
 const caller = require('caller');
 
-/// private middlewares
+/// middlewares
 import { VBodyParserJson, VBodyParserRaw } from './private-middlewares/v-body-parser-json';
 import { permissionCheck } from './private-middlewares/permission-check';
 import { apiPermissionCheck } from './private-middlewares/api-permission-check';
@@ -44,8 +44,10 @@ import { loginRequired } from './private-middlewares/login-required';
 import { mergeParams } from './private-middlewares/merge-params';
 import { inputType } from './private-middlewares/input-type';
 import { transform } from './private-middlewares/transform';
-import { MultiDataFromBody } from './private-middlewares/multi-data-from-body';
-import { MultiDataFromQuery } from './private-middlewares/multi-data-from-query';
+
+import { MultiDataFromBody, MultiDataFromQuery } from 'helpers/middlewares';
+
+/// helper
 import { Log, Mutex, retry } from 'helpers/utility';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IncomingMessage } from 'http';

@@ -10,3 +10,7 @@ LogService.logFileName = `${DateTimeService.toString(new Date(), 'YYYYMMDDHHmmss
 export { Print } from 'server-service-print';
 import { Print } from 'server-service-print';
 export const PrintService = new Print(LogService);
+
+export { File } from 'server-service-file';
+import { File } from 'server-service-file';
+export const FileService = new File();

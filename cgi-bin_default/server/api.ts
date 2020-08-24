@@ -1,7 +1,7 @@
 import { Action, Restful, RoleList, Errors, Socket, Config } from 'core/cgi-package';
 import {} from 'helpers';
 import { BasicAuth } from 'helpers/middlewares';
-import { permissionLogR } from 'workspace/define/userRoles/userPermission.define';
+import * as Permission from 'workspace/define/userRoles/userPermission.define';
 import { actions } from 'helpers/routers/router-loader';
 
 let action = new Action({
@@ -19,7 +19,7 @@ type OutputR = string;
 
 action.get(
     {
-        middlewares: [BasicAuth(permissionLogR)],
+        middlewares: [BasicAuth(Permission['permissionServerApiR'])],
     },
     async (data): Promise<OutputR> => {
         try {

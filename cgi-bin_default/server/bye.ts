@@ -1,7 +1,7 @@
 import { Action, Restful, RoleList, Errors, Socket, Config } from 'core/cgi-package';
 import {} from 'helpers';
 import { BasicAuth } from 'helpers/middlewares';
-import { permissionExitR } from 'workspace/define/userRoles/userPermission.define';
+import * as Permission from 'workspace/define/userRoles/userPermission.define';
 
 let action = new Action({
     loginRequired: false,
@@ -18,7 +18,7 @@ type OutputR = string;
 
 action.get(
     {
-        middlewares: [BasicAuth(permissionExitR)],
+        middlewares: [BasicAuth(Permission['permissionServerByeR'])],
     },
     async (data): Promise<OutputR> => {
         try {

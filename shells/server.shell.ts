@@ -124,6 +124,7 @@ var tLoadRouter = `
         PrintService.log(\`Mounting Cgi Tree.\`, undefined, 'info');
         
         let paths: string[] = [];
+        paths.push(\`\${__dirname}/../cgi-bin_default\`);
         paths.push(\`\${__dirname}/../workspace/cgi-bin\`);
 
         let actions = RouterLoader(app, paths, Config.core.cgiPath);

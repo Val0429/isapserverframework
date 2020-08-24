@@ -48,6 +48,7 @@ import { transform } from './private-middlewares/transform';
 import { MultiDataFromBody, MultiDataFromQuery } from 'helpers/middlewares';
 
 /// helper
+import * as Path from "path";
 import { Log, Mutex, retry } from 'helpers/utility';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IncomingMessage } from 'http';
@@ -58,6 +59,8 @@ import { PrintService } from 'helpers'
 
 /// Ast
 import { default as Ast } from 'services/ast-services/ast-client';
+
+const ServerPath =  Path.dirname(require.main.filename);
 
 
 let connectedSockets: { [sid: string]: Socket[] } = {};
@@ -273,7 +276,10 @@ export class Action<T = any, U = any> {
                 let multipleModeBufferCount = !!config && !!config.multipleModeBufferCount ? config.multipleModeBufferCount : 10;
                 let multipleModeInputType = !!config && !!config.multipleModeInputType ? config.multipleModeInputType : '';
 
-                let path: string = this.caller.substr(this.caller.indexOf('workspace')).replace(/\\\\/g, '/').replace(/\\/g, '/');
+                let path: string = this.caller
+                    .replace(/\\\\/g, '/')
+                    .replace(/\\/g, '/')
+                    .replace(ServerPath.replace(/\\\\/g, '/').replace(/\\/g, '/'), '');
 
                 router[action](realpath, this.configTranslate(config, this.caller, action), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
@@ -360,7 +366,10 @@ export class Action<T = any, U = any> {
             let config: ActionConfig = this.funcWsConfig;
             let realpath = (config ? config.path : "*") || "*";
             
-            let path: string = this.caller.substr(this.caller.indexOf('workspace')).replace(/\\\\/g, '/').replace(/\\/g, '/');
+            let path: string = this.caller
+                .replace(/\\\\/g, '/')
+                .replace(/\\/g, '/')
+                .replace(ServerPath.replace(/\\\\/g, '/').replace(/\\/g, '/'), '');
             
             router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller, 'websocket')), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {

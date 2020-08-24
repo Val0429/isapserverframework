@@ -50,7 +50,7 @@ export function BasicAuth(permission: IPermissionCheck): RequestHandler {
             for (let i: number = 0; i < roles.length; i++) {
                 let role = roles[i];
 
-                if (permission[role['name']]) hasPermission = true;
+                if (!!permission && permission[role['name']]) hasPermission = true;
             }
 
             if (!hasPermission) {

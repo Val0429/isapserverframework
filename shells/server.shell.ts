@@ -23,7 +23,7 @@ import { noCache } from 'helpers/middlewares/no-cache';
 import { secureContentType } from 'helpers/middlewares/secure-content-type';
 import { blockRobots } from 'helpers/middlewares/block-robots';
 import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
-import { routerLoader } from 'helpers/routers/router-loader';
+import { RouterLoader } from 'helpers/routers/router-loader';
 import { makeServerReady } from 'core/pending-tasks';
 import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
 import { Action } from 'helpers/cgi-helpers/core';
@@ -121,7 +121,12 @@ var tLoadRouter = `
 /// Load Router
 (async () => {
     try {
-        var actions = routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.core.cgiPath);
+        PrintService.log(\`Mounting Cgi Tree.\`, undefined, 'info');
+        
+        let paths: string[] = [];
+        paths.push(\`\${__dirname}/../workspace/cgi-bin\`);
+
+        let actions = RouterLoader(app, paths, Config.core.cgiPath);
         PrintService.log(\`Api loaded totally \${Action.count(actions)} apis.\`, undefined, 'info');
     } catch (e) {
         PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tLoadRouter', 'error');

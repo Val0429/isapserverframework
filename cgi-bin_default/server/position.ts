@@ -1,6 +1,5 @@
 import { Action, Restful, RoleList, Errors, Socket, Config } from 'core/cgi-package';
 import {} from 'helpers';
-import * as Path from 'path';
 
 let action = new Action({
     loginRequired: false,
@@ -19,7 +18,7 @@ action.get(
     {},
     async (): Promise<OutputR> => {
         try {
-            let server: string = Path.dirname(require.main.filename);
+            let server: string = process.cwd();
 
             return `${server.replace(/\\/gi, '/')}/`;
         } catch (e) {

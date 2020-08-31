@@ -36,11 +36,12 @@ import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 
 import { Config } from 'core/config.gen';
 
-import { PrintService } from 'helpers';
+import { PrintService, FileService } from 'helpers';
 
 const IsDebug: boolean = process.env.NODE_ENV === 'development';
 
 let app: express.Application = expressWsRoutes();
+
 
 /**
  * Get real exception message
@@ -69,6 +70,21 @@ var tProcess = `
         });
     } catch (e) {
         PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tProcess', 'error');
+        process.exit(1);
+    }
+})();
+`;
+
+var tLicense = `
+/// License
+(async () => {
+    try {
+        let files: string[] = FileService.readFolder('workspace/custom/assets/license');
+        files.forEach((value, index, array) => {
+            FileService.copyFile(\`workspace/custom/assets/license/\${value}\`, \`workspace/custom/license/\${value}\`);
+        });
+    } catch (e) {
+        PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tLicense', 'error');
         process.exit(1);
     }
 })();
@@ -293,13 +309,17 @@ export { app }
 
 function main(): string {
     var tmpstr = [];
-    
+
     /// make header /////////////////////////////
     tmpstr.push(tHeader.replace(/^[\r\n]+/, ''));
     /////////////////////////////////////////////
-    
+
     /// process /////////////////////////////////
     tmpstr.push(tProcess);
+    /////////////////////////////////////////////
+
+    /// license /////////////////////////////////
+    tmpstr.push(tLicense);
     /////////////////////////////////////////////
 
     /// debug track /////////////////////////////
@@ -335,14 +355,14 @@ function main(): string {
     /////////////////////////////////////////////
 
     /// concat
-    return tmpstr.join("\r\n");
+    return tmpstr.join('\r\n');
 }
-
 
 const genFilePath = `${__dirname}/../core/main.gen.ts`;
 const tmplPath = `${__dirname}/server.shell.ts`;
 
 import { PrintService } from 'helpers';
 
-shellWriter2(genFilePath, main(), () => { PrintService.log('Server file updated.', undefined, 'success'); });
-
+shellWriter2(genFilePath, main(), () => {
+    PrintService.log('Server file updated.', undefined, 'success');
+});

@@ -1,5 +1,5 @@
 import { Action, Restful, RoleList, Errors, Socket, Config } from 'core/cgi-package';
-import {} from 'helpers';
+import { PrintService } from 'helpers';
 import { BasicAuth } from 'helpers/middlewares';
 import * as Permission from 'workspace/define/userRoles/userPermission.define';
 
@@ -21,6 +21,8 @@ action.post(
     },
     async (data): Promise<OutputC> => {
         try {
+            PrintService.log('Server Bye', new Error(), 'info');
+
             setTimeout(() => {
                 process.exit(1);
             }, 0);
@@ -46,6 +48,8 @@ action.get(
     },
     async (data): Promise<OutputR> => {
         try {
+            PrintService.log('Server Bye', new Error(), 'info');
+
             setTimeout(() => {
                 process.exit(1);
             }, 0);

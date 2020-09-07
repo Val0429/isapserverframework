@@ -327,6 +327,7 @@ namespace AstParser {
          * 15) Any
          * 16) Buffer
          * 17) Key Mapped Type
+         * 18) object
          * 99) any
          * X) Other Class X
          */
@@ -438,6 +439,14 @@ namespace AstParser {
         } else if (type.getText() === "any") {
             /// 99) Any
             return obj;
+
+        } else if (type.getText() === "object") {
+            if (typeof obj === "object") {
+                debug && console.log(`${showname} is object, obj ${typeof obj}`);
+                return obj;
+            } else {
+                throw Errors.throw(Errors.Custom, [`<${showname}> should be object.`]);
+            }
 
         } else {
             if ( /\[[^\]]+\]$/.test(type.getText()) ) {

@@ -69,6 +69,19 @@ export async function createIndex(collectionName: string, indexName: string, fie
     } catch (reason) {
         var showname = collectionName.replace(/^\_/, '');
         Log.Info('Indexing', `Make index on <${showname}.${indexName}>.`);
-        instance.createIndex(fieldOrSpec, { background: true, name: indexName, ...options });
+        await instance.createIndex(fieldOrSpec, { background: true, name: indexName, ...options });
+    }
+}
+
+export async function dropIndex(collectionName: string, indexName: string) {
+    let db = await sharedMongoDB();
+
+    var instance = db.collection(collectionName);
+    try {
+        if (!!(await instance.indexExists(indexName))) throw null;
+    } catch (reason) {
+        var showname = collectionName.replace(/^\_/, '');
+        Log.Info('Indexing', `Drop index on <${showname}.${indexName}>.`);
+        await instance.dropIndex(indexName);
     }
 }

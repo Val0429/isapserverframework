@@ -279,7 +279,8 @@ export class Action<T = any, U = any> {
                 let path: string = this.caller
                     .replace(/\\\\/g, '/')
                     .replace(/\\/g, '/')
-                    .replace(ServerPath.replace(/\\\\/g, '/').replace(/\\/g, '/'), '');
+                    .replace(ServerPath.replace(/\\\\/g, '/').replace(/\\/g, '/'), '')
+                    .replace(/^\//g, '');
 
                 router[action](realpath, this.configTranslate(config, this.caller, action), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
@@ -369,7 +370,8 @@ export class Action<T = any, U = any> {
             let path: string = this.caller
                 .replace(/\\\\/g, '/')
                 .replace(/\\/g, '/')
-                .replace(ServerPath.replace(/\\\\/g, '/').replace(/\\/g, '/'), '');
+                .replace(ServerPath.replace(/\\\\/g, '/').replace(/\\/g, '/'), '')
+                .replace(/^\//g, '');
             
             router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller, 'websocket')), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {

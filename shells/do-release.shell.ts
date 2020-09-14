@@ -107,7 +107,7 @@ export function findFilesInDir(startPath: string, filter) {
         let logpath = path.resolve(cwd, "change.log");
 
         /// 1) unlink old one
-        fs.unlinkSync(logpath);
+        fs.existsSync(logpath) && fs.unlinkSync(logpath);
 
         /// 2) split
         let lines: any = gitlog.toString("UTF-8").split("{||}");
@@ -157,7 +157,7 @@ export function findFilesInDir(startPath: string, filter) {
         /// 7) write all nsi
         let regex = /^(\!define\ PRODUCT_VERSION\ )\"([^\"]+)\"$/im;
         let nsisfiles = findFilesInDir(nsispath, /\.nsi$/);
-        nsisfiles.forEach(nsisfile => {
+        (nsisfiles||[]).forEach(nsisfile => {
             let data = fs.readFileSync(nsisfile, { encoding: "UTF-8" });
             data = data.replace(regex, (a, b, c) => `${b}"${version}"`);
             fs.writeFileSync(nsisfile, data, { encoding: "UTF-8" });

@@ -334,7 +334,7 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
                 /// get real data
                 data = this.findFieldValue(data, key);
                 /// if (!data) break main;
-                if (data === undefined) break main;
+                /// if (data === undefined) break main;
                 
                 /// compare data with rules
                 if (typeof value === 'string') {

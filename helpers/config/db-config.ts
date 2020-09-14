@@ -84,7 +84,7 @@ export class DBConfigFactory<T> {
 
             /// 2) find default value
             let value = dbObject = await new Parse.Query(classname).first();
-            let todoset = value ? { ...value.attributes, createdAt: undefined, updatedAt: undefined } : config;
+            let todoset = value ? { ...config as any, ...value.attributes, createdAt: undefined, updatedAt: undefined } : config;
             Object.keys(todoset).forEach(key => this[key] = todoset[key]);
             if (!value) {
                 /// 3) Write default if not exists

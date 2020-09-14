@@ -261,8 +261,6 @@ export class Action<T = any, U = any> {
                     var response = <any>info.res;
                     var socket = await Socket.get(info, cb);
                     let sid = (request.session || {}).id;
-                    /// send 200 ok
-                    socket.send({statusCode: 200});
                     /// insert connected socket. ignore loginRequired == false
                     sid && ( connectedSockets[sid] || (connectedSockets[sid] = []) ).push(socket);
 
@@ -292,6 +290,9 @@ export class Action<T = any, U = any> {
                     } catch(reason) {
                         next(reason);
                     }
+
+                    /// send 200 ok
+                    socket.send({statusCode: 200});
                 }
             );
         }

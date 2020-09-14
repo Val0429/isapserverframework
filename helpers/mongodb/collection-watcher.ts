@@ -28,6 +28,7 @@ export class CollectionWatcher {
         let stream = instance.watch();
         watched = this.watched[collectionName] = new Subject<any>();
         stream.on("change", (change) => {
+            /// operation type: insert | delete | replace | update
             watched.next(change);
         });
         return watched;

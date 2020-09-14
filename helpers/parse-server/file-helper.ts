@@ -58,6 +58,13 @@ export namespace FileHelper {
     //     return url;
     // }
 
+    export function getURLProtocolPrefix(data: ActionParam<any>): string {
+        let { localAddress, localPort } = data.request.connection;
+        /// workaround, ::1 treat as localhost
+        if (localAddress === "::1") localAddress = ":localhost";
+        return `${data.request.protocol}://${localAddress.replace(/^.*:/, '')}:${localPort}`;
+    }
+
     export function getURL(file: Parse.File, data: ActionParam<any>);
     export function getURL(file: Parse.File);
     export function getURL(file: Parse.File, data?: ActionParam<any>): string {
@@ -66,10 +73,16 @@ export namespace FileHelper {
         if (!data) {
             url = url.replace(/\:([0-9]+)/, (a, b) => `:${Config.core.port}`);
         } else {
-            let { localAddress, localPort } = data.request.connection;
             url = url.replace(/^(\w+)(\:\/\/)(localhost(?:\:[0-9]*)?)/, (a, b, c, d) => {
-                return `${data.request.protocol}${c}${localAddress.replace(/^.*:/, '')}:${localPort}`;
+                return getURLProtocolPrefix(data);
             });
+
+            // let { localAddress, localPort } = data.request.connection;
+            // /// workaround, ::1 treat as localhost
+            // if (localAddress === "::1") localAddress = ":localhost";
+            // url = url.replace(/^(\w+)(\:\/\/)(localhost(?:\:[0-9]*)?)/, (a, b, c, d) => {
+            //     return `${data.request.protocol}${c}${localAddress.replace(/^.*:/, '')}:${localPort}`;
+            // });
         }
         return url;
     }

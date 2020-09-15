@@ -8,7 +8,8 @@ var config: Config = {
     enable: true,
     ip: "localhost",
     port: 27017,
-    collection: "VMS",   
+    collection: "VMS",
+    authSource: "admin"
 };
 export default config;
 
@@ -33,6 +34,7 @@ export interface Config {
     port?: number;
     account?: string;
     password?: string;
+    authSource?: string;
     /**
      * Replica config. If `replica` is provided, will ignore single machine config.
      */

@@ -8,5 +8,6 @@ dist/
 .metals/
 workspace/
 core/*.gen.ts
+.setting*
 
 env/

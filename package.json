@@ -1,11 +1,11 @@
 {
-  "name": "isap-fts-service",
-  "version": "2.01.03",
-  "frameworkversion": "1.08.04",
+  "name": "isap-vts-service",
+  "version": "1.00.00",
+  "frameworkversion": "1.08.05",
   "config": {
-    "displayname": "iSap FTS Service"
+    "displayname": "iSap VTS Service"
   },
-  "description": "iSap FTS Service v2.01.02",
+  "description": "iSap VTS Service v1.00.00",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",

@@ -65,6 +65,13 @@ export namespace FileHelper {
         return `${data.request.protocol}://${localAddress.replace(/^.*:/, '')}:${localPort}`;
     }
 
+    export function getURI(file: Parse.File) {
+        let url = file.url();
+        return url.replace(/^(\w+)(\:\/\/)(localhost(?:\:[0-9]*)?)/, (a, b, c, d) => {
+            return "";
+        });
+    }
+
     export function getURL(file: Parse.File, data: ActionParam<any>);
     export function getURL(file: Parse.File);
     export function getURL(file: Parse.File, data?: ActionParam<any>): string {

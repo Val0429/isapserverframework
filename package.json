@@ -1,11 +1,11 @@
 {
   "name": "isap-vts-service",
-  "version": "1.00.00",
+  "version": "1.00.02",
   "frameworkversion": "1.08.05",
   "config": {
     "displayname": "iSap VTS Service"
   },
-  "description": "iSap VTS Service v1.00.00",
+  "description": "iSap VTS Service v1.00.02",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",

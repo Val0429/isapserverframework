@@ -1,7 +1,7 @@
 import { Request } from 'express/lib/request';
 import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
-import { IPermissionCheck } from 'core/userRoles.gen';
+import { IPermissionCheck, RoleList } from 'core/userRoles.gen';
 import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
 import * as Bcrypt from 'bcryptjs';
 
@@ -50,7 +50,10 @@ export function BasicAuth(permission: IPermissionCheck): RequestHandler {
             for (let i: number = 0; i < roles.length; i++) {
                 let role = roles[i];
 
-                if (!!permission && permission[role['name']]) hasPermission = true;
+                if (role['name'] === RoleList.SystemAdministrator || !!permission && permission[role['name']]) {
+                    hasPermission = true;
+                    break;
+                }
             }
 
             if (!hasPermission) {

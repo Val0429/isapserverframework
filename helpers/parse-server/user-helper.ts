@@ -43,7 +43,7 @@ export namespace UserHelper {
             Parse.Object.destroyAll(sessions, { useMasterKey: true });
 
         } catch(reason) {
-            throw Errors.throw(Errors.LoginFailed);
+            throw reason;
         }
         
         return { sessionId, user };

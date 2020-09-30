@@ -322,7 +322,7 @@ export class Action<T = any, U = any> {
                                                     },
                                                 });
                                             } catch (e) {
-                                                let error = e instanceof Errors ? e : Errors.throw(Errors.Custom, [e instanceof Error ? e.message : typeof e === "object" ? JSON.stringify(e) : e]);
+                                                let error = Errors.throw(Errors.Custom, [e]);
                                                 let message = error.resolve(null, false);
 
                                                 _result = {
@@ -342,7 +342,7 @@ export class Action<T = any, U = any> {
                                 try {
                                     result = await realfunc({ ...request, request, response });
                                 } catch (e) {
-                                    let error = e instanceof Errors ? e : Errors.throw(Errors.Custom, [e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : e]);
+                                    let error = Errors.throw(Errors.Custom, [e]);
                                     let message = error.resolve(null, false);
                                     
                                     PrintService.logCustomPath(`${error.detail.statusCode}, ${message}`, `${path}:${action}`, 'error');
@@ -406,7 +406,7 @@ export class Action<T = any, U = any> {
                     try {
                         var result = await realfunc({...request, request, response, socket});
                     } catch(e) {
-                        let error = e instanceof Errors ? e : Errors.throw(Errors.Custom, [e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : e]);
+                        let error = Errors.throw(Errors.Custom, [e]);
                         let message = error.resolve(null, false);
 
                         PrintService.logCustomPath(`${error.detail.statusCode}, ${message}`, `${path}:ws`, 'error');

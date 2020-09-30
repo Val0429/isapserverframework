@@ -20,6 +20,7 @@ export * from 'models/cgis/cgis.base';
 import { Response } from 'express/lib/response';
 import { ExpressWsSocket } from 'helpers/middlewares/express-ws-routes';
 import { Socket } from 'helpers/sockets/socket-helper';
+import { MongoParseError, MongoError, MongoNetworkError } from 'mongodb';
 `;
 
 var tInterface = `
@@ -50,9 +51,30 @@ export class Errors {
         me.next = error;
     }
 
-    static throw(error: ErrorObject, args: string[] = null): Errors {
+    static throw(error: ErrorObject, args: unknown[] = null): Errors {
         var rtn = new Errors(error);
-        rtn.args = args;
+
+        rtn.args = args.map((value, index, array) => {
+            if (value instanceof Errors) {
+                rtn.detail = value.detail;
+                return value.args.join("__")
+            } else if (value instanceof Parse.Error) {
+                return \`Parse.Error, \${value.message}\`;
+            } else if (value instanceof MongoNetworkError) {
+                return \`MongoNetworkError, \${value.message}\`;
+            } else if (value instanceof MongoParseError) {
+                return \`MongoParseError, \${value.message}\`;
+            } else if (value instanceof MongoError) {
+                return \`MongoError, \${value.message}\`;
+            } else if (value instanceof Error) {
+                return \`Error, \${value.message}\`;
+            } else if (typeof value === 'object') {
+                return JSON.stringify(value);
+            } else {
+                return value.toString();
+            }
+        });
+
         return rtn;
     }
 

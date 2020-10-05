@@ -49,9 +49,10 @@ let app: express.Application = expressWsRoutes();
  */
 function GetRealMessage(e: any): string {
     try {
-        let message: string = e instanceof Error ? e.message : typeof e === 'object' ? JSON.stringify(e) : e.toString();
+        let error = Errors.throw({ statusCode: 500, message: "{0}" }, [e]);
+        let message = error.resolve(null, false);
 
-        return message
+        return message;
     } catch (e) {
         throw e
     }
@@ -63,10 +64,18 @@ var tProcess = `
 (async () => {
     try {
         process.on("uncaughtException", (e) => {
-            PrintService.logCustomPath(GetRealMessage(e), 'process/uncaughtException', 'error');
+            if (e instanceof Error) {
+                PrintService.logCustomPath(e.stack, 'process/uncaughtException', 'error');
+            } else {
+                PrintService.logCustomPath(GetRealMessage(e), 'process/uncaughtException', 'error');
+            }
         })
         process.on('unhandledRejection', (e) => {
-            PrintService.logCustomPath(GetRealMessage(e), 'process/unhandledRejection', 'error');
+            if (e instanceof Error) {
+                PrintService.logCustomPath(e.stack, 'process/unhandledRejection', 'error');
+            } else {
+                PrintService.logCustomPath(GetRealMessage(e), 'process/unhandledRejection', 'error');
+            }
         });
     } catch (e) {
         PrintService.logCustomPath(GetRealMessage(e), 'server.shell/tProcess', 'error');

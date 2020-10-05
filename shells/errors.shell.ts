@@ -66,6 +66,8 @@ export class Errors {
                 return \`MongoParseError, \${value.message}\`;
             } else if (value instanceof MongoError) {
                 return \`MongoError, \${value.message}\`;
+            } else if (value instanceof TypeError) {
+                return \`TypeError, \${value.message}\`;
             } else if (value instanceof Error) {
                 return \`Error, \${value.message}\`;
             } else if (typeof value === 'object') {

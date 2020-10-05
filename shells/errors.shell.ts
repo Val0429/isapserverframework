@@ -59,7 +59,7 @@ export class Errors {
                 rtn.detail = value.detail;
                 return value.args.join("__")
             } else if (value instanceof Parse.Error) {
-                return \`Parse.Error, \${value.message}\`;
+                return \`ParseError, \${value.message}\`;
             } else if (value instanceof MongoNetworkError) {
                 return \`MongoNetworkError, \${value.message}\`;
             } else if (value instanceof MongoParseError) {

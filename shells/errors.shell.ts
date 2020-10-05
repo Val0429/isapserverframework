@@ -54,28 +54,30 @@ export class Errors {
     static throw(error: ErrorObject, args: unknown[] = null): Errors {
         var rtn = new Errors(error);
 
-        rtn.args = args.map((value, index, array) => {
-            if (value instanceof Errors) {
-                rtn.detail = value.detail;
-                return value.args.join("__")
-            } else if (value instanceof Parse.Error) {
-                return \`ParseError, \${value.message}\`;
-            } else if (value instanceof MongoNetworkError) {
-                return \`MongoNetworkError, \${value.message}\`;
-            } else if (value instanceof MongoParseError) {
-                return \`MongoParseError, \${value.message}\`;
-            } else if (value instanceof MongoError) {
-                return \`MongoError, \${value.message}\`;
-            } else if (value instanceof TypeError) {
-                return \`TypeError, \${value.message}\`;
-            } else if (value instanceof Error) {
-                return \`Error, \${value.message}\`;
-            } else if (typeof value === 'object') {
-                return JSON.stringify(value);
-            } else {
-                return value.toString();
-            }
-        });
+        if (args !== null && args !== undefined) {
+            rtn.args = args.map((value, index, array) => {
+                if (value instanceof Errors) {
+                    rtn.detail = value.detail;
+                    return value.args.join("__")
+                } else if (value instanceof Parse.Error) {
+                    return \`ParseError, \${value.message}\`;
+                } else if (value instanceof MongoNetworkError) {
+                    return \`MongoNetworkError, \${value.message}\`;
+                } else if (value instanceof MongoParseError) {
+                    return \`MongoParseError, \${value.message}\`;
+                } else if (value instanceof MongoError) {
+                    return \`MongoError, \${value.message}\`;
+                } else if (value instanceof TypeError) {
+                    return \`TypeError, \${value.message}\`;
+                } else if (value instanceof Error) {
+                    return \`Error, \${value.message}\`;
+                } else if (typeof value === 'object') {
+                    return JSON.stringify(value);
+                } else {
+                    return value.toString();
+                }
+            });
+        }
 
         return rtn;
     }
@@ -130,11 +132,9 @@ var tInterfaceUnit = `
 import { Config } from 'models/cgis/errors.define';
 function main(events: Config[]): string {
     var tmpstr = [];
-    
+
     /// make header /////////////////////////////
-    tmpstr.push(
-        tHeader.replace(/^[\r\n]+$/, '')
-    );
+    tmpstr.push(tHeader.replace(/^[\r\n]+$/, ''));
     /////////////////////////////////////////////
 
     /// make interface //////////////////////////
@@ -142,21 +142,18 @@ function main(events: Config[]): string {
     for (var event of events) {
         tmp.push(
             tInterfaceUnit
-                      .replace(/^[\r\n]+|[\r\n]+$/g, '')
-                      .replace(/\{0\}/g, event[0])
-                      .replace(/\{1\}/g, event[1].toString())
-                      .replace(/\{2\}/g, event[2])
+                .replace(/^[\r\n]+|[\r\n]+$/g, '')
+                .replace(/\{0\}/g, event[0])
+                .replace(/\{1\}/g, event[1].toString())
+                .replace(/\{2\}/g, event[2]),
         );
     }
-    tmpstr.push(
-        tInterface.replace( /\{0\}/g, tmp.join("\r\n") )
-    );
+    tmpstr.push(tInterface.replace(/\{0\}/g, tmp.join('\r\n')));
     /////////////////////////////////////////////
 
     /// concat
-    return tmpstr.join("\r\n");
+    return tmpstr.join('\r\n');
 }
-
 
 const genFilePath = `${__dirname}/../core/errors.gen.ts`;
 const tmplPath = `${__dirname}/errors.shell.ts`;
@@ -177,10 +174,6 @@ import { Log } from 'helpers/utility';
 //     }
 // );
 
-shellWriter2(
-    genFilePath,
-    main([...events, ...cevents]),
-    () => {
-        Log.Info("Code Generator", "Error file updated!");
-    }
-);
+shellWriter2(genFilePath, main([...events, ...cevents]), () => {
+    Log.Info('Code Generator', 'Error file updated!');
+});

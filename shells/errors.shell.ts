@@ -51,7 +51,11 @@ export class Errors {
         me.next = error;
     }
 
-    static throw(error: ErrorObject, args: unknown[] = null): Errors {
+    static throw(error: ErrorObject): Errors
+    static throw(error: ErrorObject, args: unknown[]): Errors
+    static throw(error: ErrorObject, args?: unknown[]): Errors {
+        args = args || [];
+
         var rtn = new Errors(error);
 
         if (args !== null && args !== undefined) {

@@ -75,7 +75,6 @@
     "typings": "2.1.1",
     "uuid": "3.3.0",
     "websocket": "1.0.25",
-    "winser": "git+http://isap-dev-server:3000/iSAP-AP-Team/winser.git#33b6fd8e35",
     "xml2js": "0.4.19"
   }
 }

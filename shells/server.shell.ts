@@ -35,6 +35,7 @@ import GridStoreAdapter from 'parse-server/lib/Adapters/Files/GridStoreAdapter';
 import { mongoDBUrl } from 'helpers/mongodb/url-helper';
 
 import { Config } from 'core/config.gen';
+import { Errors } from 'core/errors.gen';
 
 import { PrintService, FileService } from 'helpers';
 
@@ -236,8 +237,6 @@ var tRunWeb = `
 
 var tFinalizeError = `
 /// Finalize Error
-import { Errors } from 'core/errors.gen';
-
 (async () => {
     try {
         app.use( (reason, req, res, next) => {

@@ -1,3 +1,4 @@
+import { DateTimeService } from 'helpers';
 import * as Enum from 'core/licenses.gen';
 import licenseService from 'services/license';
 
@@ -46,8 +47,8 @@ export class License {
                     productName: this.GetProductName(Enum.ELicenseProductId[value.productNO]),
                     count: value.count,
                     trial: value.trial,
-                    registerDate: value.registerDate,
-                    expireDate: value.expireDate,
+                    registerDate: !value.registerDate ? undefined : DateTimeService.toDate(value.registerDate, 'YYYY/MM/DD'),
+                    expireDate: !value.expireDate ? undefined : DateTimeService.toDate(value.expireDate, 'YYYY/MM/DD'),
                     expired: value.expired,
                 };
             });
@@ -109,8 +110,8 @@ export namespace License {
         productName: string;
         count: number;
         trial: boolean;
-        registerDate: string;
-        expireDate: string;
+        registerDate: Date;
+        expireDate: Date;
         expired: boolean;
     }
 

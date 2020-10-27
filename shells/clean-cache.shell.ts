@@ -7,8 +7,10 @@
 const os = require('os');
 const fs = require('fs');
 const rimraf = require('rimraf');
+const isWindows = process.platform === "win32";
 
-let paths = [os.tmpdir(), "C:\\Windows\\Temp\\"];
+let paths = [os.tmpdir()];
+if (isWindows) paths.push("C:\\Windows\\Temp\\");
 
 paths.forEach( (path) => {
     fs.readdir(path, (err, filenames) => {

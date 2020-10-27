@@ -46,7 +46,7 @@ export namespace FileHelper {
         input = <any>(<string>input).replace(regex, (a, b) => { type = b; return ""; });
         if (type !== null) name = `file.${mimeType.extension(type) || "b64"}`;
 
-        var file = new Parse.File(`${name || 'file.b64'}`, { base64: input }, mime);
+        var file = new Parse.File(`${name || 'file.b64'}`, { base64: input as string }, mime);
         await file.save();
         return <any>file;
     }

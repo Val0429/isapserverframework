@@ -19,7 +19,7 @@ export async function createMongoDB(): Promise<{ client: MongoClient, db: Db }> 
     let { ip, port, collection } = Config.mongodb;
     const url = mongoDBUrl();
 
-    let client = await MongoClient.connect(url, {useNewUrlParser: true, poolSize: 100});
+    let client = await MongoClient.connect(url, {useNewUrlParser: true, poolSize: 100, useUnifiedTopology: true});
     let db = client.db(collection);
 
     /// check collection exists
@@ -52,13 +52,7 @@ export async function ensureCollectionExists(collectionName: string) {
     let db = await sharedMongoDB();
     /// ensure collection exists
     await mutex.acquire();
-    let dbs = await db.listCollections({ name: collectionName }).toArray();
-    if(dbs.length === 0) {
-        await new Promise( (resolve, reject) => db.createCollection(collectionName, (err, res) => {
-            err && reject(err);
-            !err && resolve(res);
-        }) );
-    }
+    await db.createCollection(collectionName);
     mutex.release();
 }
 
@@ -67,10 +61,24 @@ export async function createIndex(collectionName: string, indexName: string, fie
 
     var instance = db.collection(collectionName);
     try {
-        if (!await instance.indexExists(indexName)) throw null;
+        if (!(await instance.indexExists(indexName))) throw null;
     } catch(reason) {
         var showname = collectionName.replace(/^\_/, '');
         Log.Info("Indexing", `Make index on <${showname}.${indexName}>.`);
         instance.createIndex(fieldOrSpec, {background: true, name: indexName, ...options});
     }
 }
+
+export async function dropIndex(collectionName: string, indexName: string) {
+    let db = await sharedMongoDB();
+
+    var instance = db.collection(collectionName);
+    try {
+        if (!!(await instance.indexExists(indexName))) throw null;
+    } catch (reason) {
+        var showname = collectionName.replace(/^\_/, '');
+        Log.Info('Indexing', `Drop index on <${showname}.${indexName}>.`);
+        await instance.dropIndex(indexName);
+    }
+}
+    

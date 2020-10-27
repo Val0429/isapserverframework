@@ -77,7 +77,7 @@ export class ScheduleControllerBase<
         /// 2) calculate action
         let actionInput = await this.callbackAction(event, data);
         let action: Action = new (this.action as any)();
-        let actionOutput = await action.do({ ...templateOutput, ...(actionInput as any) });
+        let actionOutput = await action.do({ ...templateOutput as any, ...(actionInput as any) });
 
         return actionOutput;
     }

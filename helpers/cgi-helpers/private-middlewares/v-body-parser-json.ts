@@ -5,6 +5,7 @@
  */
 
 import { Request } from 'express/lib/request';
+import { Response } from 'express/lib/response';
 declare module 'express/lib/request' {
     interface Request {
         parameters: any;

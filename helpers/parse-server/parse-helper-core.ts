@@ -79,13 +79,13 @@ export class ParseObject<T> extends Parse.Object {
     attributes: T;
     constructor(data?: Partial<T>) {
         super();
-        Parse.Object.call(this, this.constructor.name);
+        this.className = this.constructor.name;
         data && super.set(data);
     }
     getValue<U extends keyof T>(key: U): T[U] {
         return super.get(key as string);
     }
-    setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): boolean {
+    setValue<U extends keyof T>(key: U, value: T[U], options?: Parse.Object.SetOptions): false | this {
         return super.set(key as string, <any>value, options);
     }
 

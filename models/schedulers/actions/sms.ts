@@ -5,7 +5,7 @@
  */
 
 import { ScheduleActionBase } from './core';
-import { sendSMS, SMSCommand } from 'helpers/sms';
+import { sendSMS } from 'helpers/sms';
 import { Config } from 'core/config.gen';
 
 /// sms core /////////////////////////

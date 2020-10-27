@@ -5,7 +5,7 @@
  */
 
 import { Action } from 'helpers/cgi-helpers/core';
-import { SourceFile } from 'ts-simple-ast';
+import { SourceFile } from 'ts-morph';
 import { Errors } from 'core/errors.gen';
 
 export enum EnumRequestType {

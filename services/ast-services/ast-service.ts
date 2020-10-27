@@ -12,7 +12,7 @@ import { Action } from 'helpers/cgi-helpers/core';
 import { Errors } from 'core/errors.gen';
 import { deepMerge } from 'helpers/utility/deep-merge';
 import { _O } from 'helpers/utility/O';
-import Project, { Type, ts, Identifier, TypeGuards, InterfaceDeclaration, ImportSpecifier, TypeAliasDeclaration, ClassDeclaration, SourceFile, PropertySignature, EnumMember, createWrappedNode, TypeReferenceNode } from 'ts-simple-ast';
+import { Project, Type, ts, InterfaceDeclaration, TypeAliasDeclaration, ImportSpecifier, ClassDeclaration, SourceFile, PropertySignature, EnumMember } from 'ts-morph';
 import * as path from 'path';
 
 const debug = false;
@@ -23,7 +23,7 @@ var reflector: Project = this.reflector = new Project({
     tsConfigFilePath,
     addFilesFromTsConfig: true
 });
-reflector.addExistingSourceFiles("node_modules/@types/**/*");
+//reflector.addExistingSourceFiles("node_modules/@types/**/*");
 var tSource = reflector.getSourceFile(`ast-core.ts`);
 
 class AstService {
@@ -334,7 +334,7 @@ namespace AstParser {
         var showname = prefix;
         var obj = data;
 
-        if (typeof obj === 'undefined') return undefined;
+        if (obj == undefined) return undefined;
 
         if (type.isBoolean()) {
             /// 1) boolean
@@ -386,6 +386,7 @@ namespace AstParser {
         } else if (type.isArray()) {
             /// 8) Array --- Array
             debug && console.log(`${showname} is Array, obj ${typeof obj}`);
+            obj = [].concat(obj).filter(n => n != null);
             return AstConverter.toArray(type, obj, showname);
 
         } else if (type.isTuple()) {
@@ -579,7 +580,7 @@ namespace AstConverter {
     export function toNumber(input: string | number, name: string, isArray: boolean = false): number {
         if (typeof input !== 'string' && typeof input !== 'number') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be number${isArray?'[]':''}.`]);
         if (typeof input === 'string') {
-            let result = parseInt(input, 10);
+            let result = parseFloat(input);
             if (Number.isNaN(result)) throw Errors.throw(Errors.CustomInvalid, [`value of <${name}> is not convertable to number.`]); 
             return result;
         }

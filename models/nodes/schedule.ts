@@ -200,10 +200,10 @@ export namespace Schedule {
 
             /// before save, calculate endDate
             // destroy<U extends Tree<T>>(this: U, options?: Parse.Object.DestroyOptions): Parse.Promise<this> {
-            save(attrs?: { [key: string]: any } | null, options?: Parse.Object.SaveOptions): Parse.Promise<this>;
-            save(key: string, value: any, options?: Parse.Object.SaveOptions): Parse.Promise<this>;
-            save(attrs: object, options?: Parse.Object.SaveOptions): Parse.Promise<this>;
-            save(arg1?, arg2?, arg3?): Parse.Promise<this> {
+            save(attrs?: { [key: string]: any } | null, options?: Parse.Object.SaveOptions): Promise<this>;
+            save(key: string, value: any, options?: Parse.Object.SaveOptions): Promise<this>;
+            save(attrs: object, options?: Parse.Object.SaveOptions): Promise<this>;
+            save(arg1?, arg2?, arg3?): Promise<this> {
                 let options = typeof arg1 === 'string' ? arg3 : arg2;
                 let attrs = typeof arg1 === 'string' ? { [arg1]: arg2 } : arg1;
                 if (attrs) this.set(attrs);
@@ -234,10 +234,10 @@ export namespace Schedule {
                 if (Array.isArray(on)) result = on;
                 else {
                     let query = new Parse.Query(thisClass);
-                    if (typeof who === 'function' && on instanceof who) query.equalTo("who", on);
-                    else if (typeof where === 'function' && on instanceof where) query.equalTo("where", on);
-                    else if (typeof what === 'function' && on instanceof what) query.equalTo("what", what);
-                    else if (typeof how === 'function' && on instanceof how) query.equalTo("how", how);
+                    if (typeof who === 'function' && on instanceof who) query.equalTo("who", on as any);
+                    else if (typeof where === 'function' && on instanceof where) query.equalTo("where", on as any);
+                    else if (typeof what === 'function' && on instanceof what) query.equalTo("what", what as any);
+                    else if (typeof how === 'function' && on instanceof how) query.equalTo("how", how as any);
                     result = await query.find();
                 }
 

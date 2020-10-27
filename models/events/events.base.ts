@@ -100,7 +100,7 @@ export interface IEvents<T = IEvent> {
         get(): Parse.Query<Events> {
             return new Parse.Query(Events)
                 .include("owner")
-                .include("target");
+                .include("target" as any);
         },
         tuner() {
             return async (data: Events[]): Promise<Events[]> => {

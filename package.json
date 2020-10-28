@@ -1,7 +1,7 @@
 {
   "name": "isap-vts-service",
   "version": "1.00.06",
-  "frameworkversion": "1.08.03",
+  "frameworkversion": "1.08.06",
   "config": {
     "displayname": "iSap VTS Service"
   },

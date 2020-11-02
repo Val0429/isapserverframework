@@ -20,9 +20,7 @@
     "build:debug": "nodemon --watch false --exec node --trace-warnings -r ts-node/register main.ts",
     "build:ts-node": "node --trace-warnings -r ts-node/register/transpile-only main.ts",
     "build:ts-node:debug": "node --trace-warnings -r ts-node/register main.ts",
-    "clean": "ts-node ./shells/clean-cache.shell.ts",
-    "install-windows-service": "winser -i -s -a --startwithnpm --displayname \"%npm_package_config_displayname%\"",
-    "uninstall-windows-service": "winser -r -x -s"
+    "clean": "ts-node ./shells/clean-cache.shell.ts"
   },
   "nodemonConfig": {
     "ignore": [

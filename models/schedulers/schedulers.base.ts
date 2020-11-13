@@ -7,9 +7,9 @@
 import { ParseObject, registerSubclass, retrievePrimaryClass } from 'helpers/parse-server/parse-helper';
 import { IEvent } from 'models/events/events.base';
 import { EventList } from 'core/events.gen';
-export * from './actions/index';
-export * from './templates/index';
-export * from './controllers/index';
+// export * from './actions/index';
+// export * from './templates/index';
+// export * from './controllers/index';
 
 export enum ScheduleTimeType {
     Minute = 0, Hour = 1, Day = 2, Week = 3

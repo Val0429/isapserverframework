@@ -10,6 +10,9 @@ import { EventList } from 'core/events.gen';
 // export * from './actions/index';
 // export * from './templates/index';
 // export * from './controllers/index';
+export * from './actions/core';
+export * from './templates/core';
+export * from './controllers/core';
 
 export enum ScheduleTimeType {
     Minute = 0, Hour = 1, Day = 2, Week = 3

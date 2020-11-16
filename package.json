@@ -1,11 +1,11 @@
 {
-  "name": "isap-vts-service",
-  "version": "1.00.06",
-  "frameworkversion": "1.08.06",
+  "name": "isap-smartface-engine",
+  "version": "1.00.00",
+  "frameworkversion": "1.08.07",
   "config": {
-    "displayname": "iSap VTS Service"
+    "displayname": "iSap SmartFace Engine"
   },
-  "description": "iSap VTS Service v1.00.06",
+  "description": "iSap SmartFace Engine v1.00.00",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -77,7 +77,6 @@
     "tmp-promise": "3.0.2",
     "ts-morph": "7.1.2",
     "ts-node": "git+http://val.liu:65576557v@isap-dev-server:3000/iSAP-AP-Team/ts-node.git#cbe90a614e",
-    "ts-simple-ast": "16.0.1",
     "typescript": "3.8.3",
     "typings": "2.1.1",
     "uuid": "3.3.0",

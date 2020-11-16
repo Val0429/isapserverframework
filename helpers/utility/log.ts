@@ -15,7 +15,7 @@ export enum Level {
 }
 
 export namespace Log {
-    let currentLevel: Level = Level.Trace;
+    let currentLevel: Level = Level.Info;
     let currentRegEx: RegExp;
     export function setLevel(level: Level, reg?: RegExp | string) {
         currentLevel = level;
@@ -62,6 +62,11 @@ export namespace Log {
         return msg;
     }
 
+    class DummyWrapper {
+        constructor() {}
+        public end() {}
+    }
+
     class TimeEndWrapper {
         private msg: string;
         constructor(msg: string) {
@@ -74,14 +79,14 @@ export namespace Log {
 
     let timeCount = 0;
     export function TraceTime(title: string, message: string) {
-        if (!TestPass(Level.Trace)) return;
+        if (!TestPass(Level.Trace)) return new DummyWrapper();
         let msg = getTraceMessage(title, message, true) + `(#${++timeCount})`;
         console.time(msg);
         return new TimeEndWrapper(msg);
     }
 
     export function InfoTime(title: string, message: string) {
-        if (!TestPass(Level.Info)) return;
+        if (!TestPass(Level.Info)) return new DummyWrapper();
         let msg = getInfoMessage(title, message, true) + `(#${++timeCount})`;
         console.time(msg);
         return new TimeEndWrapper(msg);

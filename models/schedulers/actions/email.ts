@@ -57,6 +57,9 @@ export class ScheduleActionEmail extends ScheduleActionBase<
                 auth: {
                     user: config.email,
                     pass: config.password
+                },
+                tls: {
+                    minVersion: "TLSv1"
                 }
             });
 

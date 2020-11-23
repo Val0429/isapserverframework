@@ -1,11 +1,11 @@
 {
-  "name": "isap-smartface-engine",
-  "version": "1.00.00",
-  "frameworkversion": "1.08.07",
+  "name": "isap-vts-service",
+  "version": "1.00.08",
+  "frameworkversion": "1.08.08",
   "config": {
-    "displayname": "iSap SmartFace Engine"
+    "displayname": "iSap VTS Service"
   },
-  "description": "iSap SmartFace Engine v1.00.00",
+  "description": "iSap VTS Service v1.00.08",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -62,7 +62,7 @@
     "mongodb": "3.5.9",
     "network": "0.3.2",
     "node-csv-parse": "1.2.0",
-    "nodemailer": "4.6.8",
+    "nodemailer": "6.4.16",
     "nodemon": "git+http://val.liu:65576557v@isap-dev-server:3000/iSAP-AP-Team/nodemon.git#dc821512",
     "npm": "git+http://val.liu:65576557v@isap-dev-server:3000/iSAP-AP-Team/npm.git#96bdc33",
     "parse-dashboard": "1.2.0",

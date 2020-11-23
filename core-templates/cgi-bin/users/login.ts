@@ -38,14 +38,24 @@ export default new Action<Input, Output>({
     let sessionId: string, user: Parse.User;
     if ('username' in data.inputType) {
         /// Try login
-        var obj = await UserHelper.login(data.inputType);
-        sessionId = obj.sessionId;
-        user = obj.user;
+        try {
+            var obj = await UserHelper.login(data.inputType);
+            sessionId = obj.sessionId;
+            user = obj.user;
+    
+            var ev = new EventLogin({
+                owner: obj.user
+            });
+            Events.save(ev);
 
-        var ev = new EventLogin({
-            owner: obj.user
-        });
-        Events.save(ev);
+        } catch(e) {
+            switch (e.code) {
+                case 101:
+                    throw Errors.throw(Errors.CustomUnauthorized, ["Invalid username/password."]);
+                default:
+                    throw e;
+            }
+        }
 
     } else {
         if (!data.session) throw Errors.throw(Errors.CustomUnauthorized, ["This session is not valid or is already expired."]);

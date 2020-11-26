@@ -22,6 +22,7 @@ let nsispath = path.resolve(cwd, "nsis");
 // let outerpackagejson = require(outerpackagejsonpath);
 
 let version = packagejson.version;
+let packagename = packagejson.packagename;
 
 export function increaseVersion(version: string): string {
     return version.split(".").map((value, index) => {
@@ -67,7 +68,7 @@ export function findFilesInDir(startPath: string, filter) {
     const pushhint = "Your branch is ahead of";
     const pullhint = "Your branch is behind";
     let gitstatus = execSync(`git status`, { cwd });
-    let packagename = execSync(`git rev-parse --abbrev-ref HEAD`, { cwd }).toString("UTF-8").replace(/[\r\n]/, "");
+    packagename = packagename || execSync(`git rev-parse --abbrev-ref HEAD`, { cwd }).toString("UTF-8").replace(/[\r\n]/, "");
 
     if (gitstatus.indexOf(commithint) < 0) showError("尚未commit，請先進行 commit / push。");
     if (gitstatus.indexOf(pushhint) >= 0) showError("尚未push，請先手動 push。");

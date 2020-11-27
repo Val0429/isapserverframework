@@ -56,7 +56,9 @@ export type IPerson{1} = Person<IPerson{1}Data>;
 ////////////////////////////////////////////////////
 `;
 
-function main(events: Array<[number, string, string] | [number, string]>): string {
+
+import { Config } from 'models/define/userRoles/personRoles';
+function main(events: Config[]): string {
     var tmpstr = [];
     
     /// make header /////////////////////////////

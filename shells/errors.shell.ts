@@ -133,7 +133,7 @@ var tInterfaceUnit = `
     static {0}: ErrorObject = { statusCode: {1}, message: "{2}" };
 `;
 
-import { Config } from 'models/cgis/errors.define';
+import { Config } from 'models/define/cgis/errors';
 function main(events: Config[]): string {
     var tmpstr = [];
 
@@ -161,7 +161,7 @@ function main(events: Config[]): string {
 
 const genFilePath = `${__dirname}/../core/errors.gen.ts`;
 const tmplPath = `${__dirname}/errors.shell.ts`;
-const defPath = `${__dirname}/../models/cgis/errors.define.ts`;
+const defPath = `${__dirname}/../defaults/define/cgis/errors.define.ts`;
 const customDefPath = `${__dirname}/../workspace/define/cgis/errors.define.ts`;
 
 var events = require(defPath).default;

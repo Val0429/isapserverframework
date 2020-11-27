@@ -83,7 +83,8 @@ export type IUser{1} = IUser<IUser{1}Data>;
 var tPartial = `export type PartialIUser{0} = Partial<IUser{0}>;`;
 
 
-function main(events: Array<[number, string, string, string[]] | [number, string, string] | [number, string]>): string {
+import { Config } from 'models/define/userRoles/userRoles';
+function main(events: Config[]): string {
     var tmpstr = [];
     
     /// make header /////////////////////////////

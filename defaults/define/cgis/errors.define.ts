@@ -1,8 +1,4 @@
-/*
- * Created on Tue Jul 30 2019
- * Author: Val Liu
- * Copyright (c) 2019, iSAP Solution
- */
+import { Config } from 'models/define/cgis/errors';
 
 var errors: Config[] = [
     ['LoginRequired', 401, 'This action requires login.'],
@@ -43,5 +39,3 @@ var errors: Config[] = [
 ];
 
 export default errors;
-
-export type Config = [string, number, string];

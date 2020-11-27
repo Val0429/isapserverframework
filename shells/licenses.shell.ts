@@ -12,7 +12,8 @@ export enum ELicenseProductName {
 }
 `;
 
-function main(events: Array<[string, string]>): string {
+import { Config } from 'models/define/licenses/product-id';
+function main(events: Config[]): string {
     var tmpstr = [];
 
     var tmp = [];

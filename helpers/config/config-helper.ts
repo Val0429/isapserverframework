@@ -9,7 +9,7 @@ import * as p from 'path';
 
 /// deprecated for now. just keep for reference.
 
-const defaultPath = `${__dirname}/../../config_default`;
+const defaultPath = `${__dirname}/../../defaults/config`;
 const wsDefaultPath = `${__dirname}/../../workspace/config/default`;
 const wsOtherPath = `${__dirname}/../../workspace/config/custom`;
 
@@ -24,7 +24,7 @@ export interface IConfiguration<T = any> {
 ////////////////////////////////////////////////////
 
 var template = `
-import { Config } from 'config_default/{0}';
+import { Config } from 'defaults/config/{0}';
 
 var config: Partial<Config> = {
     

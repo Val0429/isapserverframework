@@ -10,5 +10,5 @@ alias.addAlias('helpers', `${__dirname}/../helpers`);
 alias.addAlias('models', `${__dirname}/../models`);
 alias.addAlias('shells', `${__dirname}/../shells`);
 alias.addAlias('workspace', `${__dirname}/../workspace`);
-alias.addAlias('config_default', `${__dirname}/../config_default`);
+alias.addAlias('defaults', `${__dirname}/../defaults`);
 alias.addAlias('services', `${__dirname}/../services`);

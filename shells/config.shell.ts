@@ -9,8 +9,8 @@ import * as fs from 'fs';
 import * as p from 'path';
 import { Log } from 'helpers/utility';
 
-// import coreConfig, { Config as coreConfigType } from 'config_default/core';
-// import mongodbConfig, { Config as mongodbConfigType } from 'config_default/mongodb';
+// import coreConfig, { Config as coreConfigType } from 'defaults/config/core';
+// import mongodbConfig, { Config as mongodbConfigType } from 'defaults/config/mongodb';
 var tHeaderSpecial = `
 /*
  * Created on Tue Jul 30 2019
@@ -53,7 +53,7 @@ let tmp = Config;   /// force initialize
 
 const genFilePath = `${__dirname}/../core/config.gen.ts`;
 const tmplPath = `${__dirname}/config.shell.ts`;
-const defPath = `${__dirname}/../config_default`;
+const defPath = `${__dirname}/../defaults/config`;
 const wsDefPath = `${__dirname}/../workspace/config/default`;
 const wsCustomPath = `${__dirname}/../workspace/config/custom`;
 
@@ -151,7 +151,7 @@ function main(): string {
 
 var result = {};
 var template = `
-import { Config } from 'config_default/{0}';
+import { Config } from 'defaults/config/{0}';
 export { Config };
 
 var config: Partial<Config> = {};

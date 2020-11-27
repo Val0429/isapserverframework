@@ -42,8 +42,8 @@ const customDefPath = `${__dirname}/../workspace/define/licenses/product-id.defi
 // var events = require(defPath).default;
 var cevents = require(customDefPath).default;
 import * as fs from 'fs';
-import { Log } from 'helpers/utility';
+import { PrintService } from 'helpers';
 
 shellWriter2(genFilePath, main([...cevents]), () => {
-    Log.Info('Code Generator', 'License file updated!');
+    PrintService.log('License file updated.', undefined, 'info');
 });

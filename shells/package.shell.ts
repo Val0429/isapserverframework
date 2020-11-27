@@ -25,13 +25,13 @@ function main(): string {
 
 const genFilePath = `${__dirname}/../package.json`;
 const tmplPath = `${__dirname}/../workspace/package.json`;
-import { Log } from 'helpers/utility';
+import { PrintService } from 'helpers';
 
 shellWriter2(
     genFilePath,
     main(),
     () => {
-        Log.Info("Code Generator", "Package file updated!");
+        PrintService.log('Package file updated.', undefined, 'info');
     }
 );
 

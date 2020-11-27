@@ -372,5 +372,5 @@ const tmplPath = `${__dirname}/server.shell.ts`;
 import { PrintService } from 'helpers';
 
 shellWriter2(genFilePath, main(), () => {
-    PrintService.log('Server file updated.', undefined, 'success');
+    PrintService.log('Server file updated.', undefined, 'info');
 });

@@ -116,8 +116,7 @@ const customDefPath = `${__dirname}/../workspace/define/userRoles/personRoles.de
 
 // var events = require(defPath).default;
 var cevents = require(customDefPath).default;
-import * as fs from 'fs';
-import { Log } from 'helpers/utility';
+import { PrintService } from 'helpers';
 
 // shellWriter(
 //     [tmplPath, customDefPath],
@@ -132,7 +131,7 @@ shellWriter2(
     genFilePath,
     main([...cevents]),
     () => {
-        Log.Info("Code Generator", "PersonRole file updated!");
+        PrintService.log('PersonRole file updated.', undefined, 'info');
     }
 );
 

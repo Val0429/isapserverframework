@@ -1,0 +1,246 @@
+# [v2.02.08](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.08) (2020/10/22)
+
+### Release Note:
+* Add default download license information cgi.
+* Update response format in default get license list cgi.
+
+### Note:
+* Reinstall node modules.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.02.07](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.07) (2020/10/12)
+
+### Release Note:
+* Fix reference error in server shell.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.02.06](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.06) (2020/10/06)
+
+### Release Note:
+* Remove winser package.
+* Return real exception message when use UserHelper Login function.
+* Update the rule of BasicAuth middleware, default allow “SystemAdministrator” when permission was not defined.
+* Update uncaughtException and unhandleRejection event of process, print log use error stack.
+* Update error message format in Errors.throw function.
+
+### Note:
+* Reinstall node module.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.02.05](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.05) (2020/09/17)
+
+### Release Note:
+* Fix ast service error when parse string to number.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.02.04](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.04) (2020/09/14)
+
+### Release Note:
+* Update service-datetime package to v1.06.00.
+* Add drop index function in helper.
+
+### Note:
+* Reinstall node module.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.02.03](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.03) (2020/09/07)
+
+### Release Note:
+* Fix ast service error when type was object.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.02.02](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.02) (2020/08/31)
+
+### Release Note:
+* Fix cgi core error, postpone send 200 opportunity.
+* Add log in default server bye cgi.
+* Add default container bye cgi.
+* Add transform license define shell.
+* Update server-service-print package to v1.03.04.
+* Add base request model.
+* Add base response model.
+* Add license class in helper.
+* Add default license cgi.
+* Add copy license from assets folder in server shell.
+
+### Note:
+* Reinstall node module.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+* Remove copy license in main file.
+* Remove license cgi in **workspace/cgi-bin/license/index.ts** if no need overwirte.
+* Add license product id define in **workspace/define/licenses/product-id.define.ts**.
+  ```typescript
+  import { Config } from 'models/define/licenses/product-id';
+
+  var productIds: Config[] = [
+      ['00255', 'FRS Video Source'],
+      ['00257', 'FR Tablet'],
+  ];
+
+  export default productIds;
+  ```
+* Add export base request model and it is recommended to remove the duplicate.  
+  In **workspace/custom/models/request/_index.ts**
+  ```typescript
+  export * from 'models/request/_index';
+  ```
+* Add export base response model and it is recommended to remove the duplicate.  
+  In **workspace/custom/models/response/_index.ts**
+  ```typescript
+  export * from 'models/response/_index';
+  ```
+* Extends **License class** in license service.  
+  In **workspace/custom/systems/license.ts**
+  ```typescript
+  import { License } from 'helpers/license';
+
+  class Service extends License {
+  ...
+  ```
+
+
+
+# [v2.02.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.01) (2020/08/24)
+
+### Release Note:
+* Add generate permission map and permission check interface in user role shell.
+* Add middleware helper.
+* Add basic auth and paging default value middleware.
+* Add server-service-file package.
+* Add default cgi.
+
+### Note:
+* Reinstall node module.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+* Add default server cgi and it is recommended to remove the duplicate. If need overwrite some cgi, please add in **cgi-bin/** folder, it will overwrite base on same filename.
+* Can uninstall server-service-file package in workspace if it version same with framework.
+* Add import and export permission map and permission check interface and it is recommended to remove the duplicate.  
+  in **workspace/define/userRoles/userPermission.define.ts**
+  ```typescript
+  import { RoleList, IPermissionMap, IPermissionCheck } from 'core/userRoles.gen';
+
+  export { IPermissionMap, IPermissionCheck };
+  ```
+* Add default server cgi permission in define.  
+  in **workspace/define/userRoles/userPermission.define.ts**
+  ```typescript
+  export const permissionServerApiR: IPermissionCheck = {
+      [RoleList.SystemAdministrator]: true,
+      [RoleList.Administrator]: false,
+      [RoleList.TenantAdministrator]: false
+   };
+  export const permissionServerConfigR: IPermissionCheck = {
+      [RoleList.SystemAdministrator]: true,
+      [RoleList.Administrator]: false,
+      [RoleList.TenantAdministrator]: false
+  };
+  export const permissionServerLogR: IPermissionCheck = {
+      [RoleList.SystemAdministrator]: true,
+      [RoleList.Administrator]: false,
+      [RoleList.TenantAdministrator]: false
+  };
+  export const permissionServerChangeLogR: IPermissionCheck = {
+      [RoleList.SystemAdministrator]: true,
+      [RoleList.Administrator]: false,
+      [RoleList.TenantAdministrator]: false
+  };
+  export const permissionServerByeR: IPermissionCheck = {
+      [RoleList.SystemAdministrator]: true,
+      [RoleList.Administrator]: false,
+      [RoleList.TenantAdministrator]: false
+  };
+  ```
+* Add export base middlewares and it is recommended to remove the duplicate.  
+  in **workspace/custom/middlewares/index.ts**
+  ```typescript
+  export * from 'helpers/middlewares';
+  ```
+* Update paging request default value middle when use.
+  ```typescript
+  action.get(
+    {
+        inputType: 'InputR',
+        middlewares: [Middleware.PagingRequestDefaultValue()],
+        ...
+  ```
+
+
+
+# [v2.01.02](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.01.02) (2020/07/24)
+
+### Release Note:
+* to be completed...
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.01.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.01.01) (2020/07/21)
+
+### Release Note:
+* to be completed...
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.00.03](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.00.03) (2020/07/16)
+
+### Release Note:
+* to be completed...
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.00.02](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.00.02) (2020/07/14)
+
+### Release Note:
+* to be completed...
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.00.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.00.01) (2020/07/02)
+
+### Release Note:
+* to be completed...
+
+### Note:
+* Node.js v12.18.x
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.

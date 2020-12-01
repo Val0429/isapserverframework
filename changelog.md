@@ -1,3 +1,76 @@
+# [v2.03.00](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.03.00) (2020/12/01)
+
+### Release Note:
+* Remove winser related script in package.json.
+* Remove default sgsms, sms, smtp config.
+* Move cgi-bin_default and config_default into defaults folder.
+* Add define related model.
+* Update service-datetime package to v1.06.01.
+* Update server-service-print package to v1.03.05.
+* Update server-service-log package to v1.01.02.
+* Add change log file.
+* Add readme file.
+* Update default server time cgi response format.
+
+### Note:
+* Reinstall node modules.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+* Remove **workspace/config/default/sgsms.ts**, **workspace/config/default/sms.ts** and **workspace/config/default/smtp.ts**.
+* Update default config interface reference path.  
+  In **workspace/config/default/core.ts**
+  ```typescript
+  import { Config } from 'defaults/config/core';
+  ```
+  In **workspace/config/default/mongodb.ts**
+  ```typescript
+  import { Config } from 'defaults/config/mongodb';
+  ```
+  In **workspace/config/default/parse-server.ts**
+  ```typescript
+  import { Config } from 'defaults/config/parse-server';
+  ```
+* Update define interface reference path.  
+  In **workspace/define/cgis/errors.define.ts**
+  ```typescript
+  import { Config } from 'models/define/cgis/errors';
+
+  var errors: Config[] = [];
+
+  export default errors;
+  ```
+  In **workspace/define/license/priduct-id.define.ts**
+  ```typescript
+  import { Config } from 'models/define/licenses/product-id';
+
+  var productIds: Config[] = [
+      ...
+  ];
+
+  export default productIds;
+  ```
+  In **workspace/define/userRoles/personRoles.define.ts**
+  ```typescript
+  import { Config } from 'models/define/userRoles/personRoles';
+
+  var personRoles: Config[] = [];
+
+  export default personRoles;
+  ```
+  In **workspace/define/userRoles/userRoles.define.ts**
+  ```typescript
+  import { Config } from 'models/define/userRoles/userRoles';
+
+  var userRoles: Config[] = [
+      ...
+  ];
+
+  export default userRoles;
+  ```
+
+
+
 # [v2.02.08](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.08) (2020/10/22)
 
 ### Release Note:

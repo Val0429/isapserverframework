@@ -18,7 +18,7 @@ action.get(
     {},
     async (): Promise<OutputR> => {
         try {
-            return DateTimeService.toString(new Date());
+            return DateTimeService.toString(new Date(), 'YYYY/MM/DD HH:mm:ss Z');
         } catch (e) {
             throw e;
         }

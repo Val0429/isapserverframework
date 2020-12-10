@@ -338,6 +338,8 @@ namespace AstParser {
         if (typeof obj === 'undefined') return undefined;
         if (obj === undefined || obj === null) return undefined;
 
+        if (typeof obj === 'string') obj = obj.trim();
+
         if (type.isBoolean()) {
             /// 1) boolean
             debug && console.log(`${showname} is boolean, obj ${typeof obj}`);

@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import * as Rx from 'rxjs/Rx';
 import { Response } from 'express/lib/response';
 import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
+import { Retrier } from 'workspace/custom/helpers/retrier';
 
 
 
@@ -18,11 +19,13 @@ export class Socket {
 
     static get(response: Response): Promise<Socket>;
     static get(ws: WSSocket): Promise<Socket>;
+    static get(url: string): Promise<Socket>;
     static get(info: ExpressWsRouteInfo, cb: ExpressWsCb): Promise<Socket>;
     static get(arg1: any, arg2?: any): Promise<Socket> {
         return new Promise( (resolve) => {
             var ws, info, cb;
             if (!arg2) {
+                if (typeof arg1 === "string") arg1 = new WSSocket(arg1);
                 if (arg1 instanceof WSSocket) {
                     ws = arg1;
                     info = {}; cb = (c) => {c(ws)};
@@ -38,6 +41,16 @@ export class Socket {
             if (info.vsocket) { resolve(info.vsocket); return; }
             cb( (socket) => {
                 info.vsocket = new Socket(socket);
+
+                /// apply ping / pong rule on it
+                const pingInterval: number = 10000;
+                const pongInterval: number = pingInterval / 2 * 3;
+                let pingRetrier = new Retrier(() => { pingRetrier.stop(); pongRetrier.start(); socket.ping("ping"); }, pingInterval);
+                let pongRetrier = new Retrier(() => { pingRetrier.stop(); pongRetrier.stop(); socket.terminate(); }, pongInterval);
+                socket.addListener("pong", () => { pingRetrier.start(); pongRetrier.stop(); });
+                socket.addListener("open", () => { pingRetrier.start(); pongRetrier.stop(); });
+                socket.addListener("close", () => { pingRetrier.stop(); pongRetrier.stop(); });
+
                 resolve(info.vsocket);
             });
         });

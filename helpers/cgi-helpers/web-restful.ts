@@ -48,7 +48,7 @@ export namespace Restful {
     export type InputC<T> = T;
     export type OutputC<T, K extends Option = {
         parseObject: true
-    }, U = K extends { parseObject: false } ? T : ParseObject<T> >
+    }, U = K extends { parseObject: false } ? ValidObject & T : ParseObject<T> >
          = U;
 
     export type InputR<T, K extends Option = {
@@ -58,14 +58,14 @@ export namespace Restful {
     export type OutputR<T, K extends Option = {
         paging: true,
         parseObject: true,
-    }, U = K extends { parseObject: false } ? T : ParseObject<T>,
+    }, U = K extends { parseObject: false } ? ValidObject & T : ParseObject<T>,
        V = K extends { paging: false } ? U : IOutputPaging<U> >
        = V;
 
     export type InputU<T> = ValidObject & Partial<T>;
     export type OutputU<T, K extends Option = {
         parseObject: true
-    }, U = K extends { parseObject: false } ? T : ParseObject<T> >
+    }, U = K extends { parseObject: false } ? ValidObject & T : ParseObject<T> >
          = U;
 
     export type InputD<T> = InputU<T>;

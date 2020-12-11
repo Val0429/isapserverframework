@@ -726,10 +726,10 @@ namespace AstConverter {
             for (var key = 0; key < types.length; ++key)
                 rtn = { ...rtn, ...AstParser.validateType(types[key], input, name, false, params) };
         } catch(reason) {
-            if (reason instanceof Errors) {
-                reason.append(Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]));
-                for (var type of types) reason.append(Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]));
-            }
+            // if (reason instanceof Errors) {
+            //     reason.append(Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]));
+            //     for (var type of types) reason.append(Errors.throw(Errors.Custom, [`${AstParser.getTypeInfo(type)}\r\n`]));
+            // }
             throw reason;
         }
         return rtn;

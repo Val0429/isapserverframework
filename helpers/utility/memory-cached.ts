@@ -107,9 +107,10 @@ export function memoryCached<T>(config?: IMemoryCachedConfig) {
             let index1 = getCachedIndexName(indexName, ref);
             return index1[instanceKey] || (index1[instanceKey] = []);
         }
-        let addIndexing = (item, ref?) => {
-            if (!indexes || !item) return;
-            for (let indexName of indexes) {
+        let addIndexing = (item, ref?, customIndexes?) => {
+            customIndexes = customIndexes || indexes;
+            if (!customIndexes || !item) return;
+            for (let indexName of customIndexes) {
                 getCachedInstanceKey(indexName, item.getValue(indexName), ref).push(item);
             }
         }
@@ -128,7 +129,9 @@ export function memoryCached<T>(config?: IMemoryCachedConfig) {
             let cachedList = metaObject.cachedList;
             if (!cachedIndexList[key]) {
                 /// remake
-                Object.keys(cachedList).forEach(v => addIndexing(v, cachedIndexList));
+                let customIndexes = [key];
+                Object.keys(cachedList).forEach(v => addIndexing(cachedList[v], cachedIndexList, customIndexes));
+                indexes.push(key);
             }
         }
 

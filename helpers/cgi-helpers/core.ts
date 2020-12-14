@@ -285,14 +285,13 @@ export class Action<T = any, U = any> {
                     }
                     ///////////////////////////////////////////////
 
+                    /// send 200 ok
+                    socket.send({statusCode: 200});
                     try {
                         var result = await realfunc({...request, request, response, socket});
                     } catch(reason) {
                         next(reason);
                     }
-
-                    /// send 200 ok
-                    socket.send({statusCode: 200});
                 }
             );
         }

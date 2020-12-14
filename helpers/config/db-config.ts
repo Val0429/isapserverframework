@@ -57,8 +57,15 @@ export class DBConfigFactory<T> {
         const get = (key) => {
             return innateValue[key];
         }
-        const set = (key, value) => {
-            innateValue[key] = value;
+        const set = (key, value?) => {
+            /// if no value, replace all in innateValue
+            if (!value) {
+                value = key;
+                Object.keys(innateValue).forEach(key => delete innateValue[key]);
+                Object.keys(value).forEach(key => innateValue[key] = value[key]);
+            } else {
+                innateValue[key] = value;
+            }
             sjChange.next(innateValue);
         }
 
@@ -84,8 +91,11 @@ export class DBConfigFactory<T> {
 
             /// 2) find default value
             let value = dbObject = await new Parse.Query(classname).first();
-            let todoset = value ? { ...config as any, ...value.attributes, createdAt: undefined, updatedAt: undefined } : config;
-            Object.keys(todoset).forEach(key => this[key] = todoset[key]);
+            let todoset = value ? { ...config as any, ...value.attributes } : config;
+            delete todoset.createdAt;
+            delete todoset.updatedAt;
+            //Object.keys(todoset).forEach(key => this[key] = todoset[key]);
+            set(todoset);
             if (!value) {
                 /// 3) Write default if not exists
                 await save();

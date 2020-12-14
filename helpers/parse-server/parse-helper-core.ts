@@ -8,6 +8,7 @@ import { EnumConverter } from './../utility/get-enum-key';
 import { RoleList } from 'core/userRoles.gen';
 import { Meta } from 'helpers/utility/meta';
 import { Log } from 'helpers/utility/log';
+import { ObjectId, Binary } from 'mongodb';
 
 /// decorators //////////////
 var primaryClassMap = {};
@@ -173,7 +174,7 @@ export class ParseObject<T> extends Parse.Object {
             }
         }
 
-        var NeutualizeType = (data: any, filter: any, refDetect = {}): any => {
+        var NeutualizeType = (data: any, filter: any, refDetect = {}, hintKey?): any => {
             var type = typeof data;
             if (type === 'boolean') return data;
             else if (type === 'string') return data;
@@ -183,6 +184,8 @@ export class ParseObject<T> extends Parse.Object {
             else if (data instanceof Date) return data.toISOString();
             else if (data instanceof Parse.File) return data.url();
             else if (data instanceof Parse.Relation) return undefined;
+            else if (data instanceof ObjectId) return data.toString();
+            else if (data instanceof Binary) return data.buffer.toString("base64");
             else if (data instanceof Parse.Object) {
                 if (data.id && refDetect[data.id]) return undefined;
                 if (data instanceof Parse.User) filter = filter || filterRules["Parse.User"];
@@ -205,13 +208,13 @@ export class ParseObject<T> extends Parse.Object {
                     else if (typeof cfilter === 'function') {
                         result[key] = cfilter(data[key]);
                     } else {
-                        let rtn = NeutualizeType(data[key], cfilter, refDetect);
+                        let rtn = NeutualizeType(data[key], cfilter, refDetect, key);
                         !isArray && (result[key] = rtn);
                         isArray && (rtn !== undefined) && (<any>result).push(rtn);
                     }
                 } return result;
             } else {
-                throw `Inner Error: ${type} is not accepted output type.`;
+                throw `Inner Error: ${type} is not accepted output type. key: ${hintKey}`;
             }
         };
 

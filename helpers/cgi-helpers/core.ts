@@ -50,6 +50,7 @@ import { IncomingMessage } from 'http';
 import { UserHelper } from 'helpers/parse-server/user-helper';
 import { Tree } from 'models/nodes';
 import CollectionWatcher from 'helpers/mongodb/collection-watcher';
+import { Cursor } from 'mongodb';
 
 
 let connectedSockets: { [sid: string]: Socket[] } = {};
@@ -375,7 +376,7 @@ export namespace Restful {
         return query;
     }
 
-    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T> | any[], params: IInputPaging<any>, filter: any = null, tuner: ((input: T[])=> Promise<T[]>) = null): Promise<IOutputPaging<any>> {
+    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T> | Cursor<any> | any[], params: IInputPaging<any>, filter: any = null, tuner: ((input: T[])=> Promise<T[]> | T[]) = null): Promise<IOutputPaging<any>> {
         var paging = params.paging || {};
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
@@ -388,8 +389,17 @@ export namespace Restful {
             total = await query.count();
             totalPages = Math.ceil(total / pageSize);
             page = Math.max(Math.min(page, totalPages), 1);
-            var o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
+            let o = await query.limit(pageSize).skip( (page-1) * pageSize ).find();
     
+            if (tuner) o = await tuner(o);
+            results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );
+
+        } else if (query instanceof Cursor) {
+            total = await query.count();
+            totalPages = Math.ceil(total / pageSize);
+            page = Math.max(Math.min(page, totalPages), 1);
+            let o = await query.limit(pageSize).skip( (page-1) * pageSize ).toArray();
+
             if (tuner) o = await tuner(o);
             results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );
 

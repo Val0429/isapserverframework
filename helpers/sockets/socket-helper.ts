@@ -9,8 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import * as Rx from 'rxjs/Rx';
 import { Response } from 'express/lib/response';
 import { ExpressWsRouteInfo, ExpressWsCb } from './../middlewares/express-ws-routes';
-import { Retrier } from 'workspace/custom/helpers/retrier';
-
+import { Retrier } from 'helpers/utility/retrier';
 
 
 export class Socket {
@@ -22,10 +21,22 @@ export class Socket {
     static get(url: string): Promise<Socket>;
     static get(info: ExpressWsRouteInfo, cb: ExpressWsCb): Promise<Socket>;
     static get(arg1: any, arg2?: any): Promise<Socket> {
-        return new Promise( (resolve) => {
+        return new Promise( async (resolve, reject) => {
             var ws, info, cb;
             if (!arg2) {
-                if (typeof arg1 === "string") arg1 = new WSSocket(arg1);
+                if (typeof arg1 === "string") {
+                    try {
+                        arg1 = new WSSocket(arg1);
+                        await new Promise((resolve, reject) => {
+                            let handled: boolean = false;
+                            let openListener = () => !handled && (handled = true, resolve());
+                            let errorListener = (e) => !handled && (handled = true, reject(e));
+                            arg1.addListener("open", openListener);
+                            arg1.addListener("close", errorListener);
+                            arg1.addListener("error", errorListener);
+                        });
+                    } catch(e) { reject(e) }
+                }
                 if (arg1 instanceof WSSocket) {
                     ws = arg1;
                     info = {}; cb = (c) => {c(ws)};

@@ -9,11 +9,10 @@ import { RegistrationDelegator } from "../declarations";
 import { IAgentRequest, EAgentRequestType, IAgentResponse } from "../core";
 import { jsMapAssign } from "helpers/utility/jsmap-assign";
 import { ServerDBTask } from "../database/server-db-task";
-import { Log } from "helpers/utility";
+import { Log, idGenerate } from "helpers/utility";
 import { DataKeeper } from "../data-keeper";
 import { ObjectHolder } from "./object-holder";
 import { AgentDBTask } from "../database/agent-db-task";
-import { idGenerate } from "../id-generator";
 import { Subject } from "rxjs";
 import { SocketResolver } from "../socket-manager/socket-resolver";
 

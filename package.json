@@ -1,11 +1,11 @@
 {
-  "name": "isap-smartface-server",
+  "name": "isap-smartface-engine",
   "version": "1.00.00",
   "frameworkversion": "1.08.09",
   "config": {
-    "displayname": "iSap SmartFace Server"
+    "displayname": "iSap SmartFace Engine"
   },
-  "description": "iSap SmartFace Server v1.00.00",
+  "description": "iSap SmartFace Engine v1.00.00",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -60,6 +60,7 @@
     "mime-types": "2.1.19",
     "module-alias": "2.1.0",
     "mongodb": "3.5.9",
+    "nanoid": "^3.1.20",
     "network": "0.3.2",
     "node-csv-parse": "1.2.0",
     "nodemailer": "6.4.16",
@@ -73,7 +74,6 @@
     "rxjs": "5.5.11",
     "server-packager": "git+http://val.liu:65576557v@isap-dev-server:3000/iSAP-AP-Team/server-packager.git#e801a0aa52",
     "sharp": "^0.26.2",
-    "shortid": "^2.2.16",
     "tmp-promise": "3.0.2",
     "ts-morph": "7.1.2",
     "ts-node": "git+http://val.liu:65576557v@isap-dev-server:3000/iSAP-AP-Team/ts-node.git#cbe90a614e",

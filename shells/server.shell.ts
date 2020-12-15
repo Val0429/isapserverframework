@@ -87,8 +87,7 @@ if (Config.mongodb.enable) {
     var ParseServer = new parse.ParseServer({
         //databaseURI,
         databaseAdapter: new InMemoriableMongoDBAdapter({uri: databaseURI, mongoOptions: {
-            reconnectInterval: 2000,
-            reconnectTries: 300000,
+            useUnifiedTopology: true
         }}),
         filesAdapter: new GridStoreAdapter(databaseURI),
         appId: Config.parseServer.appId,

@@ -81,7 +81,7 @@ export var EventsSubject: Subject<Events> = new Subject<Events>();
 
     let { ip, port, collection } = Config.mongodb;
     const url = mongoDBUrl();
-    let client = await MongoClient.connect(url, {useNewUrlParser: true});
+    let client = await MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
     let db = client.db(collection);
 
     let events = [{2}];

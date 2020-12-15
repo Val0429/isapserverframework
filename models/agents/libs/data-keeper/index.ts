@@ -7,10 +7,10 @@
 import { EnumAgentResponseStatus, ITaskFunctionDataKeeping, IDataKeeperStorage, TimestampToken } from "../core";
 import { ISocketDelegatorRequest } from "../socket-manager";
 import { BehaviorSubject, Subject } from "rxjs";
-import { idGenerate } from "../id-generator";
 import { DataStorage, collection } from "./data-storage";
 import { createIndex } from "helpers/parse-server/parse-helper";
 import { makeCancelablePromise } from "helpers/utility/make-cancelable-promise";
+import { idGenerate } from "helpers/utility/id-generator";
 
 export interface IDataKeeperConfig {
     rule?: ITaskFunctionDataKeeping;

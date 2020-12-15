@@ -7,8 +7,8 @@
 import { IAgentRequest, IAgentResponse, IAgentStreaming, EAgentRequestType, EnumAgentResponseStatus, IRemoteAgentTask, injectTimestamp, injectErrorTimestamp, injectCompleteTimestamp, TimestampToken } from "../core";
 import { Subject, Observable } from "rxjs";
 import { Socket, ActionParam, ParseObject } from "helpers/cgi-helpers/core";
-import { idGenerate } from "../id-generator";
 import { SocketResolver } from "./socket-resolver";
+import { idGenerate } from "helpers/utility/id-generator";
 
 export interface ISocketDelegatorRequest {
     request: IAgentRequest;

@@ -8,11 +8,10 @@ import { IRemoteAgentTask, IAgentTaskFunction, ITaskFunctionRemote, IAgentTaskRe
 import { Observable, Observer, BehaviorSubject } from "rxjs";
 import { RegistrationDelegator } from "./registration-delegator";
 import { SocketManager } from './../socket-manager';
-import { idGenerate } from "../id-generator";
 export * from './registration-delegator';
 import ast from 'services/ast-services/ast-client';
 import { ServerDBTasks } from "../database/server-db-task";
-import { Mutex } from "helpers/utility";
+import { Mutex, idGenerate } from "helpers/utility";
 import { AgentDBTasks } from "../database/agent-db-task";
 import outputEventSaver from "../database/output-event-saver";
 const caller = require('caller');

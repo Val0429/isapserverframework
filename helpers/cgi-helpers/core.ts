@@ -413,9 +413,6 @@ export class Action<T = any, U = any> {
 
                         next(error);
                     }
-                    
-                    /// send 200 ok
-                    socket.send({statusCode: 200});
                 }
             );
         }

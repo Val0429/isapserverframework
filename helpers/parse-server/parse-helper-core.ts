@@ -206,7 +206,7 @@ export class ParseObject<T> extends Parse.Object {
                     var cfilter = Array.isArray(data) ? filter : (filter ? filter[key] : undefined);
                     if (cfilter === false) result[key] = undefined;
                     else if (typeof cfilter === 'function') {
-                        result[key] = cfilter(data[key]);
+                        result[key] = cfilter(data[key], data);
                     } else {
                         let rtn = NeutualizeType(data[key], cfilter, refDetect, key);
                         !isArray && (result[key] = rtn);

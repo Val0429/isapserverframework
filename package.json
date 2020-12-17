@@ -1,11 +1,11 @@
 {
-  "name": "isap-smartface-engine",
+  "name": "isap-smartface-server",
   "version": "1.00.00",
-  "frameworkversion": "1.08.09",
+  "frameworkversion": "1.08.10",
   "config": {
-    "displayname": "iSap SmartFace Engine"
+    "displayname": "iSap SmartFace Server"
   },
-  "description": "iSap SmartFace Engine v1.00.00",
+  "description": "iSap SmartFace Server v1.00.00",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -72,7 +72,7 @@
     "request": "2.87.0",
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",
-    "server-packager": "git+http://val.liu:65576557v@isap-dev-server:3000/iSAP-AP-Team/server-packager.git#e801a0aa52",
+    "server-packager": "git+http://val.liu:65576557v@isap-dev-server:3000/iSAP-AP-Team/server-packager.git#5929fd954b",
     "sharp": "^0.26.2",
     "tmp-promise": "3.0.2",
     "ts-morph": "7.1.2",
@@ -87,25 +87,52 @@
   },
   "pkg": {
     "targets": [
-      "node8-win-x64"
+      "node12-win-x64"
     ],
     "assets": [
       "**/*",
-      "!workspace/config/**/*",
+      "!.setting*",
+      "!workspace/custom/assets/**/*",
       "!workspace/custom/license/**/*",
       "!workspace/custom/files/**/*",
       "!dist/**/*",
-      "!**/.git/**/*"
+      "!**/.git/**/*",
+      "!workspace/custom/modules/valxnet/build/data/**/*"
     ],
     "inplaces": [
-      "workspace/config/**/*",
+      ".setting_core.json",
+      ".setting_db.json",
+      ".setting_parseDashboard.json",
+      ".setting_parseServer.json",
+      "workspace/custom/assets/**/*",
       "workspace/custom/license/**/*",
-      "workspace/custom/files/**/*"
+      "workspace/custom/files/**/*",
+      "workspace/custom/modules/valxnet/build/data/**/*",
+      "workspace/custom/modules/valxnet/build/Release/models/**/*"
     ],
     "natives": {
-      "helpers/sms/lib/sms-dll.dll": "./",
-      "services/license/lib/windows/license_manager.node": "./",
-      "services/face-detection/lib/LibFaceDetection.dll": "./"
+      "workspace/custom/modules/valxnet/build/Release/valxnet.node": "./",
+      "workspace/custom/modules/valxnet/build/Release/avcodec-58.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/avdevice-58.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/avfilter-7.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/avformat-58.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/avutil-56.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/mkl_avx2.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/mkl_avx512.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/mkl_core.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/mkl_rt.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/opencv_core430.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/opencv_highgui430.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/opencv_imgcodecs430.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/swresample-3.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/swscale-5.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/tbb.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/tvm.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/tvm_runtime.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/tvm_topi.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/models/MXNet/deploy_graph_0.json": "./",
+      "workspace/custom/modules/valxnet/build/Release/models/MXNet/deploy_lib_0.dll": "./",
+      "workspace/custom/modules/valxnet/build/Release/models/MXNet/deploy_param_0.params": "./"
     }
   }
 }

@@ -340,13 +340,14 @@ export namespace Restful {
         parseObject: true
     }> = OutputU<T, K>;
 
-    export function Filter<T extends Parse.Object = any>(query: Parse.Query<T>, params: object): Parse.Query<T> {
-        /// remove paging
+    // export function Filter<T extends Parse.Object = any>(query: Parse.Query<T> | Cursor<any>, params: object): Parse.Query<T> {
+    export function Filter<T extends (Parse.Query<U> | Cursor<any>), U extends Parse.Object = any>(query: T, params: object): T {
+            /// remove paging
         var ps :any = { ...params, paging: undefined };
         //console.log('ps',ps);
         /// including others
         // for (var p in ps) query = query.equalTo(p, ps[p]);
-        function queryFilter(query: Parse.Query<T>, params: object, prefix: string = null) {
+        function queryFilter(query: Parse.Query<U>, params: object, prefix: string = null) {
          //console.log('prefix', prefix, params);
             if (Array.isArray(params)) return query.containedIn(prefix, params);
             if (params instanceof Parse.Object ||
@@ -362,16 +363,26 @@ export namespace Restful {
             return query.equalTo(prefix, params);
 
         }
-        queryFilter(query, ps);
+        /// Filter don't handle Cursor for now
+        if (query instanceof Parse.Query) queryFilter(query, ps);
         //sorting
         if(ps.sorting && ps.sorting.order !=undefined && ps.sorting.field){
-           
-            if(!ps.sorting.order) query.ascending(ps.sorting.field);
-            else query.descending(ps.sorting.field);
+            let order = parseInt(ps.sorting.order, 10);
+            if (query instanceof Cursor) {
+                if (!order) query = query.sort(ps.sorting.field, -1) as any;
+                else query = query.sort(ps.sorting.field, 1) as any;
+
+            } else if (query instanceof Parse.Query) {
+                if(!order) query.ascending(ps.sorting.field);
+                else query.descending(ps.sorting.field);
+            }
         }
-        //filtering
-        if(ps.filtering && ps.filtering.field && ps.filtering.value){
-            query.matches(ps.filtering.field, new RegExp(ps.filtering.value), "i");
+
+        if (query instanceof Parse.Query) {
+            // filtering don't handle Cursor for now
+            if(ps.filtering && ps.filtering.field && ps.filtering.value){
+                query.matches(ps.filtering.field, new RegExp(ps.filtering.value), "i");
+            }
         }
         return query;
     }

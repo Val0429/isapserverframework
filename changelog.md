@@ -1,3 +1,22 @@
+# [v2.03.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.03.01) (2020/12/01)
+
+### Release Note:
+* Remove ast service response extra exception message
+* Add trim in request parameter when type was string
+* Remove auto send success response when use websocket
+
+### Workspace Adjustment:
+* Add send success response message when webscoket cgi
+  In **workspace/cgi-bin/\*\*/*.ts**
+  ```typescript
+  action.ws({}, async (data) => {
+    let _socket: Socket = data.socket;
+    _socket.send({ statusCode: 200 });
+  });
+  ```
+
+
+
 # [v2.03.00](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.03.00) (2020/12/01)
 
 ### Release Note:

@@ -72,7 +72,7 @@
     "request": "2.87.0",
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",
-    "server-packager": "git+http://isap-dev-server:3000/iSAP-AP-Team/server-packager.git#615ef9b5a0",
+    "server-packager": "git+http://isap-dev-server:3000/iSAP-AP-Team/server-packager.git#56cc0f0edf",
     "sharp": "^0.26.2",
     "tmp-promise": "3.0.2",
     "ts-morph": "7.1.2",

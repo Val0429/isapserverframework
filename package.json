@@ -1,7 +1,7 @@
 {
   "name": "isap-smartface-engine",
   "version": "1.00.00",
-  "frameworkversion": "1.08.10",
+  "frameworkversion": "1.08.11",
   "config": {
     "displayname": "iSap SmartFace Engine"
   },
@@ -12,8 +12,8 @@
   "bin": "main.ts",
   "typings": "dist/index",
   "scripts": {
-    "start": "npm run build:live",
-    "debug": "cross-env NODE_ENV=development npm run build:debug",
+    "start": "cross-env TVM_NUM_THREADS=1 && npm run build:live",
+    "debug": "cross-env NODE_ENV=development TVM_NUM_THREADS=1 && npm run build:debug",
     "build": "ts-node main.ts",
     "build:live": "nodemon --restartcrash --exec ts-node main.ts",
     "build:debug": "nodemon --exec ts-node main.ts",
@@ -24,7 +24,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "install-windows-service": "winser -i -s -a --startwithnpm --displayname \"%npm_package_config_displayname%\"",
     "uninstall-windows-service": "winser -r -x -s",
-    "pack": "server-packager ./ --no-bytecode --out-path=./dist",
+    "pack": "ts-node ./core/packer.ts && server-packager ./ --no-bytecode --out-path=./dist",
     "dorelease": "ts-node ./shells/do-release.shell.ts -s"
   },
   "nodemonConfig": {
@@ -65,7 +65,7 @@
     "node-csv-parse": "1.2.0",
     "nodemailer": "6.4.16",
     "nodemon": "git+http://isap-dev-server:3000/iSAP-AP-Team/nodemon.git#5480aea102",
-    "npm": "git+http://isap-dev-server:3000/iSAP-AP-Team/npm.git#d91a1cedf94",
+    "npm": "git+http://isap-dev-server:3000/iSAP-AP-Team/npm.git#0c804981c2bb",
     "parse-dashboard": "1.2.0",
     "parse-server": "^4.3.0",
     "qrcode": "^1.3.3",

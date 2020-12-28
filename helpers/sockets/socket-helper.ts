@@ -87,9 +87,7 @@ export class Socket {
         var cb = arg3 || arg2;
         cb = cb ? this.wrapper(cb) : null;
         this.sendCount.next(this.sendCount.getValue()+1);
-        try {
-            this.io.send.call(this.io, data, cb);
-        } catch(e) { /* socket closed */ }
+        this.io.send.call(this.io, data, cb);
     }
     private wrapper(callback: (err: Error) => void): (err: Error) => void {
         return (err: Error): void => {

@@ -69,17 +69,22 @@ export class DBConfigFactory<T> {
             sjChange.next(innateValue);
         }
 
+        const define = (key) => {
+            if (typeof key !== "string") return Object.keys(key).forEach(v => define(v));
+            if (!definedTable[key]) {
+                Object.defineProperty(this, key, { enumerable: true,
+                    get: () => get(key),
+                    set: (value) => set(key, value)
+                });
+                definedTable[key] = true;
+            }
+        }
+
         /// define Proxy
         let definedTable: any = {};
         (this as any).__proto__ = new Proxy({}, {
             set: (target, key, value) => {
-                if (!definedTable[key] && value !== undefined) {
-                    Object.defineProperty(this, key, { enumerable: true,
-                        get: () => get(key),
-                        set: (value) => set(key, value)
-                    });
-                    definedTable[key] = true;
-                }
+                define(key);
                 set(key, value);
                 return true;
             },
@@ -95,6 +100,7 @@ export class DBConfigFactory<T> {
             delete todoset.createdAt;
             delete todoset.updatedAt;
             //Object.keys(todoset).forEach(key => this[key] = todoset[key]);
+            define(todoset);
             set(todoset);
             if (!value) {
                 /// 3) Write default if not exists

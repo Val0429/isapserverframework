@@ -1,7 +1,7 @@
 {
   "name": "isap-smartface-server",
   "version": "1.00.02",
-  "frameworkversion": "1.08.11",
+  "frameworkversion": "1.08.12",
   "config": {
     "displayname": "iSap SmartFace Server"
   },
@@ -97,11 +97,11 @@
       "!.setting_parseServer.json",
       "!node_modules/winser/bin/nssm64.exe",
       "!node_modules/winser/bin/nssm.exe",
+      "!dist/**/*",
+      "!**/.git/**/*",
       "!workspace/custom/assets/**/*",
       "!workspace/custom/license/**/*",
       "!workspace/custom/files/**/*",
-      "!dist/**/*",
-      "!**/.git/**/*",
       "!workspace/custom/modules/valxnet/build/data/**/*"
     ],
     "inplaces": [

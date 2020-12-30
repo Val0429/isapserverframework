@@ -58,6 +58,8 @@ declare module "helpers/parse-server/parse-helper-core" {
         export function getCachedByIndex<T>(targetClass: Constructor<T>, key: keyof ExtractParseObjectT<T>): { [instanceKey: string]: T[] };
         export function getCachedByIndex<T>(targetClass: Constructor<T>, key: keyof ExtractParseObjectT<T>, instanceKey: string): T[];
         export function getCachedOneByIndex<T>(targetClass: Constructor<T>, key: keyof ExtractParseObjectT<T>, instanceKey: string): T;
+
+        export function getCachedById<T>(targetClass: Constructor<T>, id: string): T;
     }
 }
 
@@ -239,6 +241,16 @@ export function memoryCached<T>(config?: IMemoryCachedConfig) {
                 ensureIndexing(metaObject, key);
                 let ary = getCachedInstanceKey(key as any, instanceKey, cachedIndexList);
                 return ary.length === 0 ? undefined : ary[0];
+            }
+        }
+
+        /// add getCachedById to ParseObject
+        if (!ParseObject.getCachedById) {
+            ParseObject.getCachedById = function(target, id) {
+                let metaObject = Meta.get(target);
+                let cachedList = metaObject.cachedList;
+                if (!cachedList) return;
+                return cachedList[id];
             }
         }
 

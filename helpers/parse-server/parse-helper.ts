@@ -81,4 +81,40 @@ export async function dropIndex(collectionName: string, indexName: string) {
         await instance.dropIndex(indexName);
     }
 }
-    
+
+/// magicString example: TTLUpdatedDate
+/// field example: invitationDate
+export async function createExpiringIndexByConfig(collection: string, magicString: string, days: number, field: string) {
+    if (days === undefined) return;
+    let db = await sharedMongoDB();
+    let expireAfterSeconds = days*24*60*60;
+    let regex = new RegExp(`^${magicString}_`);
+    let regexMatch = new RegExp(`^${magicString}_(([0-9]*[.])?[0-9]+)`);
+    await ensureCollectionExists(collection);
+    let instance = db.collection(collection);
+    let indexes = await instance.listIndexes().toArray();
+    let touchDateIdx: string = indexes.reduce( (final, value) => {
+        if (final) return final;
+        if (regex.test(value.name)) return value.name;
+    }, undefined);
+    /// if exists, check day
+    if (touchDateIdx) {
+        let result: number = +touchDateIdx.match(regexMatch)[1];
+        if (days !== result) {
+            /// drop old index
+            Log.Info("Dropping Index", `Drop Old ${collection} Recycle Index...`);
+            await instance.dropIndex(touchDateIdx);
+            /// create new index
+            createIndex(collection, `${magicString}_${days}`,
+                { [field]: 1 },
+                { expireAfterSeconds }
+            );
+        }
+    } else {
+        /// create new index
+        createIndex(collection, `${magicString}_${days}`,
+            { [field]: 1 },
+            { expireAfterSeconds }
+        );
+    }
+}

@@ -1,11 +1,11 @@
 {
   "name": "isap-smartface-server",
-  "version": "1.00.02",
-  "frameworkversion": "1.08.12",
+  "version": "1.00.03",
+  "frameworkversion": "1.08.13",
   "config": {
     "displayname": "iSap SmartFace Server"
   },
-  "description": "iSap SmartFace Server v1.00.02",
+  "description": "iSap SmartFace Server v1.00.03",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -55,6 +55,7 @@
     "express-ws": "3.0.0",
     "express-ws-routes": "1.1.0",
     "getmac": "1.4.6",
+    "ipcheck": "^0.1.0",
     "json-prune": "1.1.0",
     "longjohn": "0.2.12",
     "mime-types": "2.1.19",

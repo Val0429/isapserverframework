@@ -34,6 +34,10 @@ export interface Config {
     disableCache: boolean;
     accessControlAllowOrigin: boolean;
     /**
+     * Only allow localhost to connect. default: false
+     */
+    restrictToLocal?: boolean;
+    /**
      * Sub path of cgi? ex: /api
      * default: null
      */

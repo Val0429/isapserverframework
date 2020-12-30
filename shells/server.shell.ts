@@ -24,6 +24,7 @@ import * as fs from 'fs';
 import * as p from 'path';
 import { noCache } from 'helpers/middlewares/no-cache';
 import { secureContentType } from 'helpers/middlewares/secure-content-type';
+import { restrictLocal } from 'helpers/middlewares/restrict-local';
 import { blockRobots } from 'helpers/middlewares/block-robots';
 import { accessControlAllowOrigin } from 'helpers/middlewares/access-control-allow-origin';
 import { routerLoader } from 'helpers/routers/router-loader';
@@ -53,6 +54,8 @@ lj.async_trace_limit = 20;
 `;
 
 var tDisableCache = `
+/// Restrict to Local
+if (Config.core.restrictToLocal) app.use(restrictLocal);
 /// Secure Content-Type
 app.use(secureContentType);
 /// block SEO

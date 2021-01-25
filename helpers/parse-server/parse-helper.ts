@@ -52,13 +52,13 @@ export async function ensureCollectionExists(collectionName: string) {
     let db = await sharedMongoDB();
     /// ensure collection exists
     await mutex.acquire();
-    await db.createCollection(collectionName);
+    await db.createCollection(collectionName, (err) => {});
     mutex.release();
 }
 
 export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions = {}) {
     let db = await sharedMongoDB();
-
+    await ensureCollectionExists(collectionName);
     var instance = db.collection(collectionName);
     try {
         if (!(await instance.indexExists(indexName))) throw null;

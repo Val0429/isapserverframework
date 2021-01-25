@@ -60,7 +60,7 @@
     "longjohn": "0.2.12",
     "mime-types": "2.1.19",
     "module-alias": "2.1.0",
-    "mongodb": "3.5.9",
+    "mongodb": "^3.6.3",
     "nanoid": "^3.1.20",
     "network": "0.3.2",
     "node-csv-parse": "1.2.0",
@@ -100,6 +100,7 @@
       "!node_modules/winser/bin/nssm64.exe",
       "!node_modules/winser/bin/nssm.exe",
       "!dist/**/*",
+      "!logs/**/*",
       "!**/.git/**/*"
     ],
     "inplaces": [

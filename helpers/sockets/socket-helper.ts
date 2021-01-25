@@ -73,7 +73,9 @@ export class Socket {
 
     sendPromise(data: any): Promise<void> {
         return new Promise( (resolve, reject) => {
+            this.sendCount.next(this.sendCount.getValue()+1);
             this.send(data, (err) => {
+                this.sendCount.next(this.sendCount.getValue()-1);
                 if (!err) return resolve();
                 reject(err);
             });
@@ -81,11 +83,12 @@ export class Socket {
     }
 
     send(data: any, cb?: (err: Error) => void): void;
-    send(data: any, options: { mask?: boolean; binary?: boolean }, cb?: (err: Error) => void): void;
-    send(data: any, arg2?: any, arg3?: any) {
+    // send(data: any, options: { mask?: boolean; binary?: boolean }, cb?: (err: Error) => void): void;
+    // send(data: any, arg2?: any, arg3?: any) {
+    send(data: any, arg2?: any) {
         typeof data === 'object' && !(data instanceof Buffer) && (data = JSON.stringify(data));
-        var cb = arg3 || arg2;
-        cb = cb ? this.wrapper(cb) : null;
+        var cb = arg2;
+        cb = this.wrapper(cb);
         this.sendCount.next(this.sendCount.getValue()+1);
         this.io.send.call(this.io, data, cb);
     }
@@ -96,12 +99,8 @@ export class Socket {
         }
     }
 
-    public closeGracefully() {
-        let subscription = this.sendCount.observeOn(Rx.Scheduler.asap).subscribe( (value) => {
-            if (value === 0) {
-                this.io.close();
-                subscription.unsubscribe();
-            }
-        });
+    public async closeGracefully() {
+        await this.sendCount.filter(v => v === 0).first().toPromise();
+        this.io.close();
     }
 }

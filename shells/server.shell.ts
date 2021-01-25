@@ -31,7 +31,7 @@ import { routerLoader } from 'helpers/routers/router-loader';
 import { makeServerReady } from 'core/pending-tasks';
 import * as ParseDashboard from 'parse-dashboard';
 import { MongoClient, Collection, IndexOptions, Db } from 'mongodb';
-import { sharedMongoDB } from 'helpers/parse-server/parse-helper';
+import { sharedMongoDB, ensureCollectionExists } from 'helpers/parse-server/parse-helper';
 import { Action } from 'helpers/cgi-helpers/core';
 import { Log } from 'helpers/utility';
 import { deployWeb } from 'helpers/deploy-web';
@@ -194,7 +194,7 @@ let jobCreateDB = () => {
         /// todo: this is a workaround. create database at the beginning.
         let { ip, port, collection } = Config.mongodb;
         let db = await sharedMongoDB();
-        await db.createCollection("_SCHEMA");
+        ensureCollectionExists("_SCHEMA");
         ////////////////////////////////////////////////////////////////
         resolve();
     });

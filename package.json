@@ -1,7 +1,7 @@
 {
   "name": "isap-smartface-server",
   "version": "1.00.03",
-  "frameworkversion": "1.08.13",
+  "frameworkversion": "1.08.14",
   "config": {
     "displayname": "iSap SmartFace Server"
   },

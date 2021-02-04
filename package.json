@@ -1,19 +1,19 @@
 {
-  "name": "isap-smartface-server",
-  "version": "1.00.03",
+  "name": "isap-smartface-engine",
+  "version": "1.00.04",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap SmartFace Server"
+    "displayname": "iSap SmartFace Engine"
   },
-  "description": "iSap SmartFace Server v1.00.03",
+  "description": "iSap SmartFace Engine v1.00.04",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
   "bin": "main.ts",
   "typings": "dist/index",
   "scripts": {
-    "start": "cross-env TVM_NUM_THREADS=1 && npm run build:live",
-    "debug": "cross-env NODE_ENV=development TVM_NUM_THREADS=1 && npm run build:debug",
+    "start": "npm run build:live",
+    "debug": "npm run build:debug",
     "build": "ts-node main.ts",
     "build:live": "nodemon --restartcrash --exec ts-node main.ts",
     "build:debug": "nodemon --exec ts-node main.ts",

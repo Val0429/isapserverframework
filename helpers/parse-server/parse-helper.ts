@@ -48,18 +48,30 @@ export async function sharedMongoDB(): Promise<Db> {
 }
 
 const mutex: Mutex = new Mutex();
-export async function ensureCollectionExists(collectionName: string) {
+export async function ensureCollectionExists(collectionName: string): Promise<Collection<any>> {
     let db = await sharedMongoDB();
     /// ensure collection exists
     await mutex.acquire();
-    await db.createCollection(collectionName, (err) => {});
-    mutex.release();
+    return new Promise<Collection<any>>((resolve, reject) => {
+        db.createCollection(collectionName, (err, collection) => {
+            try {
+                if (err) {
+                    /// other error
+                    if (err.code != 48) return reject(err);
+                    /// already exists
+                    collection = db.collection(collectionName);
+                }
+                resolve(collection);
+            } finally {
+                mutex.release();
+            }
+        });
+    });
 }
 
 export async function createIndex(collectionName: string, indexName: string, fieldOrSpec: any, options: IndexOptions = {}) {
     let db = await sharedMongoDB();
-    await ensureCollectionExists(collectionName);
-    var instance = db.collection(collectionName);
+    let instance = await ensureCollectionExists(collectionName);
     try {
         if (!(await instance.indexExists(indexName))) throw null;
     } catch(reason) {
@@ -90,8 +102,7 @@ export async function createExpiringIndexByConfig(collection: string, magicStrin
     let expireAfterSeconds = days*24*60*60;
     let regex = new RegExp(`^${magicString}_`);
     let regexMatch = new RegExp(`^${magicString}_(([0-9]*[.])?[0-9]+)`);
-    await ensureCollectionExists(collection);
-    let instance = db.collection(collection);
+    let instance = await ensureCollectionExists(collection);
     let indexes = await instance.listIndexes().toArray();
     let touchDateIdx: string = indexes.reduce( (final, value) => {
         if (final) return final;

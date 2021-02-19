@@ -43,7 +43,7 @@ FRSEdgeServer.prototype.getPerson = async function(face: IFilterPerson, times: n
         }, async (err, res, body) => {
             if (err || res.statusCode !== 200) {
                 reject(err || body.toString());
-                if (res.statusCode === 401) {
+                if (res && res.statusCode === 401) {
                     this.sjRequestLogin.next(RequestLoginReason.SessionExpired);
                     await this.waitForLogin();
                 }

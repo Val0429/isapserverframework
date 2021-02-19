@@ -6,6 +6,6 @@
 
 import { nanoid } from 'nanoid';
 
-export function idGenerate() {
-    return nanoid(10);
+export function idGenerate(len: number = 10) {
+    return nanoid(len);
 }

@@ -124,7 +124,7 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
     } else {
         var route: Action = loadRouteFromPath(path);
         if (route === null) return;
-        var routename = name === defaultPath ? (name = "", "($)") : name;
+        var routename = name === defaultPath ? (name = "", "") : name;
 
         var types = [];
         if (route instanceof Action) {

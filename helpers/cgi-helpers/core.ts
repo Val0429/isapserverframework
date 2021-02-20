@@ -236,7 +236,7 @@ export class Action<T = any, U = any> {
             if (this[`func${func}`]) {
                 let realfunc = this[`func${func}`];
                 let config: ActionConfig = this[`func${func}Config`];
-                let realpath = (config ? config.path : "*") || "*";
+                let realpath = (config ? config.path : "/") || "/";
                 router[func.toLowerCase()](realpath, this.configTranslate(config, this.caller), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {
@@ -255,7 +255,7 @@ export class Action<T = any, U = any> {
         if (this.funcWs) {
             let realfunc = this.funcWs;
             let config: ActionConfig = this.funcWsConfig;
-            let realpath = (config ? config.path : "*") || "*";
+            let realpath = (config ? config.path : "/") || "/";
             router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller)), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {
                     var request = <any>info.req;

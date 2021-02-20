@@ -30,7 +30,7 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
         var types = [];
         var protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];
         for (var proto of protos)
-            if (route[`func${proto}`])
+            if (route[`func${proto}`].length > 0)
                 types.push(proto.toUpperCase());
         return types;
     }

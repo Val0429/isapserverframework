@@ -112,7 +112,11 @@ export class Action<T = any, U = any> {
     }
 
     _get(type, arg1, arg2 = null) {
-        var callback = arg2 || arg1; if (arg2) this[`func${type}Config`] = typeof arg1 === 'string' ? { path: arg1 } : arg1; this[`func${type}`] = <any>callback; return this;
+        let callback = arg2 || arg1;
+        let config;
+        if (arg2) config = typeof arg1 === 'string' ? { path: arg1 } : arg1;
+        this[`func${type}`].push({ config, callback });
+        return this;
     }
 
     list(): ActionTypes[] {
@@ -139,36 +143,30 @@ export class Action<T = any, U = any> {
         }, 0);
     }
 
-    public funcAllConfig: ActionConfig;
-    private funcAll: ActionCallback<T, U>;
-    all(callback: ActionCallback<T, U>): Action<T, U> { this.funcAll = callback; return this; }
+    private funcAll: { config?: ActionConfig, callback: ActionCallback<T, U> }[] = [];
+    all(callback: ActionCallback<T, U>): Action<T, U> { this.funcAll.push({callback}); return this; }
 
-    public funcGetConfig: ActionConfig;
-    private funcGet: ActionCallback<T, U>;
+    private funcGet: { config?: ActionConfig, callback: ActionCallback<T, U> }[] = [];
     get<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     get<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     get(arg1, arg2 = null) { return this._get("Get", arg1, arg2); }
 
-    public funcPostConfig: ActionConfig;
-    private funcPost: ActionCallback<T, U>;
+    private funcPost: { config?: ActionConfig, callback: ActionCallback<T, U> }[] = [];
     post<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     post<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     post(arg1, arg2 = null) { return this._get("Post", arg1, arg2); }
 
-    public funcPutConfig: ActionConfig;
-    private funcPut: ActionCallback<T, U>;
+    private funcPut: { config?: ActionConfig, callback: ActionCallback<T, U> }[] = [];
     put<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     put<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     put(arg1, arg2 = null) { return this._get("Put", arg1, arg2); }
 
-    public funcDeleteConfig: ActionConfig;
-    private funcDelete: ActionCallback<T, U>;
+    private funcDelete: { config?: ActionConfig, callback: ActionCallback<T, U> }[] = [];
     delete<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     delete<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     delete(arg1, arg2 = null) { return this._get("Delete", arg1, arg2); }
 
-    public funcWsConfig: ActionConfig;
-    private funcWs: ActionCallback<T, U>;
+    private funcWs: { config?: ActionConfig, callback: ActionCallback<T, U>}[] = [];
     ws<K = null, V = null>(path: string | ActionConfig<K, V>, callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws(arg1, arg2 = null) { return this._get("Ws", arg1, arg2); }
@@ -233,9 +231,10 @@ export class Action<T = any, U = any> {
 
         var funcs = ["All", "Get", "Post", "Put", "Delete"];
         for (var func of funcs) {
-            if (this[`func${func}`]) {
-                let realfunc = this[`func${func}`];
-                let config: ActionConfig = this[`func${func}Config`];
+            let funcAry = this[`func${func}`];
+            for (let instance of funcAry) {
+                let config: ActionConfig = instance.config;
+                let realfunc = instance.callback;
                 let realpath = (config ? config.path : "/") || "/";
                 router[func.toLowerCase()](realpath, this.configTranslate(config, this.caller), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
@@ -252,9 +251,9 @@ export class Action<T = any, U = any> {
             }
         }
         /// ws
-        if (this.funcWs) {
-            let realfunc = this.funcWs;
-            let config: ActionConfig = this.funcWsConfig;
+        for (let instance of this.funcWs) {
+            let realfunc = instance.callback;
+            let config: ActionConfig = instance.config;
             let realpath = (config ? config.path : "/") || "/";
             router["websocket"](realpath, ...this.transferSocketMiddleware(this.configTranslate(config, this.caller)), mergeParams,
                 async (info: ExpressWsRouteInfo, cb: ExpressWsCb, next: NextFunction) => {

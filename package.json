@@ -73,7 +73,7 @@
     "typescript": "3.8.3",
     "typings": "2.1.1",
     "uuid": "3.3.0",
-    "websocket": "1.0.25",
+    "websocket": "^1.0.33",
     "xml2js": "0.4.19"
   }
 }

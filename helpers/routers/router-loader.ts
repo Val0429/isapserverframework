@@ -16,7 +16,7 @@ const hiddenPath = "__api__";
 export var actions: Action[] = [];
 
 /// meant to be called only once
-export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */, routeBasePath = '', first = true, level = 0): Action[] {
+export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */, routeBasePath = '', first = true, level = 0): { actions: Action[], app: any } {
     if (!fs.existsSync(path)) return;
     let name = p.parse(path).name;
     if (name === hiddenPath) return;
@@ -146,5 +146,5 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
         ///////////////
     }
 
-    if (first) return actions;
+    if (first) return { actions, app };
 }

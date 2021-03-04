@@ -32,11 +32,14 @@ interface IConfig {
 export { IConfig };
 `;
 
+var tInterfaceP = `export type {0}ConfigTypeP = Partial<{0}ConfigType>;`;
+
 var tInterfaceSetup = `
 interface IConfigSetup {
 {0}
 }
 export { IConfigSetup };
+export { {1} };
 `;
 
 // core: coreConfig,
@@ -117,16 +120,30 @@ function main(): string {
     )
     /////////////////////////////////////////////
 
+    /// make interface Partial //////////////////
+    var tmp = [];
+    for (var key of keys)
+        tmp.push(tInterfaceP.replace(/\{0\}/g, capitalize(key)));
+    tmpstr.push(tmp.join("\r\n"));
+    /////////////////////////////////////////////
+
     /// make interface setup ////////////////////
     var tmp = [];
     var template = `{0}?: Partial<{0}ConfigType>;`;
+    var tmpType = [];
+    var templateType = `{0}ConfigType`;
     for (var key of keys) {
         tmp.push(
             autoPad(template.replace(/\{0\}/g, capitalize(key)), 4)
         );
+        tmpType.push(
+            templateType.replace(/\{0\}/g, capitalize(key))
+        );
+
     }
     tmpstr.push(
         tInterfaceSetup.replace("{0}", tmp.join("\r\n"))
+                       .replace("{1}", tmpType.join(", "))
     )
     /////////////////////////////////////////////
 

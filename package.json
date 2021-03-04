@@ -1,11 +1,11 @@
 {
-  "name": "isap-smartface-engine",
+  "name": "isap-smartface-server",
   "version": "1.00.04",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap SmartFace Engine"
+    "displayname": "iSap SmartFace Server"
   },
-  "description": "iSap SmartFace Engine v1.00.04",
+  "description": "iSap SmartFace Server v1.00.04",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",

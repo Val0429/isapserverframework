@@ -236,12 +236,15 @@ namespace AstParser {
         /// 3) and also get from asterisk export
         var rtn: Type<ts.Type> = sourceFile.getImportDeclarations().reduce<Type<ts.Type>>( (final, imd, i, ary) => {
             var result = imd.getNamedImports().reduce<Type<ts.Type>>( (final, ims, i, ary2) => {
-                if (ims.getName() === type.type) {
+                if (
+                    type.type === ims.getName() ||
+                    type.type === ims.compilerNode.name.escapedText
+                    ) {
                     /// found
                     //var sf = ims.getNameNode().getDefinitions()[0].getSourceFile();
                     let sf = getSourceFileFromImport(sourceFile, ims);
                     ary.length = ary2.length = 0;
-                    return AstParser.getType({path: sf, type: type.type});
+                    return AstParser.getType({path: sf, type: ims.getName()});
                 } return final;
             }, null);
             if (result) return result;

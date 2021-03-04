@@ -71,7 +71,9 @@ if (Config.core.accessControlAllowOrigin) app.use(<any>accessControlAllowOrigin)
 
 var tLoadRouter = `
 /// Load Routers!
-var actions = routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.core.cgiPath);
+let routerResult = routerLoader(app, \`\${__dirname}/../workspace/cgi-bin\`, Config.core.cgiPath);
+let actions = routerResult.actions;
+let appExport = routerResult.app;
 Log.Info('API Loaded', \`Totally \${Action.count(actions)} APIs.\`);
 `;
 
@@ -206,7 +208,7 @@ let jobCreateDB = () => {
 })();
 
 export {
-  app
+  appExport as app
 }
 `;
 

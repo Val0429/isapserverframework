@@ -171,19 +171,20 @@ export class Action<T = any, U = any> {
     ws<K = null, V = null>(callback: ActionCallback<K extends null ? T : K, V extends null ? U : V>): Action<T, U>;
     ws(arg1, arg2 = null) { return this._get("Ws", arg1, arg2); }
 
+
+    fetchConfig<T extends keyof ActionConfig>(key: T, config: ActionConfig): ActionConfig[T] {
+        return O(config)[key] || O(this.config)[key];
+    }
+
     /// translate ActionConfig to array of middlewares
     configTranslate(config: ActionConfig, caller: string): any[] {
         var middlewares = [];
         if (!config && !this.config) return middlewares;
         /////////////////////////////////////////////
         /// mount middlewares
-        let fetchConfig = <T extends keyof ActionConfig>(key: T): ActionConfig[T] => {
-            return O(config)[key] || O(this.config)[key];
-        }
-
         /// 1) bodyParser
-        let cfPostSizeLimit = fetchConfig("postSizeLimit");
-        let cfTransform = fetchConfig("transform");
+        let cfPostSizeLimit = this.fetchConfig("postSizeLimit", config);
+        let cfTransform = this.fetchConfig("transform", config);
 
         if (!cfTransform) {
             middlewares.push(
@@ -195,21 +196,21 @@ export class Action<T = any, U = any> {
         }
 
         /// 2) login
-        let cfLoginRequired = fetchConfig("loginRequired");
+        let cfLoginRequired = this.fetchConfig("loginRequired", config);
         middlewares.push(loginRequired(cfLoginRequired));
 
         /// 3) permission
-        let cfPermission = fetchConfig("permission");
+        let cfPermission = this.fetchConfig("permission", config);
         cfPermission && middlewares.push(permissionCheck(cfPermission));
         /// 4) api permission
-        let cfApiPermission = fetchConfig("apiToken");
+        let cfApiPermission = this.fetchConfig("apiToken", config);
         cfApiPermission && middlewares.push(apiPermissionCheck(cfApiPermission));
 
         /// 5) inputType
-        let cfInputType = fetchConfig("inputType");
+        let cfInputType = this.fetchConfig("inputType", config);
         cfInputType && middlewares.push(inputType(caller, cfInputType));
         /// mount others
-        let cfMiddlewares = fetchConfig("middlewares");
+        let cfMiddlewares = this.fetchConfig("middlewares", config);
         cfMiddlewares && (middlewares = [...middlewares, ...cfMiddlewares]);
         /////////////////////////////////////////////
 
@@ -235,7 +236,7 @@ export class Action<T = any, U = any> {
             for (let instance of funcAry) {
                 let config: ActionConfig = instance.config;
                 let realfunc = instance.callback;
-                let realpath = (config ? config.path : "/") || "/";
+                let realpath = this.fetchConfig("path", config) || "/";
                 router[func.toLowerCase()](realpath, this.configTranslate(config, this.caller), mergeParams,
                     async (request: Request, response: Response, next: NextFunction) => {
                         try {

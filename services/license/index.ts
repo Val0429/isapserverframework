@@ -7,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Log } from 'helpers/utility';
-const configPath: string = `${__dirname}/../../workspace/custom/license/`;
+const configPath: string = path.resolve(process.cwd(), "./workspace/custom/license");
 
 /// import native module
 const isWindows = process.platform === "win32";

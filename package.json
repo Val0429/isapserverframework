@@ -1,11 +1,11 @@
 {
   "name": "isap-smartface-server",
-  "version": "1.00.04",
+  "version": "1.00.05",
   "frameworkversion": "1.08.14",
   "config": {
     "displayname": "iSap SmartFace Server"
   },
-  "description": "iSap SmartFace Server v1.00.04",
+  "description": "iSap SmartFace Server v1.00.05",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -110,6 +110,12 @@
       ".setting_parseServer.json",
       "node_modules/winser/bin/nssm64.exe",
       "node_modules/winser/bin/nssm.exe"
-    ]
+    ],
+    "natives": {
+      "services/license/lib/windows/liblicense.dll": "./",
+      "services/license/lib/windows/license_manager.node": "./",
+      "services/license/lib/liblicense.dll": "./",
+      "services/license/lib/LibLicenseManager.dll": "./"
+    }
   }
 }

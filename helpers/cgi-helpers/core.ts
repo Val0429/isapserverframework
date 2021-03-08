@@ -133,7 +133,8 @@ export class Action<T = any, U = any> {
         let count = 0;
         let data = actionTypes;
         for (let key of data) {
-            this[`func${key}`] && count++;
+            let func = this[`func${key}`];
+            if (func) count += func.length;
         }
         return count;
     }

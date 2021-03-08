@@ -15,6 +15,11 @@ const defaultPath = "index";
 const hiddenPath = "__api__";
 export var actions: Action[] = [];
 
+interface IRouterPath {
+    path: string;
+    types: string[];
+}
+
 /// meant to be called only once
 export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */, routeBasePath = '', first = true, level = 0): { actions: Action[], app: any } {
     if (!fs.existsSync(path)) return;
@@ -25,17 +30,31 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
         if (name !== blockingException) return;
     }
 
-    var getTypesFromAction = (route: Action) => {
+    var getTypesFromAction = (route: Action): IRouterPath[] => {
         if (route === null) return null;
-        var types = [];
-        var protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];
-        for (var proto of protos)
-            if (route[`func${proto}`].length > 0)
-                types.push(proto.toUpperCase());
-        return types;
+        const protos = ["All", "Get", "Post", "Put", "Delete", "Ws"];
+        let tmproute: { [path: string]: {[key: string]: boolean} } = {};
+        let path = route.config.path || "/";
+        for (let proto of protos) {
+            let funcs = route[`func${proto}`];
+            for (let func of funcs) {
+                let path2 = (func.config||{}).path || path;
+                // { config?: ActionConfig, callback: ActionCallback<T, U> }
+                let curroute = tmproute[path2] || (tmproute[path2] = {});
+                curroute[proto.toUpperCase()] = true;
+            }
+        }
+        return Object.keys(tmproute)
+            .reduce((final, path) => {
+                final.push({
+                    path,
+                    types: Object.keys(tmproute[path])
+                })
+                return final;
+            }, []);
     }
 
-    var gettypesFromActionClassic = (route: express.Router) => {
+    var gettypesFromActionClassic = (route: express.Router): IRouterPath[] => {
         var router: any = route;
         var stack = router.stack;
         var methods = stack[0].route.methods;
@@ -46,7 +65,7 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
             if (methods[proto])
                 types.push(proto.toUpperCase());
         }
-        return types;
+        return [{ path: "/", types }];
     }
 
     var loadRouteFromPath = (path: string) => {
@@ -63,28 +82,37 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
         return route;
     }
 
-    var getTypesFromPath = (path: string) => {
+    var getTypesFromPath = (path: string): IRouterPath[] => {
         var route: Action = loadRouteFromPath(path);
-        var types = [];
+        var types: IRouterPath[] = [];
         if (!route) return types;
         if (route instanceof Action) {
             types = getTypesFromAction(route);
+            /// only take root for path
+            types = types.reduce((final, value) => {
+                if (value.path === "/") final.push(value);
+                return final;
+            }, []);
+
         } else {
             types = gettypesFromActionClassic(route);
         }
         return types;
     }
 
-    var printChild = (name: string, types: Array<string>, root: boolean = true) => {
-        if (root) {
-            var msg = ["\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m"];
-            if (types && types.length > 0) {
-                msg = [...msg.slice(0, msg.length-1), `(${types.join(", ")})`];
-            }
-            console.log(...msg, "\x1b[0m");
+    const printChild = (name: string, router: IRouterPath[], root: boolean = true) => {
+        if (root && router.length === 0) {
+            console.log("\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m");
+            return;
+        }
 
-        } else {
-            if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
+        for (let route of router) {
+            let path = route.path;
+            path = (!path || path === "/") ? '' : path;
+            if (!root && !path && !name) continue;
+            let types = route.types;
+            let msg = ["\x1b[1m\x1b[32m", autoPad(`${root?'/':'-->'}${name}${path}`, 3*level), "\x1b[0m"];
+            console.log("\x1b[33m", ...msg, types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
         }
     }
 
@@ -111,7 +139,7 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
                 app = router;
             }
             /// message ///
-            var types = getTypesFromPath(`${path}/${defaultPath}`);
+            var types: IRouterPath[] = getTypesFromPath(`${path}/${defaultPath}`);
             printChild(name, types, true);
             ///////////////
         }
@@ -126,7 +154,7 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
         if (route === null) return;
         var routename = name === defaultPath ? (name = "", "") : name;
 
-        var types = [];
+        var types: IRouterPath[] = [];
         if (route instanceof Action) {
             route.uri = `${routeBasePath}${name ? `/${name}` : ''}`;
             actions.push(route);
@@ -142,7 +170,6 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
 
         /// message ///
         printChild(name, types, level === 0 ? true : false);
-        // if (name) console.log("\x1b[33m", autoPad(`-->${name}`, 3*level), types.length == 0 ? '' : `(${types.join(", ")})`, "\x1b[0m");
         ///////////////
     }
 

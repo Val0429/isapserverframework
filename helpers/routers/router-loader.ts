@@ -101,6 +101,8 @@ export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */,
     }
 
     const printChild = (name: string, router: IRouterPath[], root: boolean = true) => {
+        router = router.sort((a, b) => a.path.localeCompare(b.path));
+
         if (root && router.length === 0) {
             console.log("\x1b[1m\x1b[32m", autoPad(`/${name}`, 3*level), "\x1b[0m");
             return;

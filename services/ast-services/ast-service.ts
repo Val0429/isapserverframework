@@ -344,80 +344,80 @@ namespace AstParser {
         if (type.isBoolean()) {
             /// 1) boolean
             debug && console.log(`${showname} is boolean, obj ${typeof obj}`);
-            return AstConverter.toBoolean(obj, showname, isArray);
+            return AstServerConverter.toBoolean(obj, showname, isArray);
 
         } else if (type.isString()) {
             /// 2) string
             debug && console.log(`${showname} is string, obj ${typeof obj}`);
-            return AstConverter.toString(obj, showname, isArray);
+            return AstServerConverter.toString(obj, showname, isArray);
 
         } else if (type.isNumber()) {
             /// 3) number
             debug && console.log(`${showname} is number, obj ${typeof obj}`);
-            return AstConverter.toNumber(obj, showname, isArray);
+            return AstServerConverter.toNumber(obj, showname, isArray);
 
         } else if (type.getText() === 'Date') {
             /// 4) Date
             debug && console.log(`${showname} is Date, obj ${typeof obj}`);
-            return AstConverter.toDateEntity(obj, showname, isArray);
+            return AstServerConverter.toDateEntity(obj, showname, isArray);
 
         } else if (type.getText() === 'Buffer') {
             /// 16) Buffer
             debug && console.log(`${showname} is Buffer, obj ${typeof obj}`);
-            return AstConverter.toBufferEntity(obj, showname, isArray);
+            return AstServerConverter.toBufferEntity(obj, showname, isArray);
 
         } else if (type.isEnumLiteral()) {
             /// 5) Enum
             debug && console.log(`${showname} is Enum, obj ${typeof obj}`);
-            return AstConverter.toEnum(type, obj, showname, isArray);
+            return AstServerConverter.toEnum(type, obj, showname, isArray);
         
         } else if (type.isClass()) {
             if (type.getText() === 'Parse.File') {
                 /// 10) Parse.File
                 debug && console.log(`${showname} is ParseFile, obj ${typeof obj}`);
-                return AstConverter.toParseFileEntity(type, obj, showname, isArray);
+                return AstServerConverter.toParseFileEntity(type, obj, showname, isArray);
             } else {
                 /// 6) ParseObject --- string (objectId) | Object
                 debug && console.log(`${showname} is ParseObject, obj ${typeof obj}`);
-                return AstConverter.toParseObjectEntity(type, obj, showname, isArray);
+                return AstServerConverter.toParseObjectEntity(type, obj, showname, isArray);
             }
 
         } else if (type.isInterface() || type.isAnonymous()) {
             /// 7) Object (Interface) --- Object
             /// 7.1) Anonymous Type
             debug && console.log(`${showname} is Interface or Anonymous, obj ${typeof obj}`);
-            return AstConverter.toObject(type, obj, showname, isArray, forceOptional);
+            return AstServerConverter.toObject(type, obj, showname, isArray, forceOptional);
 
         } else if (type.isArray()) {
             /// 8) Array --- Array
             debug && console.log(`${showname} is Array, obj ${typeof obj}`);
             obj = [].concat(obj).filter(n => n != null);
-            return AstConverter.toArray(type, obj, showname);
+            return AstServerConverter.toArray(type, obj, showname);
 
         } else if (type.isTuple()) {
             /// 9) Tuple
             debug && console.log(`${showname} is Tuple, obj ${typeof obj}`);
-            return AstConverter.toTuple(type, obj, showname);
+            return AstServerConverter.toTuple(type, obj, showname);
 
         } else if (type.isNumberLiteral() || type.isBooleanLiteral() || type.isStringLiteral()) {
             /// 11) Literal Type
             debug && console.log(`${showname} is Literal, obj ${typeof obj}`);
-            return AstConverter.ToLiteral(type, obj, showname);
+            return AstServerConverter.ToLiteral(type, obj, showname);
 
         } else if (type.isIntersection()) {
             /// 12) Intersection
             debug && console.log(`${showname} is Intersection, obj ${typeof obj}`);
-            return AstConverter.toIntersection(type, obj, showname, params, forceOptional);
+            return AstServerConverter.toIntersection(type, obj, showname, params, forceOptional);
 
         } else if (type.isUnion()) {
             /// 13) Union
             debug && console.log(`${showname} is Union, obj ${typeof obj}`);
-            return AstConverter.toUnion(type, obj, showname, params, forceOptional);
+            return AstServerConverter.toUnion(type, obj, showname, params, forceOptional);
 
         } else if (type.isObject() && type.getTypeArguments().length > 0) {
             /// 14) Generic
             debug && console.log(`${showname} is Generic, obj ${typeof obj}`);
-            return AstConverter.toObject(type, obj, showname, isArray, forceOptional);
+            return AstServerConverter.toObject(type, obj, showname, isArray, forceOptional);
 
         } else if (type.isObject() && type.getSymbol().getName() === '__type') {
             /// 15) Partial
@@ -426,7 +426,7 @@ namespace AstParser {
                 debug && console.log(`${showname} is Partial, obj ${typeof obj}`);
                 var itype = type.getTypeArguments();
                 if (itype.length === 0) itype = type.getAliasTypeArguments();
-                //return AstConverter.toObject(itype[0], obj, showname, false, true);
+                //return AstServerConverter.toObject(itype[0], obj, showname, false, true);
                 return AstParser.validateType(itype[0], obj, showname, isArray, params, true);
             }
 
@@ -569,7 +569,7 @@ namespace AstParser {
 
 
 /// Value Converter
-namespace AstConverter {
+export namespace AstServerConverter {
 
     export function toBoolean(input: string | number | boolean | any, name: string, isArray: boolean = false): boolean {
         return typeof input === 'string' ? (input === 'true' ? true : false) :
@@ -612,6 +612,7 @@ namespace AstConverter {
         if (typeof input !== 'string') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be valid base64 string of Buffer${isArray?'[]':''}.`]);
         return {
             __type__: "Buffer",
+            class: name,
             data: input
         }
     }

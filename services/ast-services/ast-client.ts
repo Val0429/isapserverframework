@@ -48,10 +48,10 @@ export class AstClient {
 
         /// try convert back
         try {
-            var result = AstConverter.fromDateEntity(data) ||
-                        AstConverter.fromBufferEntity(data) ||
-                        (await AstConverter.fromParseObjectEntity(data)) ||
-                        (await AstConverter.fromParseFileEntity(data))
+            var result = AstClientConverter.fromDateEntity(data) ||
+                        AstClientConverter.fromBufferEntity(data) ||
+                        (await AstClientConverter.fromParseObjectEntity(data)) ||
+                        (await AstClientConverter.fromParseFileEntity(data))
                         ;
             if (result) return result;
 
@@ -230,7 +230,7 @@ namespace AstJSONConverter {
     }
 }
 
-namespace AstConverter {
+export namespace AstClientConverter {
 
     export function fromDateEntity(input: ConverterEntity): Date {
         if (input.__type__ !== "Date") return;
@@ -239,7 +239,14 @@ namespace AstConverter {
 
     export function fromBufferEntity(input: ConverterEntity): Buffer {
         if (input.__type__ !== "Buffer") return;
-        return Buffer.from(input.data, 'base64');
+        //return Buffer.from(input.data, 'base64');
+        try {
+            let regex = /^data[^;]+\;base64\,/i;
+            let data = input.data.replace(regex, "");
+            return Buffer.from(data, 'base64');
+        } catch(e) {
+            throw Errors.throw(Errors.CustomInvalid, [`<${input.class}> should be valid buffer.`]);
+        }
     }
 
     export async function fromParseObjectEntity(input: ConverterEntity): Promise<ParseObject<any>> {

@@ -28,11 +28,13 @@ function deployWeb(directory: string, appOrPort: express.Application | number) {
                     /// don't response web page for websocket
                     if ((req as any).method === 'WEBSOCKET') return next();
                     do {
-                        /// detect in cgi-bin
-                        let uri = url.parse(!Config.core.cgiPath ? req.originalUrl : req.originalUrl.replace(`/${Config.core.cgiPath}`, ''));
-                        let paths = uri.pathname.split('/');
-                        let curi = paths.length > 1 ? paths[1] : null;
-                        if (!curi) break;   /// should not happen
+                        /// url inside cgiPath, do detect in cgi-bin
+                        const url = req.originalUrl;
+                        const regex = Config.core.cgiPath ? new RegExp(`/${Config.core.cgiPath}`, "i") : null;
+                        /// ignore the test, if not inside cgiPath
+                        if (regex && !regex.test(url)) break;
+                        const curi = regex ? url.replace(regex, "") : url;
+
                         let path = p.resolve(__dirname, "../../workspace/cgi-bin", curi);
                         let exists = await Promise.all([
                             new Promise( (resolve, reject) => fs.exists(path, (exists) => resolve(exists)) ),

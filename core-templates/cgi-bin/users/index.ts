@@ -8,15 +8,16 @@ import {
     express, Request, Response, Router,
     IRole, IUser, RoleList,
     Action, Errors,
-    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful, UserHelper, ParseObject,
+    getEnumKey, IInputPaging, IOutputPaging, Restful, UserHelper, ParseObject,
 } from 'core/cgi-package';
-
+import * as path from "path";
+import ast from 'services/ast-services/ast-client';
+const userRolePath = path.resolve(process.cwd(), "./core/userRoles.gen.ts");
 
 var action = new Action({
     loginRequired: true,
     permission: [RoleList.SystemAdministrator]
 });
-
 
 /// C: create users ///////////////////////
 type InputC = Restful.InputC<IUser>;
@@ -25,10 +26,12 @@ type OutputC = Restful.OutputC<IUser>;
 action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
     /// 1) Create Users
     var user = new Parse.User();
-    var roles = data.inputType.roles;
 
     /// 2) Check Role
     var roleNames: RoleList[] = data.inputType.roles;
+    data.inputType.data = (await Promise.all(
+        roleNames.map((role) => ast.requestValidation({ path: userRolePath, type: `IUser${getEnumKey(RoleList, role)}Data` }, data.parameters.data))
+    )).reduce((final, value) => Object.assign(final, value), {});
 
     /// 3) Signup Users
     user = await user.signUp({
@@ -83,6 +86,12 @@ action.put<InputU, OutputU>({ inputType: "InputU" }, async (data) => {
         .include("roles")
         .get(objectId);
     if (!user) throw Errors.throw(Errors.CustomNotExists, [`User <${objectId}> not exists.`]);
+
+    /// 2) Check Role
+    var roleNames: RoleList[] = user.get("roles").map(r => r.get("name"));
+    data.inputType.data = (await Promise.all(
+        roleNames.map((role) => ast.requestValidation({ path: userRolePath, type: `PartialIUser${getEnumKey(RoleList, role)}Data` }, data.parameters.data))
+    )).reduce((final, value) => Object.assign(final, value), user.get("data"));
 
     /// 2.0) Prepare params to feed in
     var input = { ...data.inputType };

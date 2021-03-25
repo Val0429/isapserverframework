@@ -1,6 +1,6 @@
 export * from './get-enum-key';
 export * from './task-helper';
-export * from './omit-object';
+import './object-helper';
 export * from './semaphore';
 export * from './mutex';
 export * from './deep-merge';

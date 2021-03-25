@@ -8,7 +8,7 @@ import {
     express, Request, Response, Router,
     IRole, IUser, RoleList,
     Action, Errors,
-    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful, UserHelper, ParseObject, LICENSE_KEY,
+    getEnumKey, IInputPaging, IOutputPaging, Restful, UserHelper, ParseObject, LICENSE_KEY,
 } from 'core/cgi-package';
 import * as request from 'request';
 import * as fs from 'fs';

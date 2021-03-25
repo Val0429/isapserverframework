@@ -28,7 +28,6 @@ export * from './../parse-server/user-helper';
 export * from './../parse-server/file-helper';
 export * from './../parse-server/parse-helper';
 export * from './../sockets/socket-helper';
-import { omitObject } from './../utility/omit-object';
 import { ParseObject, ParseObjectJSONRule, retrievePrimaryClass } from './../parse-server/parse-helper';
 import CRUDMaker from 'shells/crud.shell';
 import ServerMaker from 'shells/server-maker.shell';

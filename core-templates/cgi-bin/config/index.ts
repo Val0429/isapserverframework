@@ -11,7 +11,6 @@ import {
     Restful, FileHelper, ParseObject
 } from 'core/cgi-package';
 import ConfigManager from 'helpers/shells/config-manager';
-//import { sfeConfigType } from "core/config.gen";
 import * as configtype from "core/config.gen";
 import * as path from "path";
 
@@ -59,7 +58,7 @@ action.post({ path: "/:key" }, async (data) => {
     let { parameters } = data;
     let key = data.request.params.key;
     var value = await ast.requestValidation({
-        path: path.resolve(__dirname, "./../../../core/config.gen.ts"),
+        path: path.resolve(process.cwd(), "./core/config.gen.ts"),
         type: `${key}ConfigTypeP`
     }, parameters);
 

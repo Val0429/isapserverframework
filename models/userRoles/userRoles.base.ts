@@ -30,4 +30,7 @@ export interface IUser<T = {}> {
     data: T & IUserData;
     roles: [RoleList, ...Array<RoleList>];
     apiRoles?: APIRoles[];
+
+    /// innate use
+    isDefault?: boolean;
 }

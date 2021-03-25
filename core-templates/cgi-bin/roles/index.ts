@@ -8,7 +8,7 @@ import {
     express, Request, Response, Router,
     IRole, IUser, RoleList,
     Action, Errors,
-    getEnumKey, omitObject, IInputPaging, IOutputPaging, Restful, UserHelper, ParseObject,
+    getEnumKey, IInputPaging, IOutputPaging, Restful, UserHelper, ParseObject,
 } from 'core/cgi-package';
 
 

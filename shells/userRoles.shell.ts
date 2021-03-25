@@ -61,7 +61,8 @@ export type IUser{1} = IUser<IUser{1}Data>;
 ////////////////////////////////////////////////////
 `;
 
-var tPartial = `export type PartialIUser{0} = Partial<IUser{0}>;`;
+var tPartial = `export type PartialIUser{0} = Partial<IUser{0}>;
+export type PartialIUser{0}Data = Partial<IUser{0}Data>;`;
 
 
 function main(events: Array<[number, string, string, string[]] | [number, string, string] | [number, string]>): string {

@@ -39,6 +39,7 @@ export class DBConfigFactory<T> {
             if (!dbObject) dbObject = new Parse.Object(classname);
             if (value) {
                 innateValue = { ...innateValue as any, ...value };
+                define(innateValue);
                 sjChange.next(innateValue);
             }
             await dbObject.save(innateValue);
@@ -74,7 +75,7 @@ export class DBConfigFactory<T> {
             if (!definedTable[key]) {
                 Object.defineProperty(this, key, { enumerable: true,
                     get: () => get(key),
-                    set: (value) => set(key, value)
+                    set: (value) => { define(key); set(key, value); }
                 });
                 definedTable[key] = true;
             }

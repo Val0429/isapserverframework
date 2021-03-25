@@ -332,6 +332,7 @@ namespace AstParser {
          * 15) Any
          * 16) Buffer
          * 17) Key Mapped Type
+         * 18) null
          * 99) any
          * X) Other Class X
          */
@@ -339,9 +340,14 @@ namespace AstParser {
         var showname = prefix;
         var obj = data;
 
-        if (obj == undefined) return undefined;
+        if (obj === undefined) return undefined;
 
-        if (type.isBoolean()) {
+        if (obj === null) {
+            /// 18) null
+            debug && console.log(`${showname} is null, obj ${typeof obj}`);
+            return null;
+
+        } else if (type.isBoolean()) {
             /// 1) boolean
             debug && console.log(`${showname} is boolean, obj ${typeof obj}`);
             return AstServerConverter.toBoolean(obj, showname, isArray);

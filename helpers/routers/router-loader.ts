@@ -24,7 +24,7 @@ interface IRouterPath {
 export function routerLoader(app, path, cgiPath = null /* prefix of cgi path */, routeBasePath = '', first = true, level = 0): { actions: Action[], app: any } {
     if (!fs.existsSync(path)) return;
     let name = p.parse(path).name;
-    if (name === hiddenPath) return;
+    if ((name||'').toLowerCase() === hiddenPath) return;
     /// level0 block
     if (level === 0 && blockingKey && blockingKey.test(name)) {
         if (name !== blockingException) return;

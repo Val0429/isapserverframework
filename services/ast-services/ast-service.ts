@@ -787,7 +787,9 @@ export namespace AstServerConverter {
             var TType = decl.getBaseTypes()[0].getTypeArguments()[0];
             var Tdecl = TType.getSymbol().getValueDeclaration();
             var inf = TType.getSymbol().getDeclarations()[0] as InterfaceDeclaration;
+            let objectId = (input as any).objectId;
             input = AstParser.validateInterface(inf, input, name);
+            (input as any).objectId = objectId;
 
         } while(0);
 

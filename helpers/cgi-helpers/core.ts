@@ -120,7 +120,7 @@ export class Action<T = any, U = any> {
 
     list(): ActionTypes[] {
         return actionTypes.reduce( (final, value) => {
-            this[`func${value}`] && (final.push(value));
+            this[`func${value}`].length > 0 && (final.push(value));
             return final;
         }, []);
     }

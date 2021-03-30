@@ -28,11 +28,18 @@ interface IAttachment {
     cid: string;
 }
 
+interface IOriginalAttachment {
+    filename: string;
+    content: string;
+    encoding: string;
+    cid: string;
+}
+
 export interface IInputScheduleActionEmail_FromController {
     to: string[];
     CC?: string[];
     BCC?: string[];
-    attachments?: (Parse.File | IAttachment)[];
+    attachments?: (Parse.File | IAttachment | IOriginalAttachment)[];
 }
 ////////////////////////////////////////
 
@@ -67,15 +74,22 @@ export class ScheduleActionEmail extends ScheduleActionBase<
             if (input.attachments) {
                 attachments = [];
                 for (let attachment of input.attachments) {
-                    let file = attachment instanceof Parse.File ? attachment : attachment.file;
-                    let cid = attachment instanceof Parse.File ? undefined : attachment.cid;
+                    if ((attachment as any).content) {
+                        /// original case
+                        attachments.push(attachment);
 
-                    let content = await FileHelper.downloadParseFile(file);
-                    attachments.push({
-                        filename: file.name(),
-                        cid,
-                        content
-                    });
+                    } else {
+                        /// Parse File case
+                        let file = attachment instanceof Parse.File ? attachment : (attachment as any).file;
+                        let cid = attachment instanceof Parse.File ? undefined : attachment.cid;
+    
+                        let content = await FileHelper.downloadParseFile(file);
+                        attachments.push({
+                            filename: file.name(),
+                            cid,
+                            content
+                        });
+                    }
                 }
             }
 

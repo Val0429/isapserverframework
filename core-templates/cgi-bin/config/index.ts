@@ -34,7 +34,7 @@ action.get<InputR, OutputR>({ inputType: "InputR", path: "/(:key)?" }, async (da
     key = data.request.params.key || key;
     let config = key ? Config[key] : Config;
     if (!config) throw Errors.throw(Errors.ParametersInvalid, ["key"]);
-    return config;
+    return ParseObject.toOutputJSON(config);
 });
 
 /********************************
@@ -49,7 +49,7 @@ action.post<InputC, OutputC>({ inputType: "InputC" }, async (data) => {
     for (var key in value) {
         await ConfigManager.update(key as any, value[key]);
     }
-    return value;
+    return ParseObject.toOutputJSON(value);
 });
 
 /// post with key
@@ -63,7 +63,7 @@ action.post({ path: "/:key" }, async (data) => {
     }, parameters);
 
     await ConfigManager.update(key as any, value);
-    return value;
+    return ParseObject.toOutputJSON(value);
 });
 // /// CRUD end ///////////////////////////////////
 

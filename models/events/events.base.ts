@@ -45,13 +45,16 @@ export interface IEvents<T = IEvent> {
         await event.save();
 
         /// make token
-        var token = `${event.className}\$${event.id}`;
+        let className = event.className;
+        var token = `${className}\$${event.id}`;
 
         /// save into Events
         var evt = new Events({
             action: event.getValue("action"),
             entity: <any>token,
-            data,
+            data: {
+                [className]: data
+            },
             owner: event.getValue("owner"),
             relatedPerson: event.getValue("relatedPerson")
         });
@@ -116,7 +119,6 @@ export interface IEvents<T = IEvent> {
         filter() {
             return {
                 action: EnumConverter(EventList),
-                data: false,
                 entity: {
                     action: false,
                     owner: false,

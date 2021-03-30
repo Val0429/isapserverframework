@@ -765,6 +765,7 @@ export namespace AstServerConverter {
     }
 
     export function toParseFileEntity(type: Type<ts.Type>, input: string | object, name, isArray: boolean = false) {
+        if (typeof input !== 'string') throw Errors.throw(Errors.CustomInvalid, [`<${name}> should be string${isArray?'[]':''}.`]);
         var type = AstParser.getType({path: tSource, type: 'vParseFile'});
         return {
             __type__: "Parse.File",

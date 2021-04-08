@@ -10,6 +10,10 @@ export class Retrier {
         if (this.timer) return;
         this.timer = setInterval(this.callback, this.interval);
     }
+    public restart() {
+        if (this.timer) { clearInterval(this.timer); this.timer = null; }
+        this.start();
+    }
     public stop() {
         if (!this.timer) return;
         clearInterval(this.timer);

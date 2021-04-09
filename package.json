@@ -1,11 +1,11 @@
 {
-  "name": "isap-smartface-server",
-  "version": "1.00.05",
+  "name": "isap-vms2-server",
+  "version": "1.00.01",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap SmartFace Server"
+    "displayname": "iSap VMS2 Server"
   },
-  "description": "iSap SmartFace Server v1.00.05",
+  "description": "iSap VMS2 Server v1.00.01",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -41,6 +41,7 @@
   "devDependencies": {},
   "dependencies": {
     "@types/bluebird": "3.5.22",
+    "@types/lodash": "4.14.168",
     "@types/mongodb": "3.5.25",
     "@types/node": "12.12.6",
     "@types/nodemailer": "4.6.2",
@@ -62,6 +63,7 @@
     "getmac": "1.4.6",
     "ipcheck": "^0.1.0",
     "json-prune": "1.1.0",
+    "lodash": "4.17.21",
     "longjohn": "0.2.12",
     "mime-types": "2.1.19",
     "module-alias": "2.1.0",

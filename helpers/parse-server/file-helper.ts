@@ -6,6 +6,7 @@
 
 import { Config } from 'core/config.gen';
 import * as mimeType from 'mime-types';
+import * as path from 'path';
 import { ActionParam } from 'helpers/cgi-helpers/core';
 
 export namespace FileHelper {
@@ -41,12 +42,21 @@ export namespace FileHelper {
         }
 
         /// Parse input for ext name
-        var regex = /^data:([^;]+);base64,/i;
-        var type = null;
-        input = <any>(<string>input).replace(regex, (a, b) => { type = b; return ""; });
-        if (type !== null) name = `file.${mimeType.extension(type) || "b64"}`;
+        let regex_base64 = /^data:([^;]+);base64,/i;
+        let regex_uri = /^http/i;
+        let base64: string, uri: string;
+        if (regex_base64.test(<string>input)) {
+            let type = null;
+            base64 = <any>(<string>input).replace(regex_base64, (a, b) => { type = b; return ""; });
+            if (type !== null) name = `file.${mimeType.extension(type) || "b64"}`;
+        }
+        if (regex_uri.test(<string>input)) {
+            uri = <string>input;
+            let parsed = path.parse(uri);
+            name = parsed.base;
+        }
 
-        var file = new Parse.File(`${name || 'file.b64'}`, { base64: input as string }, mime);
+        var file = new Parse.File(`${name || 'file.b64'}`, { base64, uri }, mime);
         await file.save();
         return <any>file;
     }

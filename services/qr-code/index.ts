@@ -17,7 +17,7 @@ interface IQRCodeOptions {
 }
 
 export class QRCode {
-    make(data: string, options?: IQRCodeOptions): Promise<Parse.File> {
+    static make(data: string, options?: IQRCodeOptions): Promise<Parse.File> {
         return new Promise( (resolve, reject) => {
             qrcode.toDataURL(data, async (err, url) => {
                 if (err) return reject(err);

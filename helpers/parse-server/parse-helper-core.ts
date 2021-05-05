@@ -9,6 +9,7 @@ import { RoleList } from 'core/userRoles.gen';
 import { Meta } from 'helpers/utility/meta';
 import { Log } from 'helpers/utility/log';
 import { ObjectId, Binary } from 'mongodb';
+import { FileHelper } from './file-helper';
 
 /// decorators //////////////
 var primaryClassMap = {};
@@ -182,7 +183,7 @@ export class ParseObject<T> extends Parse.Object {
             else if (type === 'undefined') return data;
             else if (data === null) return data;
             else if (data instanceof Date) return data.toISOString();
-            else if (data instanceof Parse.File) return data.url();
+            else if (data instanceof Parse.File) return FileHelper.getURI(data);
             else if (data instanceof Parse.Relation) return undefined;
             else if (data instanceof ObjectId) return data.toString();
             else if (data instanceof Binary) return data.buffer.toString("base64");

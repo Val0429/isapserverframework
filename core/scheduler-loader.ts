@@ -107,7 +107,7 @@ Config.mongodb.enable &&
     var objs = await new Parse.Query(Schedulers)
         .include("time")
         .include("actions")
-        .find();
+        .findAll();
     for (var obj of objs) {
         scheduler.register(obj);
     }

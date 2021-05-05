@@ -196,7 +196,7 @@ let jobCreateDB = () => {
         /// todo: this is a workaround. create database at the beginning.
         let { ip, port, collection } = Config.mongodb;
         let db = await sharedMongoDB();
-        ensureCollectionExists("_SCHEMA");
+        await ensureCollectionExists("_SCHEMA");
         ////////////////////////////////////////////////////////////////
         resolve();
     });

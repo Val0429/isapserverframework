@@ -91,7 +91,7 @@ export abstract class Tree<T> extends ParseObject<ITree<T>> {
         /// 1) get all leafs
         let query = new Parse.Query(thisClass);
         if (this.groupBy) query.equalTo(this.groupBy as any, this.attributes[this.groupBy]);
-        let results = await query.find();
+        let results = await query.findAll();
         let bulkWrites = [];
         /// 2) make new leaf and increase lft, rgt
         let refRgt = this.attributes.rgt;
@@ -149,7 +149,7 @@ export abstract class Tree<T> extends ParseObject<ITree<T>> {
                     /// get all leafs
                     let query = new Parse.Query(thisClass);
                     if (this.groupBy) query.equalTo(this.groupBy as any, this.attributes[this.groupBy]);
-                    let results = await query.find();
+                    let results = await query.findAll();
                     /// call destroy
                     let deleteId = this.id;
                     await super.destroy(options);

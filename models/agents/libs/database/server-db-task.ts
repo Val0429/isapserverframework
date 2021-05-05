@@ -36,7 +36,7 @@ export class ServerDBTasks {
     private static async initAllUserTasks() {
         if (this.userTasks) return;
         let userTasks = this.userTasks = new Map();
-        let tasks = await new Parse.Query(ServerDBTask).find();
+        let tasks = await new Parse.Query(ServerDBTask).findAll();
         tasks.forEach( (task) => {
             let userId = task.getValue("user").id;
             let objectKey = task.getValue("objectKey");

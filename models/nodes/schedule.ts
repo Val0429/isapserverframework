@@ -238,7 +238,7 @@ export namespace Schedule {
                     else if (typeof where === 'function' && on instanceof where) query.equalTo("where", on as any);
                     else if (typeof what === 'function' && on instanceof what) query.equalTo("what", what as any);
                     else if (typeof how === 'function' && on instanceof how) query.equalTo("how", how as any);
-                    result = await query.find();
+                    result = await query.findAll();
                 }
 
                 /// filter "timeRange"

@@ -1,11 +1,11 @@
 {
   "name": "isap-vms2-server",
-  "version": "1.00.01",
+  "version": "1.00.02",
   "frameworkversion": "1.08.14",
   "config": {
     "displayname": "iSap VMS2 Server"
   },
-  "description": "iSap VMS2 Server v1.00.01",
+  "description": "iSap VMS2 Server v1.00.02",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -45,7 +45,7 @@
     "@types/mongodb": "3.5.25",
     "@types/node": "12.12.6",
     "@types/nodemailer": "4.6.2",
-    "@types/parse": "2.12.1",
+    "@types/parse": "2.18.5",
     "@val/nodemon": "1.0.1",
     "@val/npm": "1.0.3",
     "@val/server-packager": "1.0.1",

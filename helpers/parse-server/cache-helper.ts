@@ -122,11 +122,7 @@ export class CacheParse {
         let first = false;
         let sj = jsMapAssign(this.caching, classObj.name, () => { first = true; return new BehaviorSubject(undefined) });
         if (first) {
-            (async () => sj.next(await new Parse.Query(classObj).find()))();
-            // (async () => {
-            //     let result = await new Parse.Query(classObj).find();
-            //     sj.next(result);
-            // })();
+            (async () => sj.next(await new Parse.Query(classObj).findAll()))();
         }
         return new CacheQuery(classObj, sj as any);
     }

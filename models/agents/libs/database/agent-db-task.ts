@@ -43,7 +43,7 @@ export class AgentDBTasks {
 
     private static async initUserTasks() {
         if (this.userTasks) return;
-        let tasks = await new Parse.Query(AgentDBTask).find();
+        let tasks = await new Parse.Query(AgentDBTask).findAll();
         this.userTasks = new Map(
             tasks.map<[string, AgentDBTask]>( (task) => [task.getValue("objectKey") as string, task] )
         );

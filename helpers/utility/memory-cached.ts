@@ -156,7 +156,7 @@ export function memoryCached<T>(config?: IMemoryCachedConfig) {
             sjDeleted.next(item);
         }
         let init = async () => {
-            let items = await new Parse.Query<any>(name).find();
+            let items = await new Parse.Query<any>(name).findAll();
             items.forEach(v => updateMapping(v, true));
             sjInited.next(cachedList);
         }

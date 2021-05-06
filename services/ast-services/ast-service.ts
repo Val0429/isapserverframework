@@ -680,7 +680,7 @@ export namespace AstServerConverter {
         // Allow any type to be `Array`
         if (!Array.isArray(input)) input = [input];
         if (!canBeEmpty && input.length === 0) throw Errors.throw(Errors.CustomInvalid, [`${name} should not be an empty array.`]);
-        var tType = type.getTypeArguments()[0];
+        let tType = type.getArrayElementType();
         for (var key in input) input[key] = AstParser.validateType(tType, input[key], name, true);
         return input;
 
@@ -750,7 +750,7 @@ export namespace AstServerConverter {
             try {
                 var result = AstParser.validateType(types[key], input, name, false, params, forceOptional);
                 passed = true;
-                if (typeof result !== 'object') return result;
+                if (Array.isArray(result) || typeof result !== 'object') return result;
                 deepMerge(rtn, result);
                 
             } catch(reason) {

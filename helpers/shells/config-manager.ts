@@ -46,7 +46,7 @@ export class ConfigManager {
     private envpath: string;
     private constructor() {
         /// 1) check /env exists
-        this.envpath = path.resolve(__dirname, "../../");
+        this.envpath = path.resolve(process.cwd(), "./");
         let exists = fs.existsSync(this.envpath);
         if (!exists) fs.mkdirSync(this.envpath, "0766");
 

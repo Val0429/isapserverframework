@@ -3,7 +3,7 @@
   "version": "1.00.02",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap VMS2 Server"
+    "displayname": "iSap Thermal Server"
   },
   "description": "iSap VMS2 Server v1.00.02",
   "author": "Val Liu",

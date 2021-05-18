@@ -19,6 +19,15 @@ export namespace DateHelper {
         return o;
     }
 
+    export function dayAdd(date: Date, days?: number): Date {
+        let o = new Date(date);
+        o.setDate(o.getDate() + days);
+        return o;
+    }
+
+    export function equals(date1: Date, date2: Date): boolean {
+        return !(date1 < date2) && !(date2 < date1);
+    }
 
     /**
      * Convert string array to RegExp

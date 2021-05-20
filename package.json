@@ -1,11 +1,11 @@
 {
   "name": "isap-vms2-server",
-  "version": "1.00.02",
+  "version": "1.00.03",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap Thermal Server"
+    "displayname": "iSap VMS2 Server"
   },
-  "description": "iSap VMS2 Server v1.00.02",
+  "description": "iSap VMS2 Server v1.00.03",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -49,7 +49,7 @@
     "@val/nodemon": "1.0.1",
     "@val/npm": "1.0.3",
     "@val/server-packager": "1.0.2",
-    "@val/ts-node": "1.0.0",
+    "@val/ts-node": "1.0.2",
     "@val/winser": "1.0.0",
     "bcryptjs": "^2.4.3",
     "bluebird": "3.5.1",

@@ -50,10 +50,13 @@ export namespace FileHelper {
             base64 = <any>(<string>input).replace(regex_base64, (a, b) => { type = b; return ""; });
             if (type !== null) name = `file.${mimeType.extension(type) || "b64"}`;
         }
-        if (regex_uri.test(<string>input)) {
+        else if (regex_uri.test(<string>input)) {
             uri = <string>input;
             let parsed = path.parse(uri);
             name = parsed.base;
+        }
+        else {
+            base64 = <string>input;
         }
 
         var file = new Parse.File(`${name || 'file.b64'}`, { base64, uri }, mime);

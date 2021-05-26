@@ -1,31 +1,31 @@
 {
   "name": "isap-vms2-server",
-  "version": "1.00.03",
+  "version": "1.00.04",
   "frameworkversion": "1.08.14",
   "config": {
     "displayname": "iSap VMS2 Server"
   },
-  "description": "iSap VMS2 Server v1.00.03",
+  "description": "iSap VMS2 Server v1.00.04",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
   "bin": "main.ts",
   "typings": "dist/index",
   "scripts": {
-    "start": "npm run build:live",
-    "debug": "npm run build:debug",
-    "build": "ts-node main.ts",
-    "build:live": "nodemon --restartcrash --exec ts-node main.ts",
-    "build:debug": "nodemon --exec ts-node main.ts",
-    "build:live:new": "nodemon --exec node -r ts-node/register main.ts",
-    "build:live:new:debug": "nodemon --exec node --inspect --inspect-port=0 -r ts-node/register main.ts",
-    "clean": "ts-node ./shells/clean-cache.shell.ts",
+    "start": "cross-env NODE_ENV=production npm run build",
+    "start:debug": "cross-env NODE_ENV=development npm run build:debug",
+    "start:ts-node": "cross-env NODE_ENV=production npm run build:ts-node",
+    "start:ts-node:debug": "cross-env NODE_ENV=development npm run build:ts-node:debug",
+    "build": "nodemon --restartcrash --exec node --trace-warnings  -r @val/ts-node/register/transpile-only main.ts",
+    "build:debug": "nodemon --watch false --exec node --trace-warnings -r @val/ts-node/register main.ts",
+    "build:ts-node": "node --trace-warnings -r @val/ts-node/register/transpile-only main.ts",
+    "build:ts-node:debug": "node --inspect --inspect-port=0 --trace-warnings -r @val/ts-node/register main.ts",
+    "clean": "@val/ts-node ./shells/clean-cache.shell.ts",
     "wc": "find . -name '*.ts' -not -path './node_modules/*' -not -path './typings/*' | xargs wc -c",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "install-windows-service": "winser -i -s -a --startwithnpm --displayname \"%npm_package_config_displayname%\"",
     "uninstall-windows-service": "winser -r -x -s",
-    "pack": "ts-node ./core/packer.ts && server-packager ./ --no-bytecode --out-path=./dist",
-    "dorelease": "ts-node ./shells/do-release.shell.ts -s"
+    "pack": "node -r @val/ts-node/register/transpile-only ./core/packer.ts && server-packager ./ --no-bytecode --out-path=./dist",
+    "dorelease": "node -r @val/ts-node/register/transpile-only ./shells/do-release.shell.ts -s"
   },
   "nodemonConfig": {
     "ignore": [

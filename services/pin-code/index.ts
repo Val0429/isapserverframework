@@ -107,10 +107,10 @@ export class PinCode {
             for (let i=min, j=0; i<max; ++i, ++j) pinNumbers[j] = i;
             shuffle(pinNumbers);
             /// store into buffer
-            let buf = new Buffer(totalSize*unitSize);
+            let buf = Buffer.alloc(totalSize*unitSize);
             for (let i=0; i<pinNumbers.length; ++i) buf.writeUInt32BE(pinNumbers[i], i*unitSize);
             /// Save into database
-            col.insert({
+            col.insertOne({
                 index: 0, total: totalSize, pin: buf
             }, () => {
                 makeSubjectReady(pins);

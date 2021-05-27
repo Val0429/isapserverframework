@@ -110,10 +110,11 @@ export class PinCode {
             let buf = Buffer.alloc(totalSize*unitSize);
             for (let i=0; i<pinNumbers.length; ++i) buf.writeUInt32BE(pinNumbers[i], i*unitSize);
             /// Save into database
-            col.insertOne({
+            let data = {
                 index: 0, total: totalSize, pin: buf
-            }, () => {
-                makeSubjectReady(pins);
+            };
+            col.insertOne(data, async (err, res) => {
+                makeSubjectReady(await col.findOne({}));
                 trace.end();
             });
 

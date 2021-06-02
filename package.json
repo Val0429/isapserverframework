@@ -1,11 +1,11 @@
 {
-  "name": "isap-smart-community-service",
-  "version": "1.00.00",
-  "frameworkversion": "2.03.01",
+  "name": "isap-frsedge-service",
+  "version": "2.05.03",
+  "frameworkversion": "2.03.04",
   "config": {
-    "displayname": "iSap Smart Community Service"
+    "displayname": "iSap FRSEdge Service"
   },
-  "description": "iSap Smart Community Service v1.00.00",
+  "description": "iSap FRSEdge Service",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -35,6 +35,7 @@
   },
   "devDependencies": {},
   "dependencies": {
+    "@val/nodemon": "1.0.1",
     "@types/bluebird": "3.5.22",
     "@types/mongodb": "3.5.25",
     "@types/node": "12.12.6",
@@ -57,10 +58,10 @@
     "module-alias": "2.1.0",
     "mongodb": "3.5.9",
     "network": "0.3.2",
+    "node-addon-api": "^1.7.2",
     "node-csv-parse": "1.2.0",
-    "nodemon": "git+http://isap-dev-server:3000/iSAP-AP-Team/nodemon.git#dc821512",
-    "parse-server": "^4.3.0",
-    "qrcode": "^1.3.3",
+    "node-gyp": "^7.1.2",
+    "parse-server": "^4.5.0",
     "request": "2.87.0",
     "rimraf": "^2.6.3",
     "rxjs": "5.5.11",

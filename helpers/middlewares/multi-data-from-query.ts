@@ -14,7 +14,7 @@ interface IResponseMessage {
 }
 
 export function MultiDataFromQuery(): RequestHandler {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async function MultiDataFromQuery(req: Request, res: Response, next: NextFunction) {
         try {
             req.inputType = await Ast.requestValidation('IMultiDelete', req.parameters);
 

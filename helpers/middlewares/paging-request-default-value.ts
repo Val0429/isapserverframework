@@ -3,7 +3,7 @@ import { Response } from 'express/lib/response';
 import { NextFunction, RequestHandler } from 'express/lib/router/index';
 
 export function PagingRequestDefaultValue(): RequestHandler {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return function PagingRequestDefaultValue(req: Request, res: Response, next: NextFunction) {
         try {
             let _paging: object = req.inputType.paging || { page: 1, pageSize: 10 };
             let _page: number = _paging['page'] || 1;

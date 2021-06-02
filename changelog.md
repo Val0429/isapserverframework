@@ -1,4 +1,80 @@
-# [v2.03.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.03.01) (2020/12/01)
+# [v2.03.04](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.03.04) (2021/03/10)
+
+### Release Note:
+* Update advantech license library.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.03.03](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.03.03) (2021/03/05)
+
+### Release Note:
+* Remove QRCode service.
+* Remove Pin Code service.
+* Add copy certificates to assets.
+* Add model helper.
+* Add advantech license library.
+
+### Note:
+* Reinstall node modules.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+* In **workspace/custom/helpers/model/index.ts**
+  ```typescript
+  export * from 'helpers/model';
+  ```
+* Remove **workspace/define/licenses/product-id.define.ts**
+* Add **workspace/define/licenses/product-device.define.ts**
+  ```typescript
+  import { Config } from 'models/define/licenses/product-device';
+
+  var productDevices: Config[] = [
+    ['Camera', 'FRS Video Source'],
+    ['Tablet', 'FR Tablet'],
+  ];
+
+  export default productDevices;
+  ```
+* Add **workspace/define/licenses/product-name.define.ts**
+  ```typescript
+  import { Config } from 'models/define/licenses/product-name';
+
+  var productName: Config = 'Custom_Face_Entry';
+
+  export default productName;
+  ```
+* Enum for license rename.
+  ```typescript
+  export enum ELicenseProductDeviceId {
+    "Camera" = 1,
+    "Tablet" = 2
+  }
+  export enum ELicenseProductDeviceName {
+    "FRS Video Source" = 1,
+    "FR Tablet" = 2
+  }
+  ```
+
+
+
+# [v2.03.02](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.03.02) (2021/01/12)
+
+### Release Note:
+* Update nodemon package to @advantech/nodemon.
+* Update compiler shell, delay config load time.
+
+### Note:
+* Reinstall node modules.
+
+### Workspace Adjustment:
+* Update framework version in package.json of workspace.
+
+
+
+# [v2.03.01](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.03.01) (2020/12/01)
 
 ### Release Note:
 * Remove ast service response extra exception message
@@ -6,6 +82,7 @@
 * Remove auto send success response when use websocket
 
 ### Workspace Adjustment:
+* Update framework version in package.json of workspace.
 * Add send success response message when webscoket cgi
   In **workspace/cgi-bin/\*\*/*.ts**
   ```typescript
@@ -17,7 +94,7 @@
 
 
 
-# [v2.03.00](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.03.00) (2020/12/01)
+# [v2.03.00](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.03.00) (2020/12/01)
 
 ### Release Note:
 * Remove winser related script in package.json.
@@ -90,7 +167,7 @@
 
 
 
-# [v2.02.08](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.08) (2020/10/22)
+# [v2.02.08](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.08) (2020/10/22)
 
 ### Release Note:
 * Add default download license information cgi.
@@ -104,7 +181,7 @@
 
 
 
-# [v2.02.07](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.07) (2020/10/12)
+# [v2.02.07](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.07) (2020/10/12)
 
 ### Release Note:
 * Fix reference error in server shell.
@@ -114,7 +191,7 @@
 
 
 
-# [v2.02.06](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.06) (2020/10/06)
+# [v2.02.06](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.06) (2020/10/06)
 
 ### Release Note:
 * Remove winser package.
@@ -131,7 +208,7 @@
 
 
 
-# [v2.02.05](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.05) (2020/09/17)
+# [v2.02.05](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.05) (2020/09/17)
 
 ### Release Note:
 * Fix ast service error when parse string to number.
@@ -141,7 +218,7 @@
 
 
 
-# [v2.02.04](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.04) (2020/09/14)
+# [v2.02.04](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.04) (2020/09/14)
 
 ### Release Note:
 * Update service-datetime package to v1.06.00.
@@ -155,7 +232,7 @@
 
 
 
-# [v2.02.03](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.03) (2020/09/07)
+# [v2.02.03](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.03) (2020/09/07)
 
 ### Release Note:
 * Fix ast service error when type was object.
@@ -165,7 +242,7 @@
 
 
 
-# [v2.02.02](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.02) (2020/08/31)
+# [v2.02.02](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.02) (2020/08/31)
 
 ### Release Note:
 * Fix cgi core error, postpone send 200 opportunity.
@@ -218,7 +295,7 @@
 
 
 
-# [v2.02.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.02.01) (2020/08/24)
+# [v2.02.01](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.02.01) (2020/08/24)
 
 ### Release Note:
 * Add generate permission map and permission check interface in user role shell.
@@ -286,7 +363,7 @@
 
 
 
-# [v2.01.02](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.01.02) (2020/07/24)
+# [v2.01.02](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.01.02) (2020/07/24)
 
 ### Release Note:
 * to be completed...
@@ -296,7 +373,7 @@
 
 
 
-# [v2.01.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.01.01) (2020/07/21)
+# [v2.01.01](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.01.01) (2020/07/21)
 
 ### Release Note:
 * to be completed...
@@ -306,7 +383,7 @@
 
 
 
-# [v2.00.03](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.00.03) (2020/07/16)
+# [v2.00.03](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.00.03) (2020/07/16)
 
 ### Release Note:
 * to be completed...
@@ -316,7 +393,7 @@
 
 
 
-# [v2.00.02](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.00.02) (2020/07/14)
+# [v2.00.02](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.00.02) (2020/07/14)
 
 ### Release Note:
 * to be completed...
@@ -326,7 +403,7 @@
 
 
 
-# [v2.00.01](http://isap-dev-server:3000/iSAP-AP-Team/isapserverframework/src/tag/MinExpansion_v2.00.01) (2020/07/02)
+# [v2.00.01](http://172.22.28.195:53000/product-repositories/framework-server/src/tag/v2.00.01) (2020/07/02)
 
 ### Release Note:
 * to be completed...

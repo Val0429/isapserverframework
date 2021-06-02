@@ -14,7 +14,7 @@ interface IResponseMessage {
 }
 
 export function MultiDataFromBody(): RequestHandler {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async function MultiDataFromBody(req: Request, res: Response, next: NextFunction) {
         try {
             req.inputType = await Ast.requestValidation('IMultiData', req.parameters);
 

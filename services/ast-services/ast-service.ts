@@ -16,13 +16,14 @@ import { Project, Type, ts, InterfaceDeclaration, TypeAliasDeclaration, ImportSp
 import * as path from 'path';
 
 const debug = false;
-
-const tsConfigFilePath = path.resolve(`${__dirname}/../../tsconfig.json`);
+const tsConfigFilePath = path.resolve(process.cwd(), "tsconfig.json");
 
 var reflector: Project = this.reflector = new Project({
     tsConfigFilePath,
-    addFilesFromTsConfig: true
+    addFilesFromTsConfig: true,
+    skipFileDependencyResolution: true,
 });
+
 //reflector.addExistingSourceFiles("node_modules/@types/**/*");
 var tSource = reflector.getSourceFile(`ast-core.ts`);
 

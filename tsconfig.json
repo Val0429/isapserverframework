@@ -17,6 +17,8 @@
         ".git",
         ".cache",
         "node_modules",
+        "workspace/custom/files",
+        "workspace/custom/assets",
         "logs"
     ]
 }

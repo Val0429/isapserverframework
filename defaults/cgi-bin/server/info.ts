@@ -19,8 +19,7 @@ action.get(
     async (): Promise<OutputR> => {
         try {
             let info: object = require('workspace/package.json');
-
-            return `${info['description']}_v${info['version']}`;
+            return `${info['formerDescription']}_v${info['formerVersion']}`;
         } catch (e) {
             throw e;
         }

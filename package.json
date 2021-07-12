@@ -1,11 +1,11 @@
 {
-  "name": "isap-smartface-engine",
-  "version": "1.01.01",
+  "name": "isap-frs2-server",
+  "version": "1.00.03",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap SmartFace Engine"
+    "displayname": "iSap FRS2 Server"
   },
-  "description": "iSap SmartFace Engine v1.01.01",
+  "description": "iSap FRS2 Server v1.00.03",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -25,7 +25,8 @@
     "install-windows-service": "winser -i -s -a --startwithnpm --displayname \"%npm_package_config_displayname%\"",
     "uninstall-windows-service": "winser -r -x -s",
     "pack": "node -r @val/ts-node/register/transpile-only ./core/packer.ts && server-packager ./ --no-bytecode --out-path=./dist",
-    "dorelease": "node -r @val/ts-node/register/transpile-only ./shells/do-release.shell.ts -s"
+    "dorelease": "node -r @val/ts-node/register/transpile-only ./shells/do-release.shell.ts -s",
+    "archive": "node -r @val/ts-node/register/transpile-only ./shells/archive.shell.ts"
   },
   "nodemonConfig": {
     "ignore": [

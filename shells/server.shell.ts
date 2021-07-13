@@ -126,7 +126,7 @@ app.use(Config.parseDashboard.serverPath, Dashboard);
 `;
 
 var tRunWeb = `
-let webPath = \`\${__dirname}/../workspace/custom/web\`;
+let webPath = \`\${process.cwd()}/workspace/custom/web\`;
 deployWeb(webPath, app);
 `;
 

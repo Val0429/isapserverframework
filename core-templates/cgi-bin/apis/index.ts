@@ -8,7 +8,7 @@ import {
     express, Request, Response, Router,
     IRole, IUser, RoleList, IConfig, Config, IConfigSetup,
     Action, Errors,
-    Restful, FileHelper, ParseObject
+    Restful, FileHelper, ParseObject, ActionConfig
 } from 'core/cgi-package';
 import * as request from 'request';
 import { actions } from 'helpers/routers/router-loader';
@@ -30,110 +30,47 @@ action.get( async (data) => {
     for (let action of actions) {
         let uri = action.uri;
         if (uri === '/apis') continue;
-        // !final[uri] && (final[uri] = {});
-        let obj = {};
 
-        for (let proto of action.list()) {
-            let loginRequired: boolean = false;
-            let hasInputType: boolean = false;
-            switch (proto) {
-                case 'All':
-                case 'Get':
-                case 'Post':
-                case 'Put':
-                case 'Delete': {
-                    /// get configs
-                    /// login required?
-                    let config = Object.assign({}, action[`func${proto}Config`], action.config);
-                    loginRequired = config.loginRequired;
-                    hasInputType = config.inputType ? true : false;
-                    let strt = { input: null, output: null, loginRequired };
-                    if (!loginRequired) { obj[proto] = strt; break; }
-                    if (!data.role) break;
-                    let roles = data.role.map( (v) => v.attributes.name );
-                    let permitRoles: string[] = config.permission;
-                    let final = permitRoles ? roles.reduce( (final, role) => {
-                        if (permitRoles.indexOf(role) >= 0) final.push(role);
-                        return final;
-                    }, []) : roles;
-                    if (final.length > 0) obj[proto] = strt;
+        const makeOnce = (config: ActionConfig<any, any>, proto: any) => {
+            const protos = ['Get', 'Post', 'Put', 'Delete'];
+            if (proto === 'All') return protos.forEach(p => makeOnce(config, p));
 
-                    break;
+            const path = config.path;
+            const thisUri = uri + (path ? path : '');
+            let obj = final[thisUri] || {};
 
-                    // let method = (proto === 'All' ? 'Get' : proto).toUpperCase();
+            try {
+                let loginRequired = config.loginRequired;
+                const strt = { input: null, output: null, loginRequired };
+                if (!loginRequired) { obj[proto] = strt; return; }
+                if (!data.role) return;
+                let roles = data.role.map(v => v.get("name"));
+                let permitRoles: string[] = config.permission;
+                let result = permitRoles ? roles.reduce( (final, role) => {
+                    if (permitRoles.indexOf(role) >= 0) final.push(role);
+                    return final;
+                }, []) : roles;
+                if (result.length > 0) obj[proto] = strt;
+                else delete obj[proto];
 
-                    // let result: string;
-                    // try {
-                    // result = await new Promise<string>( (resolve, reject) => {
-                    //     request({
-                    //         url: `http://localhost:${Config.core.port}${uri}?help&sessionId=${data.parameters.sessionId}`,
-                    //         method,
-                    //     }, (err, res, body) => {
-                    //         //if (res.statusCode === 401) return reject(401);
-                    //         if (res.statusCode !== 200) return reject(res.statusCode);
-                    //         resolve(body);
-                    //     });
-                    // });
-                    // } catch(e) {
-                    //     continue;
-                    // }
-                    // if (!hasInputType) {
-                    //     obj[proto] = { input: null, output: null, loginRequired };
-                    //     break;
-                    // }
-
-                    // /// extract input interface
-                    // const iRegex = /Input Interface:(?:\r?\n|\r)=+(?:\r?\n|\r)*/;
-                    // let imatch = iRegex.exec(result);
-                    // /// extract output interface
-                    // const oRegex = /(?:\r?\n|\r)*Output Interface:(?:\r?\n|\r)=+(?:\r?\n|\r)*/;
-                    // let omatch = oRegex.exec(result);
-
-                    // /// matches
-                    // let input = null;
-                    // if (imatch !== null) {
-                    //     let istart = imatch.index + imatch[0].length;
-                    //     let iend = omatch ? omatch.index : result.length;
-                    //     input = result.substring(istart, iend);
-                    // }
-
-                    // let output = null;
-                    // if (omatch !== null) {
-                    //     let ostart = omatch.index + omatch[0].length;
-                    //     let oend = result.length;
-                    //     output = result.substring(ostart, oend).replace(/(?:\r?\n|\r)*$/, '');
-                    // }
-
-                    // obj[proto] = { input, output, loginRequired };
-
-                    break;
-                }
-                case 'Ws':
-                    /// get configs
-                    /// login required?
-                    let config = Object.assign({}, action[`func${proto}Config`], action.config);
-                    let strt = { input: null, output: null, loginRequired };
-                    loginRequired = config.loginRequired;
-                    if (!loginRequired) { obj[proto] = strt; break; }
-                    if (!data.role) break;
-                    let roles = data.role.map( (v) => v.attributes.name );
-                    let permitRoles: string[] = config.permission;
-                    let final = permitRoles ? roles.reduce( (final, role) => {
-                        if (permitRoles.indexOf(role) >= 0) final.push(role);
-                        return final;
-                    }, []) : roles;
-                    if (final.length > 0) obj[proto] = strt;
-                    break;
-                default:
-                    break;
+            } finally {
+                if (Object.keys(obj).length !== 0) final[thisUri] = obj;
             }
         }
-        if (Object.keys(obj).length !== 0 && obj.constructor === Object) final[uri] = obj;
+
+        let config = action.config;
+        for (let proto of action.list()) {
+            let inners = action[`func${proto}`];
+            for (let inner of inners) {
+                makeOnce({ ...config, ...inner.config }, proto);
+            }
+        }
     }
 
     return {
         serverName: packinfo.name,
         serverVersion: packinfo.version,
+        serverDescription: packinfo.description,
         frameworkVersion: packinfo.frameworkversion,
         copyright: wspackinfo.copyright || packinfo.copyright,
         APIs: final

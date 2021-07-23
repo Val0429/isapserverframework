@@ -14,6 +14,7 @@ import * as request from 'request';
 import { actions } from 'helpers/routers/router-loader';
 
 let packinfo = require(`${__dirname}/../../../package.json`);
+let wspackinfo = require(`${__dirname}/../../package.json`);
 
 var action = new Action({
     loginRequired: false,
@@ -134,6 +135,7 @@ action.get( async (data) => {
         serverName: packinfo.name,
         serverVersion: packinfo.version,
         frameworkVersion: packinfo.frameworkversion,
+        copyright: wspackinfo.copyright || packinfo.copyright,
         APIs: final
     }
 });

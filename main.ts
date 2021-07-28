@@ -41,3 +41,6 @@ trace = Log.TraceTime(LogTitle, "Load Workspace");
 import './workspace/main';
 trace.end();
 
+// to fix the warning
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "1";
+

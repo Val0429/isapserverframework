@@ -12,7 +12,7 @@ type POA = Parse.Object<Parse.Attributes>;
 export namespace QueryHelper {
     export interface IQueryConfigA {
         key: string;
-        value: string;
+        value: any;
         /// clone the query? default: false (ex: for query or)
         clone?: boolean;
     }

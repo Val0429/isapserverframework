@@ -10,6 +10,7 @@
 import 'parse-server';
 
 import './core/alias';
+import './core/console-stamp';
 import './core/create-file-index';
 
 import { Log } from 'helpers/utility';

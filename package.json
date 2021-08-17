@@ -1,11 +1,11 @@
 {
-  "name": "isap-frs2-server",
-  "version": "1.00.03",
+  "name": "isap-vms2-server",
+  "version": "1.00.08",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap FRS2 Server"
+    "displayname": "iSap VMS2 Server"
   },
-  "description": "iSap FRS2 Server v1.00.03",
+  "description": "iSap VMS2 Server v1.00.08",
   "copyright": "copyright © 2009-2021 iSAP Solution All rights reserved.",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
@@ -59,6 +59,7 @@
     "body-parser": "^1.19.0",
     "caller": "1.0.1",
     "colors": "1.3.2",
+    "console-stamp": "^3.0.3",
     "cross-env": "^5.2.0",
     "express": "^4.17.1",
     "express-ws": "3.0.0",

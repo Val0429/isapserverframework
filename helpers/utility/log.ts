@@ -22,13 +22,6 @@ export namespace Log {
         currentRegEx = typeof reg === 'string' ? new RegExp(reg) : reg;
     }
 
-    function timestamp(): string {
-        let now = new Date();
-        return `${'['.grey}` +
-               `${now.getMonth()+1}/${padLeft(now.getDate(),2)} ${padLeft(now.getHours(),2)}:${padLeft(now.getMinutes(),2)}:${padLeft(now.getSeconds(),2)}.${padLeft(now.getMilliseconds(),3)}`.cyan +
-               `${']'.grey} `;
-    }
-
     function TestPass(level: Level): boolean {
         if (
             level>=currentLevel &&
@@ -37,9 +30,9 @@ export namespace Log {
         return false;
     }
 
-    let getTraceMessage = (title: string, message: string, withTimestamp: boolean = true) => `${withTimestamp?timestamp():''}${"<".grey}${title.white}${">".grey} ${message}`;
-    let getInfoMessage = (title: string, message: string, withTimestamp: boolean = true) => `${withTimestamp?timestamp():''}${"<".magenta}${title.yellow}${">".magenta} ${message}`;
-    let getErrorMessage = (title: string, message: string, withTimestamp: boolean = true) => `${withTimestamp?timestamp():''}${"<".red}${title.white.bgRed}${">".red} ${message}`;
+    let getTraceMessage = (title: string, message: string) => `${"<".grey}${title.white}${">".grey} ${message}`;
+    let getInfoMessage = (title: string, message: string) => `${"<".magenta}${title.yellow}${">".magenta} ${message}`;
+    let getErrorMessage = (title: string, message: string) => `${"<".red}${title.white.bgRed}${">".red} ${message}`;
 
     export function Trace(title: string, message: string) {
         if (!TestPass(Level.Trace)) return;

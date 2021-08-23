@@ -11,3 +11,4 @@ core/*.gen.ts
 
 .setting*.json
 .setting*.json.example
+package-lock.json

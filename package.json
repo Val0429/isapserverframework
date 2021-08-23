@@ -1,11 +1,11 @@
 {
-  "name": "isap-frsedge-service",
-  "version": "2.05.03",
+  "name": "isap-facelink-service",
+  "version": "1.00.04",
   "frameworkversion": "2.03.04",
   "config": {
-    "displayname": "iSap FRSEdge Service"
+    "displayname": "iSap FaceLink Service"
   },
-  "description": "iSap FRSEdge Service",
+  "description": "iSap FaceLink Service",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",
   "main": "test",
@@ -20,7 +20,9 @@
     "build:debug": "nodemon --watch false --exec node --trace-warnings -r ts-node/register main.ts",
     "build:ts-node": "node --trace-warnings -r ts-node/register/transpile-only main.ts",
     "build:ts-node:debug": "node --trace-warnings -r ts-node/register main.ts",
-    "clean": "ts-node ./shells/clean-cache.shell.ts"
+    "clean": "ts-node ./shells/clean-cache.shell.ts",
+    "dorelease": "node -r ts-node/register/transpile-only ./shells/do-release.shell.ts -s",
+    "archive": "node -r ts-node/register/transpile-only ./shells/archive.shell.ts"
   },
   "nodemonConfig": {
     "ignore": [
@@ -35,12 +37,12 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "@val/nodemon": "1.0.1",
     "@types/bluebird": "3.5.22",
     "@types/mongodb": "3.5.25",
     "@types/node": "12.12.6",
     "@types/nodemailer": "4.6.2",
     "@types/parse": "2.12.1",
+    "@val/nodemon": "1.0.1",
     "bcryptjs": "^2.4.3",
     "bluebird": "3.5.1",
     "body-parser": "^1.19.0",
@@ -75,6 +77,7 @@
     "typings": "2.1.1",
     "uuid": "3.3.0",
     "websocket": "1.0.25",
-    "xml2js": "0.4.19"
+    "xml2js": "0.4.19",
+    "yesno": "^0.3.1"
   }
 }

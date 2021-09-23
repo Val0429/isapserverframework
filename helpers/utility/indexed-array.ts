@@ -9,8 +9,11 @@
 // tt2.removeIndex();
 
 import { getDeep } from "./deep";
+import { Log } from "./log";
 
 type TIndex = string | Set<string>;
+
+const LogTitle = "IndexedArray";
 
 export class IndexedArray<T> extends Array<T> {
     /// todo: observe the property change on Vale.Object
@@ -56,15 +59,38 @@ export class IndexedArray<T> extends Array<T> {
                 Array.isArray(indexes) ? indexes :
                 [indexes];
 
+        /// pure string version
+        // oindexes.forEach(index => {
+        //     let idxKey = this.makeIndexKey(index);
+        //     /// string
+        //     let storedIndex = this.indexMap[idxKey] || (this.indexMap[idxKey] = {});
+
+        //     oelements.forEach(element => {
+        //         let value = getDeep(element, index as string);
+        //         let place = storedIndex[value] || (storedIndex[value] = []);
+        //         place.push(element);
+        //     });
+        // });
+
+        /// string | Set<string> version
         oindexes.forEach(index => {
+            let oindex = typeof index === "string" ? [index] : Array.from(index);
+            let oindexLength = oindex.length - 1;
+
             let idxKey = this.makeIndexKey(index);
-            /// string
             let storedIndex = this.indexMap[idxKey] || (this.indexMap[idxKey] = {});
 
             oelements.forEach(element => {
-                let value = getDeep(element, index as string);
-                let place = storedIndex[value] || (storedIndex[value] = []);
-                place.push(element);
+                oindex.reduce((storedIndex, index, idx) => {
+                    let value = getDeep(element, index);
+                    if (idx === oindexLength) {
+                        let place = storedIndex[value] || (storedIndex[value] = []);
+                        place.push(element);
+                    } else {
+                        storedIndex = storedIndex[value] || (storedIndex[value] = {});
+                    }
+                    return storedIndex;
+                }, storedIndex);
             });
         });
     }
@@ -77,23 +103,64 @@ export class IndexedArray<T> extends Array<T> {
             delete this.indexMap[idxKey];
         });
     }
-    private destructWithIndex(elements?: T | T[], indexes?: TIndex | TIndex[]) {
+    private removeWithIndex(elements?: T | T[], indexes?: TIndex | TIndex[]) {
         let oelements = Array.isArray(elements) ? elements : [elements];
         let oindexes = !indexes ? this.indexes :
                 Array.isArray(indexes) ? indexes :
                 [indexes];
 
+        // /// string version
+        // oindexes.forEach(index => {
+        //     let idxKey = this.makeIndexKey(index);
+        //     /// string
+        //     let storedIndex = this.indexMap[idxKey];
+        //     if (!storedIndex) return;
+
+        //     oelements.forEach(element => {
+        //         let value = getDeep(element, index as string);
+        //         let place: Array<T> = storedIndex[value];
+        //         if (place == undefined) return;
+        //         let idx = place.findIndex(v => v === element);
+        //         if (idx < 0) {  /// element not found
+        //             Log.Error(LogTitle, `Remove element not found in index! ${index} / ${element}`);
+        //             return;
+        //         }
+        //         place.splice(idx, 1);
+        //     });
+        // });
+
+        /// string | Set<string> version
         oindexes.forEach(index => {
+            let oindex = typeof index === "string" ? [index] : Array.from(index);
+            let oindexLength = oindex.length - 1;
+
             let idxKey = this.makeIndexKey(index);
-            /// string
             let storedIndex = this.indexMap[idxKey] || (this.indexMap[idxKey] = {});
+            if (!storedIndex) return;
 
             oelements.forEach(element => {
-                let value = getDeep(element, index as string);
-                let place = storedIndex[value] || (storedIndex[value] = []);
-                place.push(element);
+                oindex.reduce((storedIndex, index, idx) => {
+                    let value = getDeep(element, index);
+
+                    if (idx === oindexLength) {
+                        let place: Array<T> = storedIndex[value];
+                        if (place == undefined) return;
+                        let oidx = place.findIndex(v => v === element);
+                        if (oidx < 0) {  /// element not found
+                            Log.Error(LogTitle, `Remove element not found in index! ${index} / ${element}`);
+                            return;
+                        }
+                        place.splice(oidx, 1);
+
+                    } else {
+                        storedIndex = storedIndex[value];
+                        if (!storedIndex) Log.Error(LogTitle, `Stored Index not found in index! ${index} / ${element} / ${value}`);
+                    }
+                    return storedIndex;
+                }, storedIndex);
             });
         });
+
     }
 
     /// new public
@@ -152,6 +219,7 @@ export class IndexedArray<T> extends Array<T> {
     pop(): T {
         this._innateChanging = true;
         let rtn = super.pop();
+        this.removeWithIndex(rtn);
         this._innateChanging = false;
         return rtn;
     }

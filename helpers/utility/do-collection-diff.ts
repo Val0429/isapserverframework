@@ -1,4 +1,4 @@
-import { getDeep } from "./get-deep";
+import { getDeep } from "./deep";
 
 interface IFindCollectionIndexingUnit<T> {
     [key: string]: T;

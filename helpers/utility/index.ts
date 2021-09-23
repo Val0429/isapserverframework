@@ -13,4 +13,5 @@ export * from './jsmap-assign';
 export * from './id-generator';
 export * from './retrier';
 export * from './url-join';
-export * from './get-deep';
+export * from './deep';
+export * from './indexed-array';

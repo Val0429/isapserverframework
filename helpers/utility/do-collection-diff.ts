@@ -1,20 +1,27 @@
 import { getDeep } from "./deep";
+import { IndexedArray, TIndex } from "./indexed-array";
+import { Log } from "./log";
 
-interface IFindCollectionIndexingUnit<T> {
-    [key: string]: T;
+const LogTitle = "DoCollectionDiff";
+const DEBUG = false;
+
+interface IIndexFields {
+    sources: TIndex[];
+    targets: TIndex[];
 }
 
-interface IFindCollectionIndexing<T> {
-    [indexField: string]: IFindCollectionIndexingUnit<T>;
+interface IFindCollectionIndexing<Source, Target> {
+    sources: IndexedArray<Source>;
+    targets: IndexedArray<Target>;
 }
 
 interface IFindCollectionDiffConfig<Source, Target> {
     /// which fields inside source / target, should make index?
-    indexFields?: string[];
-    isAddedCallback: { (targetUnit: Target, indexing: IFindCollectionIndexing<Source|Target>): boolean };
+    indexFields?: IIndexFields;
+    isAddedCallback: { (targetUnit: Target, indexing: IFindCollectionIndexing<Source, Target>): boolean };
     addedConverter: { (targetUnit: Target): Source };
-    isModifiedCallback: { (sourceUnit: Source, indexing: IFindCollectionIndexing<Source|Target>): boolean };
-    isDeletedCallback: { (sourceUnit: Source, indexing: IFindCollectionIndexing<Source|Target>): boolean };
+    isModifiedCallback: { (sourceUnit: Source, indexing: IFindCollectionIndexing<Source, Target>): boolean };
+    isDeletedCallback: { (sourceUnit: Source, indexing: IFindCollectionIndexing<Source, Target>): boolean };
 }
 
 interface IFindCollectionDiffResult<Source, Target> {
@@ -23,56 +30,48 @@ interface IFindCollectionDiffResult<Source, Target> {
     deleted: Source[];
 }
 
-export function buildCollectionIndex<T>(sources: T[], indexFields: string | string[]): IFindCollectionIndexing<T> {
-    if (!Array.isArray(indexFields)) indexFields = [indexFields];
-    let indexes: IFindCollectionIndexing<T> = {};
-    for (let indexField of indexFields) {
-        let index = indexes[indexField] = {};
-        for (let source of sources) {
-            let key = getDeep(source, indexField);
-            if (key == null) continue;
-            index[key] = source;
-        }
-    }
-    return indexes;
-}
+// export function buildCollectionIndex<T>(sources: T[], indexFields: string | string[]): IFindCollectionIndexing<T> {
+//     if (!Array.isArray(indexFields)) indexFields = [indexFields];
+//     let indexes: IFindCollectionIndexing<T> = {};
+//     for (let indexField of indexFields) {
+//         let index = indexes[indexField] = {};
+//         for (let source of sources) {
+//             let key = getDeep(source, indexField);
+//             if (key == null) continue;
+//             index[key] = source;
+//         }
+//     }
+//     return indexes;
+// }
 
 export function findCollectionDiff<Source, Target>(sources: Source[], targets: Target[], config: IFindCollectionDiffConfig<Source, Target>): IFindCollectionDiffResult<Source, Target> {
     let { indexFields, isAddedCallback, addedConverter, isModifiedCallback, isDeletedCallback } = config;
 
     /// 1) make indexes
-    let consolidate = indexFields
-        /// consolidate
-        .reduce((final, value: string) => {
-            const regSource = /^source\./;
-            const regTarget = /^target\./;
-            if (regSource.test(value)) final.sources.push( value.replace(regSource, "") );
-            else if (regTarget.test(value)) final.targets.push( value.replace(regTarget, "") );
-            return final;
-        }, {
-            sources: [],
-            targets: []
-        });
+    let m1 = DEBUG ? Log.InfoTime(LogTitle, "New Indexed Array") : null;
+    let indexes: IFindCollectionIndexing<Source, Target> = {
+        sources: new IndexedArray(...sources),
+        targets: new IndexedArray(...targets)
+    };
+    DEBUG && m1.end();
 
-    let indexes = {};
-    consolidate.sources.forEach(sourceIndexstr => {
-        let tmpIndex = buildCollectionIndex(sources, sourceIndexstr);
-        Object.keys(tmpIndex).forEach(key => {
-            indexes[`source.${key}`] = tmpIndex[key];
+    m1 = DEBUG ? Log.InfoTime(LogTitle, "Add Indexes of Source & Target") : null;
+    [ ["sources", sources], ["targets", targets] ]
+        .forEach((o: [string, any[]]) => {
+            let [instance, units] = o;
+            let theIndexes = indexFields[instance];
+            indexes[instance].addIndexes(theIndexes);
         });
-    });
-    consolidate.targets.forEach(targetIndexstr => {
-        let tmpIndex = buildCollectionIndex(targets, targetIndexstr);
-        Object.keys(tmpIndex).forEach(key => {
-            indexes[`target.${key}`] = tmpIndex[key];
-        });
-    });
+    DEBUG && m1.end();
 
     /// 2) detect added
+    m1 = DEBUG ? Log.InfoTime(LogTitle, "Check Added") : null;
     let added = targets.filter(target => isAddedCallback(target, indexes))
                        .map(target => addedConverter(target));
+    DEBUG && m1.end();
 
     /// 3) detect modified & deleted
+    m1 = DEBUG ? Log.InfoTime(LogTitle, "Check Deleted") : null;
     let { deleted, todoConfirmSources } = sources.reduce((final, source) => {
         if (isDeletedCallback(source, indexes)) final.deleted.push(source);
         else final.todoConfirmSources.push(source);
@@ -81,7 +80,11 @@ export function findCollectionDiff<Source, Target>(sources: Source[], targets: T
         deleted: [],
         todoConfirmSources: []
     });
+    DEBUG && m1.end();
+
+    m1 = DEBUG ? Log.InfoTime(LogTitle, "Check Modified") : null;
     let modified = todoConfirmSources.filter(source => isModifiedCallback(source, indexes));
+    DEBUG && m1.end();
 
     return {
         added,

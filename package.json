@@ -1,11 +1,11 @@
 {
-  "name": "isap-vms2-server",
+  "name": "isap-vms-server",
   "version": "1.00.08",
   "frameworkversion": "1.08.14",
   "config": {
-    "displayname": "iSap VMS2 Server"
+    "displayname": "iSap VMS Server"
   },
-  "description": "iSap VMS2 Server v1.00.08",
+  "description": "iSap VMS Server v1.00.08",
   "copyright": "copyright © 2009-2021 iSAP Solution All rights reserved.",
   "author": "Val Liu",
   "license": "Private Copyright - for iSAP internal use only",

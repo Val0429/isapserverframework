@@ -19,7 +19,7 @@ let packagejson = require(packagejsonpath);
 let cwd = path.resolve(packagepath, custompath || "./");
 let gitBashPath = "C:\\Program Files\\Git\\bin\\bash.exe";
 let shell: string = isWindows ? (fs.existsSync(gitBashPath) ? gitBashPath : undefined) : undefined;
-let result = execSync(`git archive --output=${packagejson.name}.zip HEAD $(git diff --name-only ${from} ${to})`, {
+let result = execSync(`git archive --output=${packagejson.name}.zip HEAD $(git diff --diff-filter=d --name-only ${from} ${to})`, {
     cwd,
     shell
 });

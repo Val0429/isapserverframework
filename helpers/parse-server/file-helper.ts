@@ -43,7 +43,7 @@ export namespace FileHelper {
 
         /// Parse input for ext name
         let regex_base64 = /^data:([^;]+);base64,/i;
-        let regex_uri = /^http/i;
+        let regex_uri = /^\/parse\/files/i;
         let base64: string, uri: string;
         if (regex_base64.test(<string>input)) {
             let type = null;
@@ -51,7 +51,7 @@ export namespace FileHelper {
             if (type !== null) name = `file.${mimeType.extension(type) || "b64"}`;
         }
         else if (regex_uri.test(<string>input)) {
-            uri = <string>input;
+            uri = `http://localhost:${Config.core.port}${input}`;
             let parsed = path.parse(uri);
             name = parsed.base;
         }

@@ -25,7 +25,7 @@ export async function retry<T>(
 
             /// error log
             let test = Math.log10(count);
-            if (test > 0 && Number.isInteger(test)) Log.Error("Critical Error", `${hintname ? `Function <${hintname}> ` : ''}Retry ${count} times with error: ${err}`);
+            if (test > 0 && Number.isInteger(test)) Log.Error("Critical Error", `${hintname ? `Function <${hintname}> ` : ''}Retry ${count} times with error: ${JSON.stringify(err)}`);
             /// reject when there is an error happens
             if (rejectFilter && rejectFilter(err)) break;
 

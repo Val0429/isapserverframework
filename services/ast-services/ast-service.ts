@@ -18,7 +18,7 @@ import * as path from 'path';
 const debug = false;
 const tsConfigFilePath = path.resolve(process.cwd(), "tsconfig.json");
 
-var reflector: Project = this.reflector = new Project({
+var reflector: Project = (this as any).reflector = new Project({
     tsConfigFilePath,
     addFilesFromTsConfig: true,
     skipFileDependencyResolution: true,

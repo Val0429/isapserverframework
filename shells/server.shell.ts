@@ -171,7 +171,7 @@ let jobHttp = () => {
         httpServer.wsServer = expressWsRoutes.createWebSocketServer(httpServer, app, {});
         httpServer.listen(Config.core.port, async () => {
             Log.Info(packinfo.config.displayname, \`running at port \${Config.core.port}. (http)\`);
-            resolve();
+            resolve(null);
         });
     });
 }
@@ -186,7 +186,7 @@ let jobHttps = () => {
         httpsServer.wsServer = expressWsRoutes.createWebSocketServer(httpsServer, app, {});
         httpsServer.listen(Config.core.httpsPort, async () => {
             Log.Info(packinfo.config.displayname, \`running at port \${Config.core.httpsPort}. (https)\`);
-            resolve();
+            resolve(null);
         });
     });
 }
@@ -198,7 +198,7 @@ let jobCreateDB = () => {
         let db = await sharedMongoDB();
         await ensureCollectionExists("_SCHEMA");
         ////////////////////////////////////////////////////////////////
-        resolve();
+        resolve(null);
     });
 }
 

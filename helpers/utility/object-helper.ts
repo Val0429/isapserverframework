@@ -5,6 +5,7 @@
  */
 
 import { ExpressionWithTypeArguments } from "ts-morph";
+import { klona } from 'klona';
 
 export namespace ObjectHelper {
      /// remove the given keys
@@ -27,27 +28,29 @@ export namespace ObjectHelper {
      }
  
      export function deepClone<T>(source: T, hash?: any): T {
-         if (!hash) hash = new WeakMap();
-         let obj: any = source;
-         if (Object(obj) !== obj) return obj; // primitives
-         if (obj instanceof Set) return new Set(obj) as any; // See note about this!
-         if (hash.has(obj)) return hash.get(obj); // cyclic reference
-         const result =
-             obj instanceof Date ? new Date(obj) :
-                 obj instanceof File ? new File([obj], obj.name, { type: obj.type }) :
-                     obj instanceof RegExp ? new RegExp(obj.source, obj.flags) :
-                         obj.constructor ? new obj.constructor() : Object.create(null);
-         hash.set(obj, result);
-         if (obj instanceof Map)
-             Array.from(obj, ([key, val]) =>
-                 result.set(key, ObjectHelper.deepClone(val, hash))
-             );
-         return Object.assign(
-             result,
-             ...Object.keys(obj).map(key => ({
-                 [key]: ObjectHelper.deepClone(obj[key], hash)
-             }))
-         );
+         return klona(source);
+        //  if (!hash) hash = new WeakMap();
+        //  let obj: any = source;
+        //  if (Object(obj) !== obj) return obj; // primitives
+        //  if (obj instanceof Set) return new Set(obj) as any; // See note about this!
+        //  if (hash.has(obj)) return hash.get(obj); // cyclic reference
+        //  const result =
+        //      obj instanceof Date ? new Date(obj) :
+        //         // (File && obj instanceof File) ? new File([obj], obj.name, { type: obj.type }) :
+        //             obj instanceof RegExp ? new RegExp(obj.source, obj.flags) :
+        //                 obj instanceof Buffer ? Buffer.from(obj) :
+        //                     obj.constructor ? new obj.constructor() : Object.create(null);
+        //  hash.set(obj, result);
+        //  if (obj instanceof Map)
+        //      Array.from(obj, ([key, val]) =>
+        //          result.set(key, ObjectHelper.deepClone(val, hash))
+        //      );
+        //  return Object.assign(
+        //      result,
+        //      ...Object.keys(obj).map(key => ({
+        //          [key]: ObjectHelper.deepClone(obj[key], hash)
+        //      }))
+        //  );
      }
  
      export function GetValue(source: object, keys: string | string[]): any {

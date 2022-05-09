@@ -8,8 +8,16 @@ import { Config } from 'core/config.gen';
 import * as mimeType from 'mime-types';
 import * as path from 'path';
 import { ActionParam } from 'helpers/cgi-helpers/core';
+import * as fsx from 'fs-extra';
 
 export namespace FileHelper {
+
+    export async function touch(file: string) {  
+        await fsx.ensureFile(file)
+      
+        const now = new Date()
+        await fsx.utimes(file, now, now);
+    }
 
     export function removeBase64Meta(input: string): string {
         var regex = /^data:([^;]+);base64,/i;

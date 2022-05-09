@@ -29,7 +29,7 @@ export class Socket {
                         arg1 = new WSSocket(arg1);
                         await new Promise((resolve, reject) => {
                             let handled: boolean = false;
-                            let openListener = () => !handled && (handled = true, resolve());
+                            let openListener = () => !handled && (handled = true, resolve(null));
                             let errorListener = (e) => !handled && (handled = true, reject(e));
                             arg1.addListener("open", openListener);
                             arg1.addListener("close", errorListener);

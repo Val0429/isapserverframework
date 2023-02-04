@@ -47,12 +47,17 @@
     "@types/mongodb": "3.5.25",
     "@types/node": "12.12.6",
     "@types/nodemailer": "4.6.2",
+<<<<<<< HEAD
     "@types/parse": "2.18.5",
     "@val/nodemon": "1.0.1",
     "@val/npm": "1.0.3",
     "@val/server-packager": "1.0.2",
     "@val/ts-node": "1.0.2",
     "@val/winser": "1.0.0",
+=======
+    "@types/parse": "2.12.1",
+    "@valuis0429/nodemon": "1.0.1",
+>>>>>>> 9e3590ee4aa0d8594dfed0a0b51c45547e358567
     "bcryptjs": "^2.4.3",
     "bluebird": "3.5.1",
     "body-parser": "^1.19.0",

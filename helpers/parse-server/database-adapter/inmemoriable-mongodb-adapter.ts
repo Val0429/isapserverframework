@@ -184,7 +184,7 @@ export class InMemoriableMongoDBAdapter extends MongoStorageAdapter {
             }
             super.find(className,
                 schema,
-                // { className, fields: {}, classLevelPermissions: {}, indexes: { _id_: { _id: 1 } } },
+                // { className, projection: {}, classLevelPermissions: {}, indexes: { _id_: { _id: 1 } } },
                 { _rperm: { '$in': [ null, '*' ] } },
                 { skip: undefined, limit: undefined, sort: {}, keys: undefined, readPreference: undefined }
             ).then( (result) => {

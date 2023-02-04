@@ -8,7 +8,7 @@ import { padLeft } from "./pad-left";
 
 export namespace DateHelper {
     export function dayStart(date?: Date): Date {
-        let o = new Date(date);
+        let o = date ? new Date(date) : new Date();
         o.setHours(0,0,0,0);
         return o;
     }

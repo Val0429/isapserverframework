@@ -63,7 +63,8 @@ export namespace ScheduleHelperV2 {
                     timer = setTimeout( () => {
                         process.nextTick(doOnce);
                     }, period);
-                    debug && Log.Info("ScheduleHelper", `${name ? `${name}: `:''}wait for ${Math.floor(period/100)/10} seconds.`);
+                    let seconds = Math.floor(period/100)/10;
+                    debug && (seconds>600) && Log.Info("ScheduleHelper", `${name ? `${name}: `:''}wait for ${seconds} seconds.`);
                 }
             }
             doOnce();

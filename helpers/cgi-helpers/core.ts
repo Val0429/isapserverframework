@@ -49,7 +49,7 @@ import { IncomingMessage } from 'http';
 import { UserHelper } from 'helpers/parse-server/user-helper';
 import { Tree } from 'models/nodes';
 import CollectionWatcher from 'helpers/mongodb/collection-watcher';
-import { Cursor } from 'mongodb';
+import { AggregationCursor, Cursor } from 'mongodb';
 
 
 let connectedSockets: { [sid: string]: Socket[] } = {};
@@ -387,7 +387,7 @@ export namespace Restful {
         return query;
     }
 
-    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T> | Cursor<any> | any[], params: IInputPaging<any>, filter: any = null, tuner: ((input: T[])=> Promise<T[]> | T[]) = null): Promise<IOutputPaging<any>> {
+    export async function Pagination<T extends Parse.Object = any>(query: Parse.Query<T> | Cursor<any> | AggregationCursor<any> | any[], params: IInputPaging<any>, filter: any = null, tuner: ((input: T[])=> Promise<T[]> | T[]) = null): Promise<IOutputPaging<any>> {
         var paging = params.paging || {};
         var page = +(paging.page || 1);
         var pageSize = +(paging.pageSize || 20);
@@ -405,11 +405,17 @@ export namespace Restful {
             if (tuner) o = await tuner(o);
             results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );
 
-        } else if (query instanceof Cursor) {
-            total = await query.count();
+        } else if (query instanceof Cursor || query instanceof AggregationCursor) {
+            total = (query instanceof AggregationCursor) ?
+                params.total :
+                await query.count();
+            if (total == undefined) {
+                console.error("Restful.Pagination", "Aggregation should have param total.");
+                throw Errors.throw(Errors.Custom, ["Aggregation should have param total."]);
+            }
             totalPages = Math.ceil(total / pageSize);
             page = Math.max(Math.min(page, totalPages), 1);
-            let o = await query.limit(pageSize).skip( (page-1) * pageSize ).toArray();
+            let o = await query.skip( (page-1) * pageSize ).limit(pageSize).toArray();
 
             if (tuner) o = await tuner(o);
             results = o.map( (data) => ParseObject.toOutputJSON(data, filter) );
